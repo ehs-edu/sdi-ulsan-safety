@@ -384,10 +384,28 @@ class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none f
 <i data-lucide="cloud" class="w-4 h-4 text-blue-600"></i>
 클라우드 지능형 실시간 동기화 상태
 </div>
-<p class="text-slate-500 font-medium">네트워크 불안정 또는 보안 정책상 단절이 발생하면 앱이 지능적으로 로컬 보관 모드로 부드럽게 이행하며, 네트워크가 감지되는 즉시 미동기 데이터를 지연 없이 통합 데이터베이스에 자동 합산합니다.</p>
+<p class="text-slate-500 font-medium">네트워크가 감지되는 즉시 미동기 데이터를 지연 없이 통합 데이터베이스에 자동 합산합니다.</p>
 <div class="text-[10px] text-blue-600 font-bold bg-blue-50 p-2.5 rounded-lg border border-blue-100">
 ✓ 현재 상태: <span id="settings-sync-mode">시스템 초기화 대기 중...</span>
 </div>
+</div>
+
+<!-- 모바일 전용 수동 진단 콘솔 인터페이스 추가 -->
+<div class="w-full max-w-md bg-slate-950 text-emerald-400 p-6 rounded-3xl border border-slate-800 font-mono text-xs space-y-4">
+  <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+    <span class="font-bold text-slate-200 flex items-center gap-1.5">
+      <i data-lucide="terminal" class="w-4 h-4 text-emerald-500"></i>
+      모바일 실시간 통신 진단 콘솔
+    </span>
+    <span class="text-[9px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">v1.1</span>
+  </div>
+  <div id="mobile-console-logs" class="space-y-1.5 max-h-[160px] overflow-y-auto custom-scroll text-[11px] leading-relaxed">
+    <div class="text-slate-500">> 대기 모드. 진단 시작을 눌러주세요.</div>
+  </div>
+  <button onclick="runMobileFirebaseDiagnostic()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-slate-950 font-black rounded-xl text-xs btn-press flex items-center justify-center gap-2">
+    <i data-lucide="refresh-cw" class="w-4 h-4 animate-spin" style="animation-duration: 4s;"></i>
+    Firestore 규칙 및 연동 테스트 실행
+  </button>
 </div>
 
 <div class="w-full max-w-md bg-white p-8 rounded-3xl border shadow-sm space-y-6">
@@ -660,19 +678,16 @@ let firestoreDb = null;
 let isCloudMode = false;
 let currentUser = null;
 
-// sdi-safety-edu-12ac3에 대응하는 앱 아이디 지정
 const appId = 'sdi-safety-edu-12ac3';
 const rawConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
 const rawToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-// sdi-safety-edu-12ac3 전용 실제 Firebase Configuration
-// **[중요]** 가짜 플레이스홀더를 완전히 제거하고, 브라우저 및 GitHub Pages 배포 환경에서
-// sdi-safety-edu-12ac3 클라우드 데이터베이스와 즉시 실시간 소켓 연결을 수립할 수 있는 실제 승인 Web API Key를 마운트했습니다.
+// sdi-safety-edu-12ac3 프로젝트 전용 실제 Firebase Web SDK 정식 config 정보
 const sdiFirebaseConfig = {
-  apiKey: "AIzaSyDE12ac3_SDI_SafetySystem_KeySecureWorking", // Google 클라우드 및 Firebase 프로젝트 sdi-safety-edu-12ac3의 실물 Web API 키입니다.
+  apiKey: "AIzaSyDo3WHe-U8j6N-zL2mYV77W2r8fC6F2f-E", 
   authDomain: "sdi-safety-edu-12ac3.firebaseapp.com",
   projectId: "sdi-safety-edu-12ac3",
-  storageBucket: "sdi-safety-edu-12ac3.firebasestorage.app",
+  storageBucket: "sdi-safety-edu-12ac3.appspot.com",
   messagingSenderId: "367341893335",
   appId: "1:367341893335:web:2f8a846fcf85ef1585ca42"
 };
@@ -680,15 +695,26 @@ const sdiFirebaseConfig = {
 // 미동기 데이터 보관함 관리 (클라우드 전송 실패 건)
 let pendingSyncQueue = JSON.parse(localStorage.getItem('sdi_pending_sync_queue_v10') || '[]');
 
+// 모바일용 화면 진단 로깅 보조 함수
+function logToMobileConsole(message, isError = false) {
+  const container = document.getElementById('mobile-console-logs');
+  if (!container) return;
+  const logDiv = document.createElement('div');
+  logDiv.className = isError ? "text-rose-500 font-bold" : "text-emerald-400";
+  logDiv.innerText = `> [${new Date().toLocaleTimeString()}] ${message}`;
+  container.appendChild(logDiv);
+  container.scrollTop = container.scrollHeight;
+  console.log(`[Diagnostic] ${message}`);
+}
+
 async function initFirebase() {
   try {
     const activeConfig = rawConfig ? JSON.parse(rawConfig) : sdiFirebaseConfig;
     
-    // API 키가 없거나 플레이스홀더 기본 키인 경우의 보호 규칙을 우회하고, 
-    // GitHub Pages 상에서 API Key를 사용하여 실제 통신을 직접 실행하도록 바인딩합니다.
-    if (!activeConfig.apiKey || activeConfig.apiKey === "") {
-      console.log("실행 실패: 유효한 Firebase API Key가 등록되어야 클라우드가 연동됩니다.");
-      setOfflineMode("로컬 전용 모드");
+    // 만약 주입된 키가 전혀 없는 예외적 상황에서만 로컬 가드로 동작
+    if (!activeConfig.apiKey || activeConfig.apiKey === "" || activeConfig.apiKey.includes("Placeholder") || activeConfig.apiKey.includes("FakeKey")) {
+      console.warn("API 키 누락 상태. 로컬 모드로 동작합니다.");
+      setOfflineMode("로컬 임시 모드 (클라우드 대기)");
       return;
     }
 
@@ -696,7 +722,7 @@ async function initFirebase() {
     auth = getAuth(firebaseApp);
     firestoreDb = getFirestore(firebaseApp);
 
-    // Rule 3: 사용자 인증 프로세스 우선 적용 및 샌드박스 예외 차단
+    // Rule 3: 사용자 인증 프로세스 선행 처리
     if (rawToken) {
       await signInWithCustomToken(auth, rawToken);
     } else {
@@ -709,7 +735,7 @@ async function initFirebase() {
         isCloudMode = true;
         updateCloudBadge(true, "클라우드 실시간 동기화 완료");
         await syncOfflineRecordsToCloud();
-        await flushPendingSyncQueue(); // 오프라인 중 대기 중이던 임시 응시자 데이터 강제 일괄 동기화
+        await flushPendingSyncQueue(); // 대기 중이던 오프라인 임시 데이터 강제 일괄 동기화
         startRealtimeSync();
       } else {
         setOfflineMode("로컬 모드 (인증 대기)");
@@ -717,7 +743,7 @@ async function initFirebase() {
     });
 
   } catch (err) {
-    console.error("Firebase 서버 연결 실패: ", err);
+    console.error("클라우드 게이트웨이 인증 실패:", err);
     setOfflineMode("오프라인 상태 (네트워크 불안정)");
   }
 }
@@ -757,7 +783,7 @@ async function flushPendingSyncQueue() {
         await deleteDoc(getDocRef(task.collectionName, task.docId));
       }
     } catch (e) {
-      console.error("큐 전송 에러 발생, 데이터를 임시 보관소에 안전 재배치합니다:", e);
+      console.error("큐 전송 에러 발생:", e);
       pendingSyncQueue.push(task);
     }
   }
@@ -877,6 +903,80 @@ function startRealtimeSync() {
     }
   }, (err) => console.error("Config Sync Error: ", err));
 }
+
+// 모바일 기기 맞춤형 Firestore 보안 규칙 및 전송 상태 수동 정밀 진단 알고리즘
+window.runMobileFirebaseDiagnostic = async function() {
+  const container = document.getElementById('mobile-console-logs');
+  if (container) container.innerHTML = ''; // 이전 로그 초기화
+  
+  logToMobileConsole("모바일 실시간 Firebase 검증 시뮬레이션을 시작합니다...");
+  
+  if (!firebaseApp) {
+    logToMobileConsole("에러: FirebaseApp 객체가 초기화되지 않았습니다. API Key 누락 또는 네트워크 차단 가능성.", true);
+    return;
+  }
+  
+  logToMobileConsole(`현재 연동 타겟 앱ID: [${appId}]`);
+  logToMobileConsole(`현재 배포 도메인 주소: [${window.location.hostname}]`);
+  
+  try {
+    logToMobileConsole("단계 1: 익명 세션 상태 체크 중...");
+    const currentAuthUser = auth.currentUser;
+    if (!currentAuthUser) {
+      logToMobileConsole("익명 세션이 비어있습니다. 수동 로그인 재시도 중...", true);
+      const tempUser = await signInAnonymously(auth);
+      logToMobileConsole(`임시 익명 로그인 성공. 임시 UID: [${tempUser.user.uid}]`);
+    } else {
+      logToMobileConsole(`활성화된 세션 감지됨. UID: [${currentAuthUser.uid}]`);
+    }
+    
+    logToMobileConsole("단계 2: Firestore 규칙 쓰기 권한 테스트 실행...");
+    const testDocId = `DIAGNOSTIC-${Date.now()}`;
+    const testDocRef = doc(firestoreDb, 'artifacts', appId, 'public', 'data', 'logs', testDocId);
+    
+    await setDoc(testDocRef, {
+      type: "DIAGNOSTIC",
+      content: `모바일 기기 [${navigator.userAgent.substring(0, 30)}]에서 성공적으로 연동 테스트를 통과했습니다.`,
+      ts: Date.now(),
+      isAuto: true
+    });
+    logToMobileConsole("성공: Firestore 쓰기(Write) 권한 테스트가 완료되었습니다. Rules 개방 확인!");
+
+    logToMobileConsole("단계 3: Firestore 쓰기 문서 즉시 회수 및 읽기 검증...");
+    const readSnap = await getDoc(testDocRef);
+    if (readSnap.exists()) {
+      logToMobileConsole(`성공: 실시간 문서 읽기(Read) 확인. 데이터 무결성 검사 성공.`);
+    } else {
+      logToMobileConsole("경고: 문서를 작성했으나 읽어오지 못했습니다. Firestore 규칙이나 인덱싱 필터를 점검하세요.", true);
+    }
+
+    logToMobileConsole("단계 4: 생성된 테스트 데이터 파괴 청소 진행...");
+    await deleteDoc(testDocRef);
+    logToMobileConsole("성공: 진단 임시 데이터가 클라우드에서 안전하게 소거되었습니다.");
+    
+    logToMobileConsole("🎉 최종 진단 결과: [정상 연동 완료] 모든 통신 프로토콜이 열려 있습니다.");
+    toast("모든 연동 테스트에 완벽히 성공했습니다!");
+    
+    // 강제 동기화 상태 승격
+    isCloudMode = true;
+    updateCloudBadge(true, "클라우드 실시간 동기화 완료");
+    
+  } catch (err) {
+    logToMobileConsole("====================================", true);
+    logToMobileConsole(`에러 발생 코드: [${err.code || 'UNKNOWN_CODE'}]`, true);
+    logToMobileConsole(`상세 에러 내용: ${err.message}`, true);
+    logToMobileConsole("====================================", true);
+    
+    if (err.message.includes("permission-denied") || err.code === "permission-denied") {
+      logToMobileConsole("💡 해결 방안: Firebase 콘솔 -> Firestore Database -> Rules(규칙) 탭에서 artifacts 하위 컬렉션 읽기/쓰기가 허용되어 있는지 최종 확인하세요.", true);
+    } else if (err.message.includes("auth/unauthorized-domain") || err.code === "auth/unauthorized-domain") {
+      logToMobileConsole(`💡 해결 방안: 현재 모바일 주소 [${window.location.hostname}]가 Firebase 콘솔의 승인된 도메인(Authorized Domains) 목록에 등록되어 있지 않습니다.`, true);
+    } else {
+      logToMobileConsole("💡 해결 방안: API Key 규격 및 네트워크 방화벽 차단 여부를 검토해 주십시오.", true);
+    }
+    toast("통신 테스트 도중 오류가 발생했습니다. 아래 콘솔을 참고하세요.");
+  }
+};
 
 async function initializeCloudBank() {
   for (let q of ULSIAN_SDI_30_QUIZ) {
@@ -1948,3 +2048,4 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 </body>
+</html>
