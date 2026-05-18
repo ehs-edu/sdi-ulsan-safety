@@ -11,7 +11,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght=400;600;700;800&display=swap');
         
         :root {
             --sdi-blue-dark: #001A72;
@@ -420,6 +420,12 @@
         </main>
     </div>
 
+    <!-- Toast 알림 레이아웃 -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl text-xs font-bold shadow-2xl transition-all duration-300 opacity-0 pointer-events-none z-[999] flex items-center gap-2">
+        <i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
+        <span id="toast-msg">메시지</span>
+    </div>
+
     <!-- Modal: Confirmation (Delete) -->
     <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hide flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-xs rounded-3xl p-8 text-center animate-fade shadow-2xl">
@@ -479,7 +485,7 @@
         </div>
     </div>
 
-    <!-- Modal: Download Configuration & File Writer (실물 저장 설정 및 가상 다운로드) -->
+    <!-- Modal: Download Configuration & File Writer -->
     <div id="download-config-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hide flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-5">
             <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
@@ -660,7 +666,7 @@
 
         async function initFirebase() {
             if (!rawConfig) {
-                setOfflineMode("로컬 모드 (서버 구성 정보 없음)");
+                setOfflineMode("로컬 우선 모드");
                 return;
             }
 
@@ -805,13 +811,19 @@
             }, (err) => console.error(err));
         }
 
+        async function initializeCloudBank() {
+            for (let q of ULSIAN_SDI_30_QUIZ) {
+                await writeToCloudOrLocal('bank', `Q-${q.idx}`, q);
+            }
+        }
+
         async function writeToCloudOrLocal(collectionName, docId, dataPayload) {
             if (isCloudMode && currentUser) {
                 try {
                     await setDoc(getDocRef(collectionName, docId), dataPayload);
                     return true;
                 } catch (e) {
-                    console.error(e);
+                    console.error("클라우드 쓰기 에러: ", e);
                 }
             }
             return false;
@@ -823,7 +835,7 @@
                     await deleteDoc(getDocRef(collectionName, docId));
                     return true;
                 } catch (e) {
-                    console.error(e);
+                    console.error("클라우드 삭제 에러: ", e);
                 }
             }
             return false;
@@ -880,25 +892,28 @@
         }
 
         // --- Evaluation Logic ---
-        // 퀴즈 무작위 추출 중복 출제 완전 방지 No-Duplicate Randomizer 알고리즘 구현
         window.startEvaluation = function() {
             const name = document.getElementById('input-name').value.trim();
             if(!name) return toast('성명을 입력하세요.');
             state.user = { name, ts: Date.now(), id: 'SDI-' + Math.random().toString(36).substr(2,6).toUpperCase() };
             
-            // 피셔-예이츠 셔플링(Fisher-Yates) 기반의 중복 없는 완벽 무작위 10문항 선별
+            // 피셔-예이츠 셔플링 기반 무작위 10문항 선별 (중복 완전 배제)
             let indices = Array.from({ length: db.bank.length }, (_, i) => i);
             for (let i = indices.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [indices[i], indices[j]] = [indices[j], indices[i]];
             }
             
-            // 선별된 셔플링 인덱스를 바탕으로 데이터 매핑
             state.quizSet = indices.slice(0, 10).map(idx => db.bank[idx]);
             
-            if(state.quizSet.length < 10) { toast('문제은행의 문제가 부족합니다. (최소 10문항 필요)'); return; }
-            state.currIdx = 0; state.answers = Array(10).fill(null);
-            switchView('quiz'); renderQuiz();
+            if(state.quizSet.length < 10) { 
+                toast('문제은행의 문제가 부족합니다. (최소 10문항 필요)'); 
+                return; 
+            }
+            state.currIdx = 0; 
+            state.answers = Array(10).fill(null);
+            switchView('quiz'); 
+            renderQuiz();
         }
 
         function renderQuiz() {
@@ -933,18 +948,28 @@
             state.answers[state.currIdx] = ans;
             renderQuiz();
             setTimeout(() => {
-                if(state.currIdx < 9) { state.currIdx++; renderQuiz(); }
-                else completeEvaluation();
+                if(state.currIdx < 9) { 
+                    state.currIdx++; 
+                    renderQuiz(); 
+                } else {
+                    completeEvaluation();
+                }
             }, 250);
         }
 
-        window.movePrev = function() { if(state.currIdx > 0) { state.currIdx--; renderQuiz(); } }
+        window.movePrev = function() { 
+            if(state.currIdx > 0) { 
+                state.currIdx--; 
+                renderQuiz(); 
+            } 
+        }
 
         async function completeEvaluation() {
             let score = 0;
             state.quizSet.forEach((q, i) => { if(state.answers[i] === q.c) score += 10; });
             const result = { ...state.user, score, passed: score >= 80 };
 
+            // 클라우드 및 디바이스 동시 영구 저장 유도
             const cloudSuccess = await writeToCloudOrLocal('users', result.id, result);
             if (!cloudSuccess) {
                 db.users.push(result); 
@@ -962,14 +987,20 @@
             document.getElementById('score-text').innerText = data.score + '점';
             document.getElementById('qr-date').innerText = new Date(data.ts).toLocaleDateString();
             const qrc = document.getElementById('qr-canvas'); qrc.innerHTML = '';
-            if(data.passed) new QRCode(qrc, { text: data.id, width: 120, height: 120, colorDark: "#1428A0" });
-            else qrc.innerHTML = '<div class="w-24 h-24 bg-slate-50 border-2 border-dashed rounded-2xl flex items-center justify-center text-slate-300 font-bold text-[8px] text-center px-2">재교육 대상</div>';
+            if(data.passed) {
+                new QRCode(qrc, { text: data.id, width: 120, height: 120, colorDark: "#1428A0" });
+            } else {
+                qrc.innerHTML = '<div class="w-24 h-24 bg-slate-50 border-2 border-dashed rounded-2xl flex items-center justify-center text-slate-300 font-bold text-[8px] text-center px-2">재교육 대상</div>';
+            }
         }
 
         // --- Admin Dash Logic ---
         window.verifyAdmin = function() {
-            if(document.getElementById('admin-pw-input').value === db.adminPw) switchView('admin-main');
-            else toast('비밀번호가 일치하지 않습니다.');
+            if(document.getElementById('admin-pw-input').value === db.adminPw) {
+                switchView('admin-main');
+            } else {
+                toast('비밀번호가 일치하지 않습니다.');
+            }
         }
 
         function initFilters() {
@@ -1010,7 +1041,9 @@
             
             let filteredAll = db.users.filter(u => new Date(u.ts).getFullYear() === selYear);
             let summaryFiltered = [...filteredAll];
-            if(selMonth !== 'all') summaryFiltered = summaryFiltered.filter(u => new Date(u.ts).getMonth() === parseInt(selMonth));
+            if(selMonth !== 'all') {
+                summaryFiltered = summaryFiltered.filter(u => new Date(u.ts).getMonth() === parseInt(selMonth));
+            }
 
             const total = summaryFiltered.length;
             const passTotal = summaryFiltered.filter(u => u.passed).length;
@@ -1172,7 +1205,6 @@
                 saveLocalBackupOnly();
             }
             
-            // 응시이력 삭제 실시간 자동 시스템 로그 반영
             const deletedSummary = deletedData.map(d => `${d.name}(${d.id})`).join(', ');
             await addLog('SYSTEM', `응시 이력 데이터가 삭제되었습니다. 대상: [${deletedSummary}] (총 ${idsToDelete.size}건)`);
             
@@ -1197,7 +1229,6 @@
             });
         }
 
-        // --- 개별 제어 가능 문제은행 렌더링 ---
         function renderBankTable() {
             const tbody = document.getElementById('bank-table');
             if(!tbody) return;
@@ -1253,12 +1284,10 @@
                 renderBankTable();
             }
 
-            // 문제은행 선택 삭제 로그 실시간 자동화
             await addLog('UPDATE', `문제은행 문항 ${idxsToDelete.length}개가 전체 목록에서 직접 선택 삭제되었습니다.`);
             toast('문항이 성공적으로 삭제되었습니다.');
         }
 
-        // --- 문제 개별 추가 및 수정용 모달 지원 ---
         window.openQuestionModal = function(idx) {
             const title = document.getElementById('question-modal-title');
             const textInput = document.getElementById('edit-q-text');
@@ -1327,7 +1356,6 @@
                     saveLocalBackupOnly();
                     renderBankTable();
                 }
-                // 문제 개별 등록 자동화 로그 트리거
                 await addLog('UPDATE', `신규 안전 문항이 시스템에 수동 개별 추가되었습니다: "${text.substring(0,18)}..."`);
             } else {
                 const curIdx = parseInt(idxStr);
@@ -1341,7 +1369,6 @@
                     saveLocalBackupOnly();
                     renderBankTable();
                 }
-                // 문제 개별 수정 자동화 로그 트리거
                 await addLog('UPDATE', `문제은행 문항(${curIdx}번)이 관리자에 의해 수동으로 직접 편집 수정되었습니다.`);
             }
 
@@ -1349,7 +1376,7 @@
             toast('안전하게 저장되었습니다.');
         }
 
-        // --- 지능형 엑셀 대화형 업로더 ---
+        // --- 엑셀 업로더 ---
         window.handleBankUpload = function(input) {
             const file = input.files[0];
             if(!file) return;
@@ -1453,13 +1480,12 @@
                 renderBankTable();
             }
 
-            // 문제은행 엑셀 일괄 업로드 자동 로그 유도
             await addLog('UPDATE', `문제은행 데이터가 업데이트되었습니다. 업로드 방식: ${isMerge ? '기존유지병합' : '덮어쓰기'} (총 문항 수: ${finalBankList.length})`);
             toast('문제은행이 성공적으로 업데이트 완료되었습니다.');
             tempUploadBank = [];
         }
 
-        // --- 100% 실질적 모바일/PC 다운로드 보장 처리 엔진 ---
+        // --- 다운로드 보장 처리 엔진 ---
         window.openDownloadModal = function(type) {
             state.currentDownloadType = type;
             const input = document.getElementById('target-filename');
@@ -1502,7 +1528,6 @@
                 return;
             }
 
-            // 일반 보고서용 데이터 파싱
             let data = [];
             if (type === 'stats') {
                 data.push(["기준 연도", document.getElementById('filter-year').value]);
@@ -1572,15 +1597,12 @@
             executeFinalWrite(wb, filename);
         }
 
-        // 엑셀 바이너리 강제 배열 직렬화 기법 적용
         function executeFinalWrite(wb, filename) {
             try {
-                // XLSX 바이너리를 직접 내장 버퍼 파일 쓰기 호출
                 XLSX.writeFile(wb, filename);
                 toast("디바이스에 실물 파일 저장이 성공적으로 완료되었습니다.");
             } catch (error) {
                 console.error("Standard Write Process Error: ", error);
-                // 모바일 Safari 및 강제 격리 iframe 2단계 우회 처리
                 try {
                     const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
                     const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -1610,7 +1632,7 @@
             }
         }
 
-        // --- 비밀번호 변경 프로세스 및 확인용 절차 추가 ---
+        // --- 비밀번호 변경 프로세스 ---
         window.requestChangePassword = function() {
             const cur = document.getElementById('pw-current').value;
             const n1 = document.getElementById('pw-new').value;
@@ -1623,7 +1645,6 @@
 
             state.tempPwObj = { cur, n1 };
             
-            // 승인 모달 세부 값 표식 반영
             document.getElementById('confirm-pw-cur').innerText = cur;
             document.getElementById('confirm-pw-new').innerText = n1;
             
@@ -1655,15 +1676,12 @@
             }
 
             if (saveSuccess) {
-                // 로컬스토리지에도 즉시 동기화 보장 처리
                 localStorage.setItem('sdi_admin_pw_v10', n1);
                 db.adminPw = n1;
                 saveLocalBackupOnly();
 
-                // 실시간 자동화 시스템 로그 업데이트 연동 보장
                 await addLog('MAINTAIN', '관리자 시스템 계정 비밀번호가 안전하게 업데이트 변경되었습니다.');
                 
-                // 설정 필드 초기화
                 document.getElementById('pw-current').value = '';
                 document.getElementById('pw-new').value = '';
                 document.getElementById('pw-confirm').value = '';
@@ -1676,7 +1694,18 @@
             closePwConfirm();
         }
 
-        // --- PPTX 슬라이드 빌더 엔진 및 보조 다운로드 결합 ---
+        // --- 수동 로그 기입 기능 추가 ---
+        window.saveManualLog = async function() {
+            const type = document.getElementById('log-type').value;
+            const content = document.getElementById('log-content').value.trim();
+            if (!content) return toast('로그 내용을 정확하게 기입해 주세요.');
+            
+            await addLog(type, content, false);
+            closeLogModal();
+            toast('로그가 안전하게 반영되었습니다.');
+        }
+
+        // --- PPTX 슬라이드 빌더 엔진 ---
         function triggerPPTGeneration(filename) {
             try {
                 const selYear = document.getElementById('filter-year').value;
@@ -1813,6 +1842,25 @@
         // --- Modals ---
         window.showLogAddModal = function() { document.getElementById('log-modal').classList.remove('hide'); }
         window.closeLogModal = function() { document.getElementById('log-modal').classList.add('hide'); }
+
+        function renderLogs() {
+            const list = document.getElementById('log-list');
+            if(!list) return;
+            list.innerHTML = '';
+            db.logs.forEach(log => {
+                const badgeColor = log.type === 'UPDATE' ? 'bg-indigo-100 text-indigo-700' : (log.type === 'NOTICE' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700');
+                const row = document.createElement('div');
+                row.className = "flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50 rounded-2xl border text-xs gap-2";
+                row.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-1 rounded-lg font-black ${badgeColor}">${log.type}</span>
+                        <p class="font-bold text-slate-700">${log.content}</p>
+                    </div>
+                    <span class="text-[10px] text-slate-400 font-bold shrink-0">${new Date(log.ts).toLocaleString()}</span>
+                `;
+                list.appendChild(row);
+            });
+        }
 
         // --- Initial Load ---
         window.addEventListener('DOMContentLoaded', () => {
