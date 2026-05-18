@@ -665,9 +665,9 @@ const appId = 'sdi-safety-edu-12ac3';
 const rawConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
 const rawToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-// sdi-safety-edu-12ac3 전용 Firebase Configuration
+// sdi-safety-edu-12ac3 전용 Firebase Configuration (apiKey 임시 가이드 안전처리 포함)
 const sdiFirebaseConfig = {
-  apiKey: "", // Gemini 가이드에 따라 빈 문자열로 초기화되며 런타임 환경 또는 호스트 환경에서 동적으로 연동되도록 마운트합니다.
+  apiKey: "", 
   authDomain: "sdi-safety-edu-12ac3.firebaseapp.com",
   projectId: "sdi-safety-edu-12ac3",
   storageBucket: "sdi-safety-edu-12ac3.firebasestorage.app",
@@ -677,14 +677,21 @@ const sdiFirebaseConfig = {
 
 async function initFirebase() {
   try {
-    // 환경변수 __firebase_config가 주입되어 있으면 우선 적용하고, 없으면 요청한 sdi-safety-edu-12ac3 구성을 기본 적용합니다.
     const activeConfig = rawConfig ? JSON.parse(rawConfig) : sdiFirebaseConfig;
     
+    // 만약 apiKey가 완전히 비어있고 런타임 환경에서 설정되지 않은 상태라면, 
+    // 브라우저 샌드박스에서 오류를 내지 않고 우아하게 오프라인 로컬 모드로 즉시 이행하도록 보호 장치를 둡니다.
+    if (!activeConfig.apiKey || activeConfig.apiKey === "") {
+      console.warn("Firebase apiKey가 설정되어 있지 않습니다. 로컬 우선 모드로 동작을 준비합니다.");
+      setOfflineMode("오프라인 상태 (보안 토큰 대기)");
+      return;
+    }
+
     firebaseApp = initializeApp(activeConfig);
     auth = getAuth(firebaseApp);
     firestoreDb = getFirestore(firebaseApp);
 
-    // Rule 3: 연동 직후 사용자 인증 프로세스 선행 수행
+    // Rule 3: 사용자 인증 프로세스 선행 수행 및 비동기 예외 격리
     if (rawToken) {
       await signInWithCustomToken(auth, rawToken);
     } else {
@@ -704,7 +711,7 @@ async function initFirebase() {
     });
 
   } catch (err) {
-    console.warn("Firebase 연결 실패, 안전한 로컬 오프라인 모드로 실행됩니다:", err);
+    console.warn("Firebase 연결 시도 실패. 로컬 오프라인 데이터 모드로 원활하게 실행됩니다:", err);
     setOfflineMode("오프라인 상태 (네트워크 불안정)");
   }
 }
