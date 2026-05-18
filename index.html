@@ -1,1873 +1,1878 @@
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>삼성SDI 안전 교육 통합 관리 시스템</title>
-    <!-- 안정적인 외부 리소스 직접 바인딩 -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght=400;600;700;800&display=swap');
-        
-        :root {
-            --sdi-blue-dark: #001A72;
-            --sdi-blue-main: #1428A0;
-            --sdi-blue-light: #4D6AFF;
-            --surface: #ffffff;
-            --bg: #f5f7fb;
-            --vh: 1vh;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>삼성SDI 안전 교육 통합 관리 시스템</title>
+<!-- 안정적인 외부 리소스 직접 바인딩 -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 
-        body {
-            font-family: 'Pretendard', sans-serif;
-            background-color: var(--bg);
-            color: #1e293b;
-            min-height: 100vh;
-            min-height: calc(var(--vh) * 100);
-            overflow-x: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght=400;600;700;800&display=swap');
 
-        #app-container {
-            width: 100%;
-            height: 100vh;
-            height: calc(var(--vh) * 100);
-            max-width: 1280px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
+:root {
+--sdi-blue-dark: #001A72;
+--sdi-blue-main: #1428A0;
+--sdi-blue-light: #4D6AFF;
+--surface: #ffffff;
+--bg: #f5f7fb;
+--vh: 1vh;
+}
 
-        @media (min-width: 768px) {
-            #app-container {
-                height: 90vh;
-                border-radius: 2rem;
-                box-shadow: 0 25px 50px -12px rgba(20, 40, 160, 0.1);
-                border: 1px solid rgba(255, 255, 255, 0.4);
-            }
-        }
+body {
+font-family: 'Pretendard', sans-serif;
+background-color: var(--bg);
+color: #1e293b;
+min-height: 100vh;
+min-height: calc(var(--vh) * 100);
+overflow-x: hidden;
+display: flex;
+align-items: center;
+justify-content: center;
+margin: 0;
+-webkit-tap-highlight-color: transparent;
+}
 
-        .sdi-gradient {
-            background: linear-gradient(135deg, var(--sdi-blue-dark) 0%, var(--sdi-blue-main) 100%);
-        }
+#app-container {
+width: 100%;
+height: 100vh;
+height: calc(var(--vh) * 100);
+max-width: 1280px;
+background: rgba(255, 255, 255, 0.95);
+backdrop-filter: blur(20px);
+display: flex;
+flex-direction: column;
+overflow: hidden;
+transition: all 0.3s ease;
+}
 
-        .admin-tab-active {
-            background: var(--sdi-blue-main);
-            color: white !important;
-            box-shadow: 0 4px 6px -1px rgba(20, 40, 160, 0.2);
-        }
+@media (min-width: 768px) {
+#app-container {
+height: 90vh;
+border-radius: 2rem;
+box-shadow: 0 25px 50px -12px rgba(20, 40, 160, 0.1);
+border: 1px solid rgba(255, 255, 255, 0.4);
+}
+}
 
-        .hide { display: none !important; }
+.sdi-gradient {
+background: linear-gradient(135deg, var(--sdi-blue-dark) 0%, var(--sdi-blue-main) 100%);
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
+.admin-tab-active {
+background: var(--sdi-blue-main);
+color: white !important;
+box-shadow: 0 4px 6px -1px rgba(20, 40, 160, 0.2);
+}
 
-        .btn-press:active { transform: scale(0.96); transition: 0.1s; }
-        .text-keep { word-break: keep-all; }
+.hide { display: none !important; }
 
-        input[type="checkbox"] {
-            width: 1.1rem;
-            height: 1.1rem;
-            cursor: pointer;
-            accent-color: var(--sdi-blue-main);
-        }
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(10px); }
+to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade { animation: fadeIn 0.3s ease-out forwards; }
 
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-    </style>
+.btn-press:active { transform: scale(0.96); transition: 0.1s; }
+.text-keep { word-break: keep-all; }
+
+input[type="checkbox"] {
+width: 1.1rem;
+height: 1.1rem;
+cursor: pointer;
+accent-color: var(--sdi-blue-main);
+}
+
+.custom-scroll::-webkit-scrollbar { width: 4px; }
+.custom-scroll::-webkit-scrollbar-track { background: transparent; }
+.custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+</style>
 </head>
 <body>
 
-    <div id="app-container" class="animate-fade">
-        
-        <!-- Header -->
-        <header class="w-full px-6 py-4 flex justify-between items-center bg-white border-b shrink-0 z-10">
-            <div class="flex items-center gap-3">
-                <div class="sdi-gradient p-2 rounded-xl shadow-lg">
-                    <i data-lucide="shield-check" class="text-white w-5 h-5"></i>
-                </div>
-                <div>
-                    <h1 class="text-base md:text-lg font-extrabold text-slate-800">삼성SDI 안전 교육</h1>
-                    <p class="text-[8px] text-blue-500 font-black uppercase tracking-widest">S&E Management System</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2">
-                <!-- 클라우드 연동 상태 배지 -->
-                <div id="cloud-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-amber-50 text-amber-600 border-amber-200">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                    <span id="cloud-status-text">연결 확인 중</span>
-                </div>
-                <div id="admin-indicator" class="hide flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
-                    <span class="text-[10px] font-bold text-blue-800 uppercase tracking-widest">ADMIN PORTAL</span>
-                </div>
-            </div>
-        </header>
-
-        <!-- View Port -->
-        <main id="view-port" class="flex-1 overflow-y-auto relative bg-slate-50/50 custom-scroll">
-            
-            <!-- VIEW: 메인 접속 -->
-            <div id="view-auth" class="flex flex-col items-center justify-center min-h-full px-6 py-10 space-y-8 animate-fade">
-                <div class="text-center space-y-3">
-                    <div class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-[10px] font-black uppercase tracking-tighter">Safety First</div>
-                    <h2 class="text-3xl font-black text-slate-900 tracking-tight leading-tight text-keep">안전 교육 평가<br/>시스템 접속</h2>
-                    <p class="text-slate-400 text-sm font-medium">본인의 성명을 입력하여 시작하십시오.</p>
-                </div>
-                <div class="w-full max-w-md space-y-4">
-                    <input type="text" id="input-name" placeholder="성명 입력" 
-                           class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 text-lg font-bold transition-all">
-                    <button onclick="startEvaluation()" class="w-full sdi-gradient text-white py-5 rounded-2xl font-black text-lg btn-press shadow-lg shadow-blue-900/20 flex items-center justify-center gap-3">
-                        평가 시작 <i data-lucide="arrow-right-circle" class="w-6 h-6"></i>
-                    </button>
-                    <div class="pt-10 flex justify-center">
-                        <button onclick="switchView('admin-auth')" class="text-slate-300 hover:text-blue-600 text-[10px] font-bold transition-all flex items-center gap-2">
-                            <i data-lucide="settings" class="w-3 h-3"></i> ADMIN GATE
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- VIEW: 퀴즈 세션 -->
-            <div id="view-quiz" class="hide h-full flex flex-col p-6 animate-fade max-w-4xl mx-auto w-full">
-                <div class="flex justify-between items-end mb-8">
-                    <div class="space-y-1">
-                        <p class="text-[10px] font-black text-blue-600 uppercase">Progress</p>
-                        <h4 class="text-3xl font-black text-slate-900"><span id="q-idx-text">1</span><span class="text-slate-300 font-light text-xl ml-1">/ 10</span></h4>
-                    </div>
-                    <div class="flex-1 max-w-[150px] space-y-2 pb-2 ml-6">
-                        <div class="bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                            <div id="q-progress" class="sdi-gradient h-full transition-all duration-500" style="width: 10%"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex-1 space-y-4">
-                    <div class="min-h-[90px] mb-2">
-                        <h3 id="q-text" class="text-xl font-bold text-slate-800 leading-snug text-keep">질문 내용</h3>
-                    </div>
-                    
-                    <!-- 사진/텍스트 보조 예시설명 컨테이너 -->
-                    <div id="q-image-desc-container" class="hide w-full p-4 bg-blue-50/60 border border-blue-100 rounded-2xl animate-fade">
-                        <p class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-1.5">[참고 자료 및 예시설명]</p>
-                        <div id="q-image-desc" class="text-xs font-semibold text-slate-700 leading-relaxed text-keep"></div>
-                    </div>
-
-                    <div id="q-options" class="grid grid-cols-1 gap-3"></div>
-                </div>
-                <div class="py-6 flex justify-between">
-                    <button onclick="movePrev()" id="btn-back" class="text-slate-400 font-bold text-xs disabled:opacity-0 flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i> PREV</button>
-                    <div class="text-[10px] font-bold text-slate-400">합격 기준: 80점</div>
-                </div>
-            </div>
-
-            <!-- VIEW: 결과 -->
-            <div id="view-result" class="hide flex flex-col items-center min-h-full px-6 py-8 animate-fade">
-                <div id="result-status" class="mb-4 px-6 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest"></div>
-                <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm border border-slate-100 shadow-2xl mb-8 relative">
-                    <div id="qr-canvas" class="flex justify-center py-4"></div>
-                    <h4 id="qr-name" class="text-2xl font-black text-center text-slate-900">성명</h4>
-                    <div class="flex justify-between mt-6 text-center border-t pt-4">
-                        <div><p class="text-[9px] text-slate-400">SCORE</p><p id="score-text" class="font-black text-blue-600">0</p></div>
-                        <div><p class="text-[9px] text-slate-400">DATE</p><p id="qr-date" class="font-black text-slate-800">-</p></div>
-                    </div>
-                </div>
-                <button onclick="resetToHome()" class="w-full max-w-sm py-4 bg-slate-900 text-white font-bold rounded-2xl">홈으로</button>
-            </div>
-
-            <!-- VIEW: 관리자 로그인 -->
-            <div id="view-admin-auth" class="hide flex flex-col items-center justify-center min-h-full px-6 animate-fade">
-                <h2 class="text-xl font-black text-slate-900 mb-6 tracking-widest">ADMIN LOGIN</h2>
-                <input type="password" id="admin-pw-input" class="w-full max-w-xs p-5 rounded-2xl border text-center text-2xl font-black tracking-[0.5em] focus:outline-none mb-4" placeholder="****">
-                <div class="flex gap-2 w-full max-w-xs">
-                    <button onclick="resetToHome()" class="flex-1 py-4 bg-slate-100 rounded-xl font-bold">BACK</button>
-                    <button onclick="verifyAdmin()" class="flex-1 py-4 sdi-gradient text-white rounded-xl font-black">ENTER</button>
-                </div>
-            </div>
-
-            <!-- VIEW: 관리자 대시보드 -->
-            <div id="view-admin-main" class="hide p-4 md:p-8 animate-fade">
-                <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-8">
-                    <div>
-                        <h2 class="text-2xl font-black text-slate-900">통합 대시보드</h2>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Global Safety Dashboard</p>
-                    </div>
-                    <div class="flex flex-wrap gap-1 bg-white p-1.5 rounded-xl shadow-sm border overflow-x-auto max-w-full">
-                        <button onclick="setAdminTab('stats')" id="btn-tab-stats" class="admin-tab px-4 py-2 text-[10px] font-black rounded-lg text-slate-400 transition-all whitespace-nowrap">통계현황</button>
-                        <button onclick="setAdminTab('users')" id="btn-tab-users" class="admin-tab px-4 py-2 text-[10px] font-black rounded-lg text-slate-400 transition-all whitespace-nowrap">응시자 관리</button>
-                        <button onclick="setAdminTab('logs')" id="btn-tab-logs" class="admin-tab px-4 py-2 text-[10px] font-black rounded-lg text-slate-400 transition-all whitespace-nowrap">변경 사항</button>
-                        <button onclick="setAdminTab('history')" id="btn-tab-history" class="admin-tab px-4 py-2 text-[10px] font-black rounded-lg text-slate-400 transition-all whitespace-nowrap">삭제 이력</button>
-                        <button onclick="setAdminTab('bank')" id="btn-tab-bank" class="admin-tab px-4 py-2 text-[10px] font-black rounded-lg text-slate-400 transition-all whitespace-nowrap">문제은행</button>
-                        <button onclick="setAdminTab('settings')" id="btn-tab-settings" class="admin-tab px-4 py-2 text-[10px] font-black rounded-lg text-slate-400 transition-all whitespace-nowrap">설정</button>
-                    </div>
-                </div>
-
-                <!-- Tab 1: 통계현황 -->
-                <div id="atab-stats" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-2xl border">
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-black text-slate-400 uppercase">Year Filter</label>
-                            <select id="filter-year" onchange="renderStats()" class="w-full p-2.5 rounded-lg border text-xs font-bold focus:ring-2 focus:ring-blue-100 outline-none"></select>
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-black text-slate-400 uppercase">Month Filter</label>
-                            <select id="filter-month" onchange="renderStats()" class="w-full p-2.5 rounded-lg border text-xs font-bold focus:ring-2 focus:ring-blue-100 outline-none">
-                                <option value="all">전체 월</option>
-                                <option value="0">1월</option><option value="1">2월</option><option value="2">3월</option><option value="3">4월</option>
-                                <option value="4">5월</option><option value="5">6월</option><option value="6">7월</option><option value="7">8월</option>
-                                <option value="8">9월</option><option value="9">10월</option><option value="10">11월</option><option value="11">12월</option>
-                            </select>
-                        </div>
-                        <div class="flex flex-col sm:flex-row items-end gap-2">
-                            <button onclick="openDownloadModal('stats')" class="flex-1 w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-black flex items-center justify-center gap-2 btn-press">
-                                <i data-lucide="download" class="w-3 h-3"></i> 통계 엑셀 출력
-                            </button>
-                            <button onclick="openDownloadModal('ppt')" class="flex-1 w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-[10px] font-black flex items-center justify-center gap-2 btn-press">
-                                <i data-lucide="presentation" class="w-3 h-3"></i> 종합 분석 PPT 다운로드
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-white p-5 rounded-2xl border shadow-sm"><span class="text-[10px] font-black text-slate-400">전체 응시</span><h3 id="st-total" class="text-2xl font-black text-slate-900 mt-2">0</h3></div>
-                        <div class="bg-white p-5 rounded-2xl border shadow-sm"><span class="text-[10px] font-black text-slate-400">이수(합격)</span><h3 id="st-pass" class="text-2xl font-black text-blue-600 mt-2">0</h3></div>
-                        <div class="bg-white p-5 rounded-2xl border shadow-sm"><span class="text-[10px] font-black text-slate-400">미이수(불합격)</span><h3 id="st-fail" class="text-2xl font-black text-rose-500 mt-2">0</h3></div>
-                        <div class="bg-white p-5 rounded-2xl border shadow-sm"><span class="text-[10px] font-black text-slate-400">합격률</span><h3 id="st-rate" class="text-2xl font-black text-slate-900 mt-2">0%</h3></div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-3xl border shadow-sm h-96">
-                        <canvas id="statChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Tab: 변경 사항 (Logs) -->
-                <div id="atab-logs" class="hide space-y-6">
-                    <div class="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                            <h4 class="text-sm font-black text-slate-800">시스템 변경 로그 및 공지</h4>
-                            <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                                <button onclick="openDownloadModal('logs')" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-[10px] font-black flex items-center gap-2 btn-press">
-                                    <i data-lucide="download" class="w-3 h-3"></i> 변경사항 엑셀 출력
-                                </button>
-                                <button onclick="openDownloadModal('bank_history')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-[10px] font-black flex items-center gap-2 btn-press">
-                                    <i data-lucide="history" class="w-3 h-3"></i> 문제은행 업데이트 이력 엑셀 출력
-                                </button>
-                                <button onclick="showLogAddModal()" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-[10px] font-black flex items-center gap-2 btn-press">
-                                    <i data-lucide="plus" class="w-3 h-3"></i> 변경 사항 수동 추가
-                                </button>
-                            </div>
-                        </div>
-                        <div class="space-y-3 max-h-[500px] overflow-y-auto custom-scroll pr-2" id="log-list"></div>
-                    </div>
-                </div>
-
-                <!-- Tab 2: 응시자 관리 -->
-                <div id="atab-users" class="hide space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                        <p class="text-[11px] font-bold text-slate-500"><span id="user-count" class="text-blue-600">0</span>명의 응시 기록이 있습니다.</p>
-                        <div class="flex gap-2 w-full sm:w-auto">
-                            <button onclick="openDownloadModal('users')" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-[10px] font-black flex items-center gap-2 btn-press">
-                                <i data-lucide="download" class="w-3 h-3"></i> 응시자 목록 엑셀 출력
-                            </button>
-                            <button onclick="prepareDelete()" class="px-4 py-2 bg-rose-500 text-white rounded-lg text-[10px] font-black btn-press">삭제</button>
-                            <button id="btn-save-delete" onclick="confirmDeleteSave()" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-[10px] font-black btn-press hide animate-pulse">데이터 영구 저장</button>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-2xl border shadow-sm overflow-x-auto">
-                        <table class="w-full text-left min-w-[700px]">
-                            <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase border-b">
-                                <tr>
-                                    <th class="px-6 py-4 w-12 text-center"><input type="checkbox" id="check-all" onchange="toggleAll(this)"></th>
-                                    <th class="px-6 py-4">일시</th>
-                                    <th class="px-6 py-4">성명</th>
-                                    <th class="px-6 py-4">ID</th>
-                                    <th class="px-6 py-4">점수</th>
-                                    <th class="px-6 py-4">결과</th>
-                                </tr>
-                            </thead>
-                            <tbody id="user-table" class="divide-y divide-slate-100 text-xs"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Tab 3: 삭제 이력 -->
-                <div id="atab-history" class="hide space-y-4">
-                    <div class="flex justify-between items-center px-1">
-                        <p class="text-[11px] font-bold text-slate-500">삭제된 안전 교육 응시 이력 데이터입니다.</p>
-                        <button onclick="openDownloadModal('history')" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-[10px] font-black flex items-center gap-2 btn-press">
-                            <i data-lucide="download" class="w-3 h-3"></i> 삭제이력 엑셀 출력
-                        </button>
-                    </div>
-                    <div class="bg-white rounded-2xl border shadow-sm overflow-x-auto">
-                        <table class="w-full text-left min-w-[700px]">
-                            <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase border-b">
-                                <tr>
-                                    <th class="px-6 py-4">삭제 일시</th>
-                                    <th class="px-6 py-4">기존 응시 일시</th>
-                                    <th class="px-6 py-4">성명</th>
-                                    <th class="px-6 py-4">ID</th>
-                                    <th class="px-6 py-4">점수</th>
-                                </tr>
-                            </thead>
-                            <tbody id="history-table" class="divide-y divide-slate-100 text-[11px]"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Tab 4: 문제은행 관리 -->
-                <div id="atab-bank" class="hide space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div class="space-y-1">
-                            <h4 class="text-sm font-black text-slate-700">등록된 문제 (<span id="bank-count">0</span>)</h4>
-                            <p class="text-[10px] text-slate-400 font-bold">체크박스를 통해 문항을 직접 선택하여 편집하거나 삭제할 수 있습니다.</p>
-                        </div>
-                        <div class="flex flex-wrap gap-2">
-                            <!-- 직접 수동 등록 지원 -->
-                            <button onclick="openQuestionModal(null)" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-[10px] font-black flex items-center gap-2 btn-press">
-                                <i data-lucide="plus-circle" class="w-3 h-3"></i> 신규 문항 수동 추가
-                            </button>
-                            <button onclick="openDownloadModal('bank')" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-[10px] font-black flex items-center gap-2 border border-emerald-700 btn-press">
-                                <i data-lucide="download" class="w-3 h-3"></i> 문제은행 엑셀 출력
-                            </button>
-                            <button onclick="openDownloadModal('template')" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black flex items-center gap-2 border btn-press">
-                                <i data-lucide="file-down" class="w-3 h-3"></i> 양식 다운로드
-                            </button>
-                            <label class="px-4 py-2 bg-blue-600 text-white rounded-lg text-[10px] font-black cursor-pointer flex items-center gap-2 btn-press">
-                                <i data-lucide="file-up" class="w-3 h-3"></i> 엑셀 업로드
-                                <input type="file" id="bank-upload" class="hidden" accept=".xlsx, .xls" onchange="handleBankUpload(this)">
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <!-- 문제 개별 조작 바 추가 -->
-                    <div id="bank-control-bar" class="flex gap-2 p-3 bg-slate-100 rounded-xl hide">
-                        <span class="text-xs font-bold text-slate-600 self-center ml-2"><span id="checked-bank-count" class="text-blue-600">0</span>개 문항 선택됨</span>
-                        <button onclick="deleteCheckedQuestions()" class="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-[10px] font-black btn-press">선택 삭제</button>
-                    </div>
-
-                    <div class="bg-white rounded-2xl border shadow-sm overflow-x-auto">
-                        <table class="w-full text-left min-w-[900px]">
-                            <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase border-b">
-                                <tr>
-                                    <th class="px-4 py-4 w-12 text-center"><input type="checkbox" id="bank-check-all" onchange="toggleAllBank(this)"></th>
-                                    <th class="px-4 py-4 w-12">번호</th>
-                                    <th class="px-4 py-4 w-1/3">문제 내용</th>
-                                    <th class="px-4 py-4">예시설명 (미디어/텍스트)</th>
-                                    <th class="px-4 py-4">보기 옵션</th>
-                                    <th class="px-4 py-4 w-16 text-center">정답</th>
-                                    <th class="px-4 py-4 w-20 text-center">작업</th>
-                                </tr>
-                            </thead>
-                            <tbody id="bank-table" class="divide-y divide-slate-100 text-[11px]"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Tab 5: 설정 -->
-                <div id="atab-settings" class="hide flex flex-col items-center gap-6 py-6">
-                    <!-- 클라우드 가이드 패널 -->
-                    <div class="w-full max-w-md bg-slate-50 p-6 rounded-2xl border text-xs leading-relaxed space-y-3">
-                        <div class="flex items-center gap-2 font-black text-slate-800">
-                            <i data-lucide="cloud" class="w-4 h-4 text-blue-600"></i>
-                            클라우드 자동 저장 활성화 안내
-                        </div>
-                        <p class="text-slate-500 font-medium">본 어플리케이션은 기본적으로 로컬 브라우저에 데이터를 안전하게 축적하지만, Firestore 클라우드가 주입되면 모든 사용자의 스마트폰 평가 내역이 이 통합 대시보드로 실시간 동기화됩니다.</p>
-                        <div class="text-[10px] text-blue-600 font-bold bg-blue-50 p-2.5 rounded-lg border border-blue-100">
-                            ✓ 현재 상태: <span id="settings-sync-mode">상태를 불러오는 중...</span>
-                        </div>
-                    </div>
-
-                    <div class="w-full max-w-md bg-white p-8 rounded-3xl border shadow-sm space-y-6">
-                        <h4 class="text-center font-black text-slate-800 uppercase tracking-widest">비밀번호 변경</h4>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="text-[10px] font-black text-slate-400">현재 비밀번호</label>
-                                <input type="password" id="pw-current" class="w-full p-4 mt-1 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 font-bold">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-black text-slate-400">새 비밀번호</label>
-                                <input type="password" id="pw-new" class="w-full p-4 mt-1 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 font-bold">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-black text-slate-400">새 비밀번호 확인</label>
-                                <input type="password" id="pw-confirm" class="w-full p-4 mt-1 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 font-bold">
-                            </div>
-                            <!-- 승인 다이얼로그 개방 확인 절차 연계 -->
-                            <button onclick="requestChangePassword()" class="w-full py-4 sdi-gradient text-white rounded-xl font-black btn-press mt-4 shadow-lg shadow-blue-900/20">변경 사항 저장</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-12 flex justify-center border-t pt-8">
-                    <button onclick="resetToHome()" class="text-slate-400 text-[10px] font-black uppercase flex items-center gap-2 hover:text-red-500">
-                        <i data-lucide="log-out" class="w-3 h-3"></i> Exit Admin System
-                    </button>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Toast 알림 레이아웃 -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl text-xs font-bold shadow-2xl transition-all duration-300 opacity-0 pointer-events-none z-[999] flex items-center gap-2">
-        <i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
-        <span id="toast-msg">메시지</span>
-    </div>
-
-    <!-- Modal: Confirmation (Delete) -->
-    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hide flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-xs rounded-3xl p-8 text-center animate-fade shadow-2xl">
-            <div class="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
-            </div>
-            <h3 class="text-lg font-black text-slate-900 mb-2">정말 삭제하시겠습니까?</h3>
-            <p class="text-xs text-slate-400 font-medium leading-relaxed mb-8">선택한 응시자의 모든 기록이<br/>시스템에서 영구적으로 삭제됩니다.</p>
-            <div class="flex gap-3">
-                <button onclick="closeConfirm()" class="flex-1 py-4 bg-slate-100 rounded-xl font-bold text-slate-500">취소</button>
-                <button onclick="executeDelete()" class="flex-1 py-4 bg-rose-500 text-white rounded-xl font-black">확인 및 삭제</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Confirmation (Password Change) -->
-    <div id="confirm-pw-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] hide flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-xs rounded-3xl p-8 text-center animate-fade shadow-2xl">
-            <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i data-lucide="key-round" class="w-8 h-8"></i>
-            </div>
-            <h3 class="text-base font-black text-slate-900 mb-2">관리자 비밀번호를 변경하시겠습니까?</h3>
-            <div class="bg-slate-50 p-4 rounded-xl text-left text-xs font-semibold text-slate-600 mb-6 space-y-1.5">
-                <p>• 기존 비밀번호: <span id="confirm-pw-cur" class="font-bold text-slate-900 font-mono">****</span></p>
-                <p>• 신규 비밀번호: <span id="confirm-pw-new" class="font-bold text-blue-600 font-mono">****</span></p>
-                <p class="text-[10px] text-slate-400 pt-1 border-t border-slate-200">정말로 변경을 승인하고 시스템에 최종 저장하시겠습니까?</p>
-            </div>
-            <div class="flex gap-3">
-                <button onclick="closePwConfirm()" class="flex-1 py-3.5 bg-slate-100 rounded-xl font-bold text-xs text-slate-500">취소</button>
-                <button onclick="executeChangePassword()" class="flex-1 py-3.5 sdi-gradient text-white rounded-xl font-black text-xs">확인 및 변경</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Add Log -->
-    <div id="log-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hide flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-6">
-            <div class="flex justify-between items-center">
-                <h3 class="text-lg font-black text-slate-900">변경 사항 직접 입력</h3>
-                <button onclick="closeLogModal()" class="text-slate-300 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase">분류</label>
-                    <select id="log-type" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 font-bold text-xs">
-                        <option value="UPDATE">기능 업데이트</option>
-                        <option value="NOTICE">공지사항</option>
-                        <option value="MAINTAIN">정기 점검/수정</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase">내용</label>
-                    <textarea id="log-content" class="w-full p-4 mt-1 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 font-medium text-xs h-32 resize-none" placeholder="변경 내용을 입력하세요."></textarea>
-                </div>
-                <button onclick="saveManualLog()" class="w-full py-4 bg-slate-900 text-white rounded-xl font-black btn-press shadow-lg">로그 저장</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Download Configuration & File Writer -->
-    <div id="download-config-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hide flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-5">
-            <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-                <i data-lucide="download" class="w-7 h-7"></i>
-            </div>
-            <h3 class="text-lg font-black text-slate-900 text-center">파일 다운로드 보장 및 저장 설정</h3>
-            <p class="text-xs text-slate-400 font-medium leading-relaxed text-center">
-                보안 인트라넷, 가상 iframe 샌드박스, 또는 모바일 브라우저에서도 기기에 확실하게 다운로드되도록 보장하는 시스템입니다. 저장할 파일명과 경로 옵션을 설정하십시오.
-            </p>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase">저장될 파일 명칭 지정</label>
-                    <input type="text" id="target-filename" class="w-full p-3.5 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-bold text-xs">
-                </div>
-                <div class="p-3 bg-slate-50 rounded-xl text-[10px] font-bold text-slate-500 leading-relaxed">
-                    💡 <span class="text-emerald-600">안내:</span> [물리적 파일 생성 및 저장]을 누르면 디바이스의 기본 '다운로드' 디렉토리에 파일이 안전하게 실시간 생성 및 저장됩니다.
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="closeDownloadModal()" class="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold rounded-xl text-xs btn-press">취소</button>
-                    <button onclick="executeTargetDownload()" class="flex-1 py-3.5 sdi-gradient text-white font-black rounded-xl text-xs btn-press flex items-center justify-center gap-1">
-                        <i data-lucide="file-check" class="w-4 h-4"></i> 물리적 파일 생성 및 저장
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Excel Upload Mode Selection (병합 vs 덮어쓰기) -->
-    <div id="upload-mode-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hide flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-5">
-            <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto">
-                <i data-lucide="file-spreadsheet" class="w-7 h-7"></i>
-            </div>
-            <h3 class="text-lg font-black text-slate-900 text-center">문제은행 업로드 방식 선택</h3>
-            <p class="text-xs text-slate-400 font-medium leading-relaxed text-center">
-                엑셀 데이터에 수록된 문제를 등록하는 방식을 선택해 주십시오.<br/>
-                <strong>[기존 데이터 유지 후 추가]</strong> 방식을 사용하면 기존에 등록되어 있는 문제를 삭제하지 않고 새로운 내용만 병입할 수 있습니다.
-            </p>
-            <div class="grid grid-cols-1 gap-3 pt-2">
-                <button id="upload-mode-merge" class="w-full p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 rounded-2xl text-left btn-press flex items-start gap-3">
-                    <div class="p-2 bg-blue-600 text-white rounded-xl"><i data-lucide="git-merge" class="w-4 h-4"></i></div>
-                    <div>
-                        <p class="text-xs font-black">기존 데이터 유지 후 추가 (추천)</p>
-                        <p class="text-[10px] text-blue-600 font-semibold mt-0.5">기존에 등록된 문제를 삭제하지 않고 엑셀 문제를 뒤에 추가합니다.</p>
-                    </div>
-                </button>
-                <button id="upload-mode-overwrite" class="w-full p-4 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-900 rounded-2xl text-left btn-press flex items-start gap-3">
-                    <div class="p-2 bg-rose-600 text-white rounded-xl"><i data-lucide="refresh-cw" class="w-4 h-4"></i></div>
-                    <div>
-                        <p class="text-xs font-black">기존 문항 덮어쓰기</p>
-                        <p class="text-[10px] text-rose-600 font-semibold mt-0.5">기존 문제 리스트를 완전히 삭제한 후 업로드한 파일로만 재구축합니다.</p>
-                    </div>
-                </button>
-            </div>
-            <div class="flex justify-center pt-2">
-                <button onclick="closeUploadModeModal()" class="px-6 py-2 bg-slate-100 rounded-xl font-bold text-xs text-slate-500">업로드 취소</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Question Edit/Add -->
-    <div id="question-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hide flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-lg rounded-3xl p-8 animate-fade shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto custom-scroll">
-            <div class="flex justify-between items-center">
-                <h3 id="question-modal-title" class="text-lg font-black text-slate-900">문제 상세 정보 수정</h3>
-                <button onclick="closeQuestionModal()" class="text-slate-300 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
-            </div>
-            <div class="space-y-4 text-xs">
-                <input type="hidden" id="edit-q-idx">
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase">문제 내용</label>
-                    <textarea id="edit-q-text" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-bold h-20 resize-none"></textarea>
-                </div>
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase">예시설명 (미디어 설명 / 추가 사진 지침 / 텍스트 등)</label>
-                    <input type="text" id="edit-q-image" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-bold" placeholder="텍스트 혹은 이미지 파일 지침 입력 (필요 없을 시 빈칸)">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase">보기 1</label>
-                        <input type="text" id="edit-q-opt1" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-bold">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase">보기 2</label>
-                        <input type="text" id="edit-q-opt2" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-bold">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase">보기 3</label>
-                        <input type="text" id="edit-q-opt3" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-bold">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase">보기 4</label>
-                        <input type="text" id="edit-q-opt4" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-bold">
-                    </div>
-                </div>
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase">정답 번호 (1~4)</label>
-                    <select id="edit-q-correct" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-black text-xs">
-                        <option value="1">1번 보기</option>
-                        <option value="2">2번 보기</option>
-                        <option value="3">3번 보기</option>
-                        <option value="4">4번 보기</option>
-                    </select>
-                </div>
-                <button onclick="saveQuestionItem()" class="w-full py-4 sdi-gradient text-white rounded-xl font-black btn-press mt-2 shadow-lg shadow-blue-950/25">저장 완료</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase SDK 및 전체 비즈니스 로직 -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- Core Data & Init ---
-        function updateFullHeight() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
-        window.addEventListener('resize', updateFullHeight); updateFullHeight();
-
-        // 삼성SDI 울산 사업장 현장 안전 지침 30문항 기본 탑재
-        const ULSIAN_SDI_30_QUIZ = [
-            { idx: 1, q: "보행 중 스마트폰 사용에 대한 사내 규정은 무엇인가?", imageDesc: "사내 전 구역 보행 안전 강화수칙", a: ["상관없음", "완전 금지 (보행 정지 후 사용)", "전화 통화만 허용", "계단에서만 사용 금지"], c: 2 },
-            { idx: 2, q: "SDI 울산공장 내부 차량 운행의 절대 최고 속도 제한은?", imageDesc: "사내 교통 전도 사고 예방 지침", a: ["시속 10km 이하", "시속 20km 이하", "시속 30km 이하", "시속 40km 이하"], c: 2 },
-            { idx: 3, q: "LOTO(Lock-Out, Tag-Out) 설비 잠금의 궁극적인 목적은?", imageDesc: "LOTO 정비 간 오가동 차단 지침", a: ["에너지원 격리 및 불시 가동 방지", "청소 상태 검증", "생산 수율 측정", "설비 검수 기록"], c: 1 },
-            { idx: 4, q: "배터리 생산 공정 내 전해액 누출 시 현장 초동 조치 중 가장 적절한 것은?", imageDesc: "MSDS 화학 유해 물질 노출 가이드", a: ["손으로 전해액을 닦아낸다", "즉시 대피 후 방재팀 및 환경안전국에 신고", "냄새를 맡아 농도를 확인한다", "수돗물을 부어 중화한다"], c: 2 },
-            { idx: 5, q: "계단 이동 시 전도(넘어짐) 사고를 예방하기 위한 보행 규칙은?", imageDesc: "인적 위해 전도 전방 조치 예방", a: ["뛰어서 신속히 이동", "반드시 핸드레일을 잡고 걷기", "휴대폰을 주시하며 걷기", "두 칸씩 스텝 이동"], c: 2 },
-            { idx: 6, q: "사내 보행 중 외투 주머니나 바지 주머니에 손을 넣는 행위는?", imageDesc: "넘어짐 간 안면 부상 예방", a: ["상시 허용", "절대 금지 (장갑 착용 원칙)", "겨울철에만 허용", "실내 사무실 구역만 허용"], c: 2 },
-            { idx: 7, q: "고소 작업(높이 2m 이상) 시 추락 예방을 위해 무조건 체결해야 하는 장비는?", imageDesc: "고소 안전 벨트 및 안전고리 수칙", a: ["전신 안전대 (안전고리 2개 체결)", "보안경", "방진 마스크", "보안모 전면 쉴드"], c: 1 },
-            { idx: 8, q: "사내에서 자전거 및 전동 킥보드 이용 시 필수 착용 보호구는?", imageDesc: "개인형 이동장치 PM 운행 수칙", a: ["반사 조끼", "보호 헬멧", "무릎 보호대", "미끄럼 방지 장갑"], c: 2 },
-            { idx: 9, q: "화재 발생을 최초 인지했을 때 취해야 할 가장 긴급한 조치는?", imageDesc: "소방 방재 초동 전파 요령", a: ["즉시 중요 서류를 챙긴다", "발신기를 눌러 화재 경보 전파 후 대피", "자체 소화만 고집한다", "엘리베이터를 타고 탈출한다"], c: 2 },
-            { idx: 10, q: "밀폐 구역 산소 결핍 우려 장소 진입 전 필히 측정해야 할 산소 농도 기준은?", imageDesc: "밀폐공간 보건 작업 허가 지침", a: ["10% 미만", "18% 이상 23.5% 미만", "30% 이상", "농도 측정 없이 즉시 진입"], c: 2 },
-            { idx: 11, q: "배터리 전해액이나 화학 유독성 액체가 안구에 튀었을 때 응급조치 시간은?", imageDesc: "화학물질 안구 노출 긴급세척", a: ["수돗물이나 전용 안구 세척기로 15분 이상 세척", "약국 안약을 즉시 점안", "눈을 손으로 강하게 비벼서 배출", "그대로 마를 때까지 대기"], c: 1 },
-            { idx: 12, q: "설비 정비 및 점검 간 작업 개시 전 안전 조치로 틀린 것은?", imageDesc: "설비 정비 안전 가이드", a: ["기동 전원 스위치 차단", "LOTO 시건 및 태그 부착", "잔류 압력/에너지 배출", "가동 중인 설비에 직접 손 삽입"], c: 4 },
-            { idx: 13, q: "사내 전동 지게차 보행 통로 교차 구간에서의 통행 우선권은?", imageDesc: "지게차 충돌 충돌 예방 규정", a: ["무조건 지게차 우선", "보행자 절대 우선 (일시 정지 및 상호 유도)", "먼저 진입한 차선 우선", "속도가 빠른 차량 우선"], c: 2 },
-            { idx: 14, q: "전기 고압 배전반 작업 시 감전 예방을 위해 필히 착용할 절연용 장비는?", imageDesc: "고압 가공 감전 활선 수칙", a: ["면장갑", "절연용 안전 장갑 및 안전화", "가죽 안전 장갑", "코팅 목장갑"], c: 2 },
-            { idx: 15, q: "비상 대피 훈련 시 건물 외부 피난 유도 표지판의 색상은?", imageDesc: "안전 색채 유도 디자인 가이드", a: ["적색", "녹색", "황색", "청색"], c: 2 },
-            { idx: 16, q: "배터리 셀 용접 공정에서 발생하는 유해 흄 및 가스 정화용 마스크 종류는?", imageDesc: "공정 보건 송풍 필터링 가이드", a: ["면 마스크", "송풍 마스크 또는 특급 방진 마스크", "일반 비말 차단 마스크", "덴탈 마스크"], c: 2 },
-            { idx: 17, q: "사내 공사 작업 시작 전, 현장에서 실시하는 툴박스 미팅(TBM)의 주요 논의 사항은?", imageDesc: "작업 개시 전 안전 유도 TBM", a: ["당일 원가 절감 방안", "해당 작업의 위험성 평가 공유 및 안전 대책 확인", "전일 생산 실적 보고", "식당 식사 메뉴 선택"], c: 2 },
-            { idx: 18, q: "중량물을 반복 인양할 때 요통 예방을 위한 올바른 자세는?", imageDesc: "근골격계 부담작업 안전요령", a: ["허리를 굽히고 다리를 편 상태로 든다", "무릎을 굽히고 물체를 몸에 최대한 밀착시켜 다리 힘으로 든다", "반동을 이용하여 빠르게 던지듯 든다", "한 손으로만 무게 중심을 치우쳐 든다"], c: 2 },
-            { idx: 19, q: "안전 보건 표지 중 노란색 바탕에 검은색 그림이 상징하는 표지는?", imageDesc: "안전 보건 표지 색채 디자인 규격", a: ["금지 표지", "경고 표지", "지시 표지", "안내 표지"], c: 2 },
-            { idx: 20, q: "화학물질이 보관된 드럼통 외벽에 반드시 부착해야 하는 경고 표식은?", imageDesc: "GHS/MSDS 글로벌 물질 경고 의무", a: ["회사 로고", "GHS 유해성 경고 그림 및 MSDS 경고 표지", "생산 단가 표식", "납품처 주소지 명세"], c: 2 },
-            { idx: 21, q: "비상 탈출구 주변 통로에 자재나 적재물을 쌓아두는 행위는?", imageDesc: "대피 통로 장애물 배제 원칙", a: ["일시적인 보관은 가능", "소방 관계법 및 사내 규정상 절대 적치 금지", "퇴근 시간 전에만 치우면 됨", "지정 구역 외 통로 측면은 가능"], c: 2 },
-            { idx: 22, q: "사내 고압 가스 용기(산소, 질소 등)를 보관할 때 올바른 지침은?", imageDesc: "고압 가스 충전 용기 취급 요령", a: ["눕혀서 적재 보관", "직사광선을 차단하고 전도 방지 체인 결속 후 직립 보관", "난로 및 화기 바로 옆 배치", "용기 밸브를 항상 열어 보관"], c: 2 },
-            { idx: 23, q: "크레인 등 중량물 매달기 작업 하부 통행 제한 규정은?", imageDesc: "인양 낙하 충돌 협착 전방 관리", a: ["보호모 착용 시 통행 가능", "작업 반경 내 통제선 설치 및 통행 절대 금지", "지게차 유도 시 신속 통행 가능", "작업이 정지된 순간에는 상시 가능"], c: 2 },
-            { idx: 24, q: "화학물질 흡입으로 환자가 의식을 잃었을 때 우선 조치는?", imageDesc: "밀폐 질식 유독 가스 긴급대응", a: ["인공호흡 전, 즉시 대기 오염이 없는 신선한 공기가 통하는 곳으로 이송", "현장에서 계속 마사지 실시", "억지로 음료수를 주입", "현장 구역을 봉쇄하고 기다림"], c: 1 },
-            { idx: 25, q: "밀폐 배전반 보수 작업 완료 후 전원을 투입할 때 가장 선행되어야 할 확인 조치는?", imageDesc: "전기 활선 통전 전방 조치 요령", a: ["가동 스위치 작동 속도 체크", "설비 내부의 잔여 도구 수거 및 작업자 이탈 최종 확인", "외함 접지 도료 칠하기", "차단기 용량 라벨링"], c: 2 },
-            { idx: 26, q: "협착(끼임) 위험 구역에 설치된 방호 울타리(인터록 도어) 우회 개방 행위는?", imageDesc: "끼임 사고 방지 연동 도어 수칙", a: ["속도를 내기 위한 우회 연동 해제 허용", "임의 우회 해제 및 가동 절대 금지", "임원 동행 시 상시 가능", "주간 보수 시간에만 임시 가능"], c: 2 },
-            { idx: 27, q: "사내 공사 작업 시작 전, 현장에서 실시하는 툴박스 미팅(TBM)의 주요 논의 사항은?", imageDesc: "작업 개시 전 안전 유도 TBM", a: ["당일 원가 절감 방안", "해당 작업의 위험성 평가 공유 및 안전 대책 확인", "전일 생산 실적 보고", "식당 식사 메뉴 선택"], c: 2 },
-            { idx: 28, q: "전기 아크 발생 우려가 높은 작업 시 입어야 할 부적합한 의류 재질은?", imageDesc: "전기 감전 정전기 화재 예방", a: ["면 100% 소재", "폴리에스터 등 화학 합성섬유 (열융착 유발 제재)", "방염 특수 코팅 작업복", "정전기 방지 제전복"], c: 2 },
-            { idx: 29, q: "청력 보존 구역으로 지정된 소음 사업장 기준 데시벨(dB)은?", imageDesc: "소음성 난청 예방 귀마개 착용 기준", a: ["50dB 이상", "85dB 이상 강한 소음 연속 노출 장소", "30dB 야간 기준", "70dB 일반 대화"], c: 2 },
-            { idx: 30, q: "삼성SDI 안전 핵심 실천 수칙 중 '안전 제보 제도'의 참여 대상은?", imageDesc: "사내 무재해 환경안전 상생문화", a: ["경영진 및 사무국 전용", "SDI 임직원 및 모든 협력사/내방객 포함 전원", "안전 관리 담당자", "외부 소방 점검 공무원"], c: 2 }
-        ];
-
-        // 기본 안전 데이터 상태 동기화 정의
-        let db = {
-            users: JSON.parse(localStorage.getItem('sdi_db_users_v10') || '[]'),
-            history: JSON.parse(localStorage.getItem('sdi_db_history_v10') || '[]'),
-            bank: JSON.parse(localStorage.getItem('sdi_db_bank_v10') || JSON.stringify(ULSIAN_SDI_30_QUIZ)),
-            logs: JSON.parse(localStorage.getItem('sdi_db_logs_v10') || '[]'),
-            adminPw: localStorage.getItem('sdi_admin_pw_v10') || '1234'
-        };
-
-        let state = { user: null, quizSet: [], currIdx: 0, answers: [], chart: null, pendingDelete: [], tempPwObj: null, currentDownloadType: "" };
-        let tempUploadBank = []; 
-        
-        // --- Firebase Cloud Connection Configuration (RULE 1 & 3) ---
-        let firebaseApp = null;
-        let auth = null;
-        let firestoreDb = null;
-        let isCloudMode = false;
-        let currentUser = null;
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sdi-safety-ulsan-safety';
-        const rawConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
-        const rawToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        async function initFirebase() {
-            if (!rawConfig) {
-                setOfflineMode("로컬 우선 모드");
-                return;
-            }
-
-            try {
-                const firebaseConfig = JSON.parse(rawConfig);
-                firebaseApp = initializeApp(firebaseConfig);
-                auth = getAuth(firebaseApp);
-                firestoreDb = getFirestore(firebaseApp);
-
-                if (rawToken) {
-                    await signInWithCustomToken(auth, rawToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        currentUser = user;
-                        isCloudMode = true;
-                        updateCloudBadge(true, "클라우드 실시간 동기화 완료");
-                        await syncOfflineRecordsToCloud();
-                        startRealtimeSync();
-                    } else {
-                        setOfflineMode("인증 만료 (로컬 우선 동작)");
-                    }
-                });
-
-            } catch (err) {
-                console.warn("Firebase 연결 실패, 안전한 로컬 오프라인 모드로 실행됩니다:", err);
-                setOfflineMode("오프라인 상태 (네트워크 불안정)");
-            }
-        }
-
-        async function syncOfflineRecordsToCloud() {
-            if (!isCloudMode || !currentUser) return;
-            const offlineUsers = JSON.parse(localStorage.getItem('sdi_db_users_v10') || '[]');
-            if (offlineUsers.length > 0) {
-                for (let u of offlineUsers) {
-                    await writeToCloudOrLocal('users', u.id, u);
-                }
-            }
-            const offlineHistory = JSON.parse(localStorage.getItem('sdi_db_history_v10') || '[]');
-            if (offlineHistory.length > 0) {
-                for (let h of offlineHistory) {
-                    await writeToCloudOrLocal('history', h.id, h);
-                }
-            }
-            const offlineLogs = JSON.parse(localStorage.getItem('sdi_db_logs_v10') || '[]');
-            if (offlineLogs.length > 0) {
-                for (let l of offlineLogs) {
-                    const cleanLogId = l.id || `LOG-${l.ts || Date.now()}`;
-                    await writeToCloudOrLocal('logs', cleanLogId, {
-                        type: l.type,
-                        content: l.content,
-                        ts: l.ts || Date.now(),
-                        isAuto: l.isAuto !== undefined ? l.isAuto : true
-                    });
-                }
-            }
-        }
-
-        function setOfflineMode(reason) {
-            isCloudMode = false;
-            updateCloudBadge(false, reason);
-            renderStats();
-        }
-
-        function updateCloudBadge(active, text) {
-            const badge = document.getElementById('cloud-badge');
-            const statusText = document.getElementById('cloud-status-text');
-            const settingText = document.getElementById('settings-sync-mode');
-            if (statusText) statusText.innerText = text;
-            if (settingText) settingText.innerText = text;
-            if (badge) {
-                if (active) {
-                    badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-emerald-50 text-emerald-600 border-emerald-200";
-                    const span = badge.querySelector('span');
-                    if (span) span.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
-                } else {
-                    badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-slate-50 text-slate-500 border-slate-200";
-                    const span = badge.querySelector('span');
-                    if (span) span.className = "w-1.5 h-1.5 rounded-full bg-slate-400";
-                }
-            }
-        }
-
-        function getCollectionRef(colName) {
-            return collection(firestoreDb, 'artifacts', appId, 'public', 'data', colName);
-        }
-
-        function getDocRef(colName, docId) {
-            return doc(firestoreDb, 'artifacts', appId, 'public', 'data', colName, docId);
-        }
-
-        function startRealtimeSync() {
-            if (!isCloudMode || !currentUser) return;
-
-            onSnapshot(getCollectionRef('users'), (snapshot) => {
-                const users = [];
-                snapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-                db.users = users;
-                localStorage.setItem('sdi_db_users_v10', JSON.stringify(db.users));
-                renderUserTable();
-                renderStats();
-            }, (err) => console.error(err));
-
-            onSnapshot(getCollectionRef('history'), (snapshot) => {
-                const history = [];
-                snapshot.forEach(doc => history.push({ id: doc.id, ...doc.data() }));
-                db.history = history;
-                localStorage.setItem('sdi_db_history_v10', JSON.stringify(db.history));
-                renderHistoryTable();
-            }, (err) => console.error(err));
-
-            onSnapshot(getCollectionRef('bank'), (snapshot) => {
-                if (!snapshot.empty) {
-                    const bank = [];
-                    snapshot.forEach(doc => bank.push({ id: doc.id, ...doc.data() }));
-                    db.bank = bank.sort((a,b) => a.idx - b.idx);
-                    localStorage.setItem('sdi_db_bank_v10', JSON.stringify(db.bank));
-                } else {
-                    initializeCloudBank();
-                }
-                renderBankTable();
-            }, (err) => console.error(err));
-
-            onSnapshot(getCollectionRef('logs'), (snapshot) => {
-                const logs = [];
-                snapshot.forEach(doc => logs.push({ id: doc.id, ...doc.data() }));
-                db.logs = logs.sort((a, b) => b.ts - a.ts);
-                localStorage.setItem('sdi_db_logs_v10', JSON.stringify(db.logs));
-                renderLogs();
-            }, (err) => console.error(err));
-
-            onSnapshot(getDocRef('config', 'settings'), (docSnap) => {
-                if (docSnap.exists()) {
-                    db.adminPw = docSnap.data().adminPw || '1234';
-                    localStorage.setItem('sdi_admin_pw_v10', db.adminPw);
-                } else {
-                    setDoc(getDocRef('config', 'settings'), { adminPw: '1234' });
-                }
-            }, (err) => console.error(err));
-        }
-
-        async function initializeCloudBank() {
-            for (let q of ULSIAN_SDI_30_QUIZ) {
-                await writeToCloudOrLocal('bank', `Q-${q.idx}`, q);
-            }
-        }
-
-        async function writeToCloudOrLocal(collectionName, docId, dataPayload) {
-            if (isCloudMode && currentUser) {
-                try {
-                    await setDoc(getDocRef(collectionName, docId), dataPayload);
-                    return true;
-                } catch (e) {
-                    console.error("클라우드 쓰기 에러: ", e);
-                }
-            }
-            return false;
-        }
-
-        async function deleteFromCloud(collectionName, docId) {
-            if (isCloudMode && currentUser) {
-                try {
-                    await deleteDoc(getDocRef(collectionName, docId));
-                    return true;
-                } catch (e) {
-                    console.error("클라우드 삭제 에러: ", e);
-                }
-            }
-            return false;
-        }
-
-        function saveLocalBackupOnly() {
-            localStorage.setItem('sdi_db_users_v10', JSON.stringify(db.users));
-            localStorage.setItem('sdi_db_history_v10', JSON.stringify(db.history));
-            localStorage.setItem('sdi_db_bank_v10', JSON.stringify(db.bank));
-            localStorage.setItem('sdi_db_logs_v10', JSON.stringify(db.logs));
-            localStorage.setItem('sdi_admin_pw_v10', db.adminPw);
-        }
-
-        async function addLog(type, content, isAuto = true) {
-            const timestamp = Date.now();
-            const logId = `LOG-${timestamp}`;
-            const newLog = {
-                type: type,
-                content: content,
-                ts: timestamp,
-                isAuto: isAuto
-            };
-            const cloudSuccess = await writeToCloudOrLocal('logs', logId, newLog);
-            if (!cloudSuccess) {
-                db.logs.unshift({ id: logId, ...newLog });
-                if(db.logs.length > 100) db.logs.pop();
-                saveLocalBackupOnly();
-                renderLogs();
-            }
-        }
-
-        // --- Core UI & Navigation ---
-        window.toast = function(msg) {
-            const t = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            t.classList.replace('opacity-0', 'opacity-100');
-            setTimeout(() => t.classList.replace('opacity-100', 'opacity-0'), 2500);
-        }
-
-        window.switchView = function(vid) {
-            document.querySelectorAll('#view-port > div').forEach(div => div.classList.add('hide'));
-            document.getElementById('view-' + vid).classList.remove('hide');
-            document.getElementById('admin-indicator').classList.toggle('hide', vid !== 'admin-main');
-            if(vid === 'admin-main') setAdminTab('stats');
-            lucide.createIcons();
-            document.getElementById('view-port').scrollTop = 0;
-        }
-
-        window.resetToHome = function() {
-            state.user = null;
-            document.getElementById('input-name').value = '';
-            document.getElementById('admin-pw-input').value = '';
-            switchView('auth');
-        }
-
-        // --- Evaluation Logic ---
-        window.startEvaluation = function() {
-            const name = document.getElementById('input-name').value.trim();
-            if(!name) return toast('성명을 입력하세요.');
-            state.user = { name, ts: Date.now(), id: 'SDI-' + Math.random().toString(36).substr(2,6).toUpperCase() };
-            
-            // 피셔-예이츠 셔플링 기반 무작위 10문항 선별 (중복 완전 배제)
-            let indices = Array.from({ length: db.bank.length }, (_, i) => i);
-            for (let i = indices.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [indices[i], indices[j]] = [indices[j], indices[i]];
-            }
-            
-            state.quizSet = indices.slice(0, 10).map(idx => db.bank[idx]);
-            
-            if(state.quizSet.length < 10) { 
-                toast('문제은행의 문제가 부족합니다. (최소 10문항 필요)'); 
-                return; 
-            }
-            state.currIdx = 0; 
-            state.answers = Array(10).fill(null);
-            switchView('quiz'); 
-            renderQuiz();
-        }
-
-        function renderQuiz() {
-            const q = state.quizSet[state.currIdx];
-            document.getElementById('q-idx-text').innerText = state.currIdx + 1;
-            document.getElementById('q-progress').style.width = ((state.currIdx + 1) * 10) + '%';
-            document.getElementById('q-text').innerText = q.q;
-            
-            const descContainer = document.getElementById('q-image-desc-container');
-            const descEl = document.getElementById('q-image-desc');
-            if (q.imageDesc && q.imageDesc.trim() !== "") {
-                descContainer.classList.remove('hide');
-                descEl.innerText = q.imageDesc;
-            } else {
-                descContainer.classList.add('hide');
-            }
-
-            const optBox = document.getElementById('q-options');
-            optBox.innerHTML = '';
-            q.a.forEach((ans, idx) => {
-                const btn = document.createElement('button');
-                btn.className = `p-4 text-left border-2 rounded-2xl font-bold transition-all btn-press text-xs ${state.answers[state.currIdx] === idx+1 ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-100 bg-white'}`;
-                btn.innerText = `${idx+1}. ${ans}`;
-                btn.onclick = () => selectAnswer(idx + 1);
-                optBox.appendChild(btn);
-            });
-            document.getElementById('btn-back').disabled = state.currIdx === 0;
-            lucide.createIcons();
-        }
-
-        function selectAnswer(ans) {
-            state.answers[state.currIdx] = ans;
-            renderQuiz();
-            setTimeout(() => {
-                if(state.currIdx < 9) { 
-                    state.currIdx++; 
-                    renderQuiz(); 
-                } else {
-                    completeEvaluation();
-                }
-            }, 250);
-        }
-
-        window.movePrev = function() { 
-            if(state.currIdx > 0) { 
-                state.currIdx--; 
-                renderQuiz(); 
-            } 
-        }
-
-        async function completeEvaluation() {
-            let score = 0;
-            state.quizSet.forEach((q, i) => { if(state.answers[i] === q.c) score += 10; });
-            const result = { ...state.user, score, passed: score >= 80 };
-
-            // 클라우드 및 디바이스 동시 영구 저장 유도
-            const cloudSuccess = await writeToCloudOrLocal('users', result.id, result);
-            if (!cloudSuccess) {
-                db.users.push(result); 
-                saveLocalBackupOnly();
-            }
-            renderResult(result);
-        }
-
-        function renderResult(data) {
-            switchView('result');
-            const rs = document.getElementById('result-status');
-            rs.innerText = data.passed ? 'PASSED' : 'FAILED';
-            rs.className = `mb-4 px-6 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${data.passed ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`;
-            document.getElementById('qr-name').innerText = data.name;
-            document.getElementById('score-text').innerText = data.score + '점';
-            document.getElementById('qr-date').innerText = new Date(data.ts).toLocaleDateString();
-            const qrc = document.getElementById('qr-canvas'); qrc.innerHTML = '';
-            if(data.passed) {
-                new QRCode(qrc, { text: data.id, width: 120, height: 120, colorDark: "#1428A0" });
-            } else {
-                qrc.innerHTML = '<div class="w-24 h-24 bg-slate-50 border-2 border-dashed rounded-2xl flex items-center justify-center text-slate-300 font-bold text-[8px] text-center px-2">재교육 대상</div>';
-            }
-        }
-
-        // --- Admin Dash Logic ---
-        window.verifyAdmin = function() {
-            if(document.getElementById('admin-pw-input').value === db.adminPw) {
-                switchView('admin-main');
-            } else {
-                toast('비밀번호가 일치하지 않습니다.');
-            }
-        }
-
-        function initFilters() {
-            const ySelect = document.getElementById('filter-year');
-            const currentYear = new Date().getFullYear();
-            if (ySelect) {
-                ySelect.innerHTML = '';
-                for(let i=0; i<3; i++) {
-                    const year = currentYear - i;
-                    const opt = new Option(year + '년', year);
-                    ySelect.add(opt);
-                }
-            }
-        }
-
-        window.setAdminTab = function(tab) {
-            document.querySelectorAll('.admin-tab').forEach(btn => btn.classList.remove('admin-tab-active', 'text-slate-400'));
-            const activeBtn = document.getElementById('btn-tab-' + tab);
-            if (activeBtn) activeBtn.classList.add('admin-tab-active');
-            
-            document.querySelectorAll('[id^="atab-"]').forEach(div => div.classList.add('hide'));
-            const activeDiv = document.getElementById('atab-' + tab);
-            if (activeDiv) activeDiv.classList.remove('hide');
-            
-            if(tab === 'stats') renderStats();
-            if(tab === 'users') renderUserTable();
-            if(tab === 'history') renderHistoryTable();
-            if(tab === 'bank') renderBankTable();
-            if(tab === 'logs') renderLogs();
-        }
-
-        // --- Statistics Rendering ---
-        window.renderStats = function() {
-            const filterYearEl = document.getElementById('filter-year');
-            if (!filterYearEl) return;
-            const selYear = parseInt(filterYearEl.value);
-            const selMonth = document.getElementById('filter-month').value;
-            
-            let filteredAll = db.users.filter(u => new Date(u.ts).getFullYear() === selYear);
-            let summaryFiltered = [...filteredAll];
-            if(selMonth !== 'all') {
-                summaryFiltered = summaryFiltered.filter(u => new Date(u.ts).getMonth() === parseInt(selMonth));
-            }
-
-            const total = summaryFiltered.length;
-            const passTotal = summaryFiltered.filter(u => u.passed).length;
-            const failTotal = total - passTotal;
-            const rateTotal = total > 0 ? Math.round((passTotal/total)*100) : 0;
-
-            document.getElementById('st-total').innerText = total;
-            document.getElementById('st-pass').innerText = passTotal;
-            document.getElementById('st-fail').innerText = failTotal;
-            document.getElementById('st-rate').innerText = rateTotal + '%';
-
-            const passData = Array(12).fill(0);
-            const failData = Array(12).fill(0);
-            const rateData = Array(12).fill(0);
-
-            filteredAll.forEach(u => {
-                const m = new Date(u.ts).getMonth();
-                if(u.passed) passData[m]++; else failData[m]++;
-            });
-
-            for(let i=0; i<12; i++) {
-                const monthTotal = passData[i] + failData[i];
-                rateData[i] = monthTotal > 0 ? Math.round((passData[i]/monthTotal)*100) : 0;
-            }
-
-            const getAlpha = (idx) => {
-                if(selMonth === 'all') return 1;
-                return parseInt(selMonth) === idx ? 1 : 0.2;
-            };
-
-            const canvas = document.getElementById('statChart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            if(state.chart) state.chart.destroy();
-            
-            state.chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-                    datasets: [
-                        {
-                            label: '이수자',
-                            data: passData,
-                            backgroundColor: passData.map((_, i) => `rgba(20, 40, 160, ${getAlpha(i)})`),
-                            borderRadius: 6,
-                            borderSkipped: false,
-                            barPercentage: 0.8,
-                            categoryPercentage: 0.6
-                        },
-                        {
-                            label: '미이수자',
-                            data: failData,
-                            backgroundColor: failData.map((_, i) => `rgba(244, 63, 94, ${getAlpha(i)})`),
-                            borderRadius: 6,
-                            borderSkipped: false,
-                            barPercentage: 0.8,
-                            categoryPercentage: 0.6
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } },
-                        tooltip: { backgroundColor: '#1e293b', titleFont: { size: 12 }, bodyFont: { size: 11 }, padding: 12, cornerRadius: 10 }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            grid: { color: '#f1f5f9', drawBorder: false }, 
-                            ticks: { stepSize: 1, font: { size: 9 }, color: '#94a3b8' } 
-                        },
-                        x: { 
-                            grid: { display: false }, 
-                            ticks: { font: { size: 10, weight: 'bold' }, color: '#64748b' } 
-                        }
-                    },
-                    animation: {
-                        onComplete: function() {
-                            const chartInstance = this;
-                            const ctx = chartInstance.ctx;
-                            ctx.font = 'bold 9px Pretendard';
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'bottom';
-
-                            chartInstance.data.datasets[0].data.forEach((data, index) => {
-                                const mTotal = passData[index] + failData[index];
-                                if (mTotal > 0) {
-                                    const meta0 = chartInstance.getDatasetMeta(0);
-                                    const meta1 = chartInstance.getDatasetMeta(1);
-                                    const x0 = meta0.data[index].x;
-                                    const x1 = meta1.data[index].x;
-                                    const y = Math.min(meta0.data[index].y, meta1.data[index].y);
-                                    
-                                    const alpha = getAlpha(index);
-                                    ctx.fillStyle = `rgba(148, 163, 184, ${alpha * 0.8})`;
-                                    ctx.fillText(`${rateData[index]}%`, (x0 + x1) / 2, y - 5);
-                                }
-                            });
-                        }
-                    }
-                }
-            });
-        }
-
-        // --- Other Admin Functions ---
-        function renderUserTable() {
-            const tbody = document.getElementById('user-table');
-            if(!tbody) return;
-            tbody.innerHTML = '';
-            document.getElementById('user-count').innerText = db.users.length;
-            db.users.slice().sort((a,b) => b.ts - a.ts).forEach(u => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="px-6 py-4 text-center"><input type="checkbox" value="${u.id}" class="user-check"></td>
-                    <td class="px-6 py-4 text-slate-400">${new Date(u.ts).toLocaleString()}</td>
-                    <td class="px-6 py-4 font-black">${u.name}</td>
-                    <td class="px-6 py-4 font-mono text-[10px]">${u.id}</td>
-                    <td class="px-6 py-4 font-black text-blue-700">${u.score}점</td>
-                    <td class="px-6 py-4"><span class="px-2 py-0.5 rounded-full text-[10px] font-black ${u.passed?'bg-emerald-50 text-emerald-600':'bg-rose-50 text-rose-500'}">${u.passed?'PASS':'FAIL'}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
-            document.getElementById('btn-save-delete').classList.add('hide');
-        }
-
-        window.toggleAll = function(el) { 
-            document.querySelectorAll('.user-check').forEach(c => c.checked = el.checked); 
-        }
-
-        window.prepareDelete = function() {
-            const checked = Array.from(document.querySelectorAll('.user-check:checked')).map(c => c.value);
-            if(checked.length === 0) return toast('삭제할 응시자를 선택하세요.');
-            state.pendingDelete = checked;
-            document.getElementById('btn-save-delete').classList.remove('hide');
-            toast('삭제 대기 목록이 준비되었습니다. 저장 버튼을 클릭하여 완료하십시오.');
-        }
-
-        window.confirmDeleteSave = function() {
-            document.getElementById('confirm-modal').classList.remove('hide');
-            lucide.createIcons();
-        }
-
-        window.closeConfirm = function() { document.getElementById('confirm-modal').classList.add('hide'); }
-
-        window.executeDelete = async function() {
-            const idsToDelete = new Set(state.pendingDelete);
-            const deletedData = db.users.filter(u => idsToDelete.has(u.id)).map(u => ({ ...u, deleteTs: Date.now() }));
-            
-            for(let h of deletedData) {
-                await writeToCloudOrLocal('history', h.id, h);
-                await deleteFromCloud('users', h.id);
-            }
-
-            if(!isCloudMode) {
-                db.history = [...db.history, ...deletedData];
-                db.users = db.users.filter(u => !idsToDelete.has(u.id));
-                saveLocalBackupOnly();
-            }
-            
-            const deletedSummary = deletedData.map(d => `${d.name}(${d.id})`).join(', ');
-            await addLog('SYSTEM', `응시 이력 데이터가 삭제되었습니다. 대상: [${deletedSummary}] (총 ${idsToDelete.size}건)`);
-            
-            state.pendingDelete = [];
-            closeConfirm();
-            setAdminTab('users');
-            toast('정상적으로 삭제 및 반영되었습니다.');
-        }
-
-        function renderHistoryTable() {
-            const tbody = document.getElementById('history-table');
-            if(!tbody) return;
-            tbody.innerHTML = '';
-            db.history.slice().sort((a,b) => b.deleteTs - a.deleteTs).forEach(h => {
-                tbody.innerHTML += `<tr>
-                    <td class="px-6 py-4 text-rose-500 font-bold">${new Date(h.deleteTs).toLocaleString()}</td>
-                    <td class="px-6 py-4 text-slate-400">${new Date(h.ts).toLocaleString()}</td>
-                    <td class="px-6 py-4 font-black">${h.name}</td>
-                    <td class="px-6 py-4 font-mono">${h.id}</td>
-                    <td class="px-6 py-4 font-black">${h.score}점</td>
-                </tr>`;
-            });
-        }
-
-        function renderBankTable() {
-            const tbody = document.getElementById('bank-table');
-            if(!tbody) return;
-            tbody.innerHTML = '';
-            document.getElementById('bank-count').innerText = db.bank.length;
-            
-            db.bank.forEach((q, idx) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="px-4 py-4 text-center"><input type="checkbox" value="${q.idx}" class="bank-item-check" onchange="updateBankSelectedCount()"></td>
-                    <td class="px-4 py-4 font-bold text-slate-400">${idx+1}</td>
-                    <td class="px-4 py-4 font-bold text-slate-800 text-keep">${q.q}</td>
-                    <td class="px-4 py-4 text-blue-600 font-medium">${q.imageDesc && q.imageDesc.trim() !== "" ? q.imageDesc : "<span class='text-slate-300 font-light'>-</span>"}</td>
-                    <td class="px-4 py-4 text-slate-500 leading-relaxed">${q.a.map((o, i) => `<span class="${q.c === i+1 ? 'text-blue-600 font-bold' : ''}">${i+1}. ${o}</span>`).join('<br/>')}</td>
-                    <td class="px-4 py-4 text-center"><span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-black">${q.c}</span></td>
-                    <td class="px-4 py-4 text-center">
-                        <button onclick="openQuestionModal(${idx})" class="text-blue-600 hover:text-blue-800 font-bold mr-2">수정</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-            updateBankSelectedCount();
-        }
-
-        window.toggleAllBank = function(el) {
-            document.querySelectorAll('.bank-item-check').forEach(c => c.checked = el.checked);
-            updateBankSelectedCount();
-        }
-
-        window.updateBankSelectedCount = function() {
-            const checked = document.querySelectorAll('.bank-item-check:checked');
-            const controlBar = document.getElementById('bank-control-bar');
-            const countSpan = document.getElementById('checked-bank-count');
-            
-            if (countSpan) countSpan.innerText = checked.length;
-            if (controlBar) {
-                if (checked.length > 0) controlBar.classList.remove('hide');
-                else controlBar.classList.add('hide');
-            }
-        }
-
-        window.deleteCheckedQuestions = async function() {
-            const checkedBoxes = document.querySelectorAll('.bank-item-check:checked');
-            const idxsToDelete = Array.from(checkedBoxes).map(c => parseInt(c.value));
-            
-            if (isCloudMode) {
-                for (let idx of idxsToDelete) {
-                    await deleteFromCloud('bank', `Q-${idx}`);
-                }
-            } else {
-                db.bank = db.bank.filter(q => !idxsToDelete.includes(q.idx));
-                saveLocalBackupOnly();
-                renderBankTable();
-            }
-
-            await addLog('UPDATE', `문제은행 문항 ${idxsToDelete.length}개가 전체 목록에서 직접 선택 삭제되었습니다.`);
-            toast('문항이 성공적으로 삭제되었습니다.');
-        }
-
-        window.openQuestionModal = function(idx) {
-            const title = document.getElementById('question-modal-title');
-            const textInput = document.getElementById('edit-q-text');
-            const imgInput = document.getElementById('edit-q-image');
-            const opt1 = document.getElementById('edit-q-opt1');
-            const opt2 = document.getElementById('edit-q-opt2');
-            const opt3 = document.getElementById('edit-q-opt3');
-            const opt4 = document.getElementById('edit-q-opt4');
-            const correct = document.getElementById('edit-q-correct');
-            const idxInput = document.getElementById('edit-q-idx');
-
-            if (idx === null) {
-                title.innerText = "신규 평가 문항 수동 등록";
-                textInput.value = "";
-                imgInput.value = "";
-                opt1.value = "";
-                opt2.value = "";
-                opt3.value = "";
-                opt4.value = "";
-                correct.value = "1";
-                idxInput.value = "-1";
-            } else {
-                const item = db.bank[idx];
-                title.innerText = "평가 문항 수정";
-                textInput.value = item.q;
-                imgInput.value = item.imageDesc || "";
-                opt1.value = item.a[0] || "";
-                opt2.value = item.a[1] || "";
-                opt3.value = item.a[2] || "";
-                opt4.value = item.a[3] || "";
-                correct.value = String(item.c);
-                idxInput.value = String(item.idx);
-            }
-
-            document.getElementById('question-modal').classList.remove('hide');
-        }
-
-        window.closeQuestionModal = function() {
-            document.getElementById('question-modal').classList.add('hide');
-        }
-
-        window.saveQuestionItem = async function() {
-            const text = document.getElementById('edit-q-text').value.trim();
-            const img = document.getElementById('edit-q-image').value.trim();
-            const o1 = document.getElementById('edit-q-opt1').value.trim();
-            const o2 = document.getElementById('edit-q-opt2').value.trim();
-            const o3 = document.getElementById('edit-q-opt3').value.trim();
-            const o4 = document.getElementById('edit-q-opt4').value.trim();
-            const correct = parseInt(document.getElementById('edit-q-correct').value);
-            const idxStr = document.getElementById('edit-q-idx').value;
-
-            if (!text || !o1 || !o2) return toast('문제 내용 및 보기를 정확히 입력하세요.');
-
-            const aList = [o1, o2];
-            if (o3) aList.push(o3);
-            if (o4) aList.push(o4);
-
-            if (idxStr === "-1") {
-                const nextIdx = db.bank.length > 0 ? Math.max(...db.bank.map(q => q.idx)) + 1 : 1;
-                const newItem = { idx: nextIdx, q: text, imageDesc: img, a: aList, c: correct };
-                
-                if (isCloudMode) {
-                    await writeToCloudOrLocal('bank', `Q-${nextIdx}`, newItem);
-                } else {
-                    db.bank.push(newItem);
-                    saveLocalBackupOnly();
-                    renderBankTable();
-                }
-                await addLog('UPDATE', `신규 안전 문항이 시스템에 수동 개별 추가되었습니다: "${text.substring(0,18)}..."`);
-            } else {
-                const curIdx = parseInt(idxStr);
-                const updatedItem = { idx: curIdx, q: text, imageDesc: img, a: aList, c: correct };
-                
-                if (isCloudMode) {
-                    await writeToCloudOrLocal('bank', `Q-${curIdx}`, updatedItem);
-                } else {
-                    const findIdx = db.bank.findIndex(q => q.idx === curIdx);
-                    if (findIdx !== -1) db.bank[findIdx] = updatedItem;
-                    saveLocalBackupOnly();
-                    renderBankTable();
-                }
-                await addLog('UPDATE', `문제은행 문항(${curIdx}번)이 관리자에 의해 수동으로 직접 편집 수정되었습니다.`);
-            }
-
-            closeQuestionModal();
-            toast('안전하게 저장되었습니다.');
-        }
-
-        // --- 엑셀 업로더 ---
-        window.handleBankUpload = function(input) {
-            const file = input.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const ws = workbook.Sheets[workbook.SheetNames[0]];
-                    const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
-                    
-                    if (rows.length < 2) {
-                        toast('업로드된 엑셀 파일에 데이터가 부족합니다.');
-                        return;
-                    }
-
-                    const headers = rows[0];
-                    let questionIdx = -1, imageDescIdx = -1, optionIdxs = [], answerIdx = -1;
-
-                    headers.forEach((h, index) => {
-                        const cleanH = String(h).trim();
-                        if (cleanH.includes("문제") || cleanH.includes("질문") || cleanH.includes("Question")) {
-                            questionIdx = index;
-                        } else if (cleanH.includes("예시설명") || cleanH.includes("그림") || cleanH.includes("사진") || cleanH.includes("참고")) {
-                            imageDescIdx = index;
-                        } else if (cleanH.includes("보기") || cleanH.includes("예시") || cleanH.includes("Option")) {
-                            optionIdxs.push(index);
-                        } else if (cleanH.includes("정답") || cleanH.includes("답") || cleanH.includes("Answer")) {
-                            answerIdx = index;
-                        }
-                    });
-
-                    if (questionIdx === -1) questionIdx = 0;
-                    if (imageDescIdx === -1) imageDescIdx = 1; 
-                    if (optionIdxs.length === 0) optionIdxs = [2, 3, 4, 5];
-                    if (answerIdx === -1) answerIdx = 6;
-
-                    tempUploadBank = rows.slice(1).filter(r => r[questionIdx] && r[answerIdx]).map((r, i) => {
-                        const options = optionIdxs.map(idx => r[idx]).filter(v => v !== undefined && v !== null && String(v).trim() !== "");
-                        return {
-                            q: String(r[questionIdx]).trim(),
-                            imageDesc: r[imageDescIdx] ? String(r[imageDescIdx]).trim() : "",
-                            a: options.map(opt => String(opt).trim()),
-                            c: parseInt(r[answerIdx])
-                        };
-                    }).filter(q => q.a.length >= 2 && !isNaN(q.c));
-
-                    if(tempUploadBank.length === 0) {
-                        toast('엑셀에서 파싱 가능한 유효한 평가 문항이 없습니다.');
-                        return;
-                    }
-
-                    document.getElementById('upload-mode-modal').classList.remove('hide');
-                    document.getElementById('upload-mode-merge').onclick = () => executeUploadAndClose(true);
-                    document.getElementById('upload-mode-overwrite').onclick = () => executeUploadAndClose(false);
-
-                } catch (err) {
-                    console.error(err);
-                    toast('엑셀 해독에 오류가 발생했습니다.');
-                }
-                input.value = '';
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        window.closeUploadModeModal = function() {
-            document.getElementById('upload-mode-modal').classList.add('hide');
-            tempUploadBank = [];
-        }
-
-        async function executeUploadAndClose(isMerge) {
-            document.getElementById('upload-mode-modal').classList.add('hide');
-            
-            let finalBankList = [];
-            if (isMerge) {
-                const maxIdx = db.bank.length > 0 ? Math.max(...db.bank.map(q => q.idx)) : 0;
-                const mappedNew = tempUploadBank.map((q, i) => ({
-                    idx: maxIdx + 1 + i,
-                    ...q
-                }));
-                finalBankList = [...db.bank, ...mappedNew];
-            } else {
-                finalBankList = tempUploadBank.map((q, i) => ({
-                    idx: i + 1,
-                    ...q
-                }));
-            }
-
-            if (isCloudMode) {
-                if (!isMerge) {
-                    for(let q of db.bank) {
-                        await deleteFromCloud('bank', `Q-${q.idx}`);
-                    }
-                }
-                for(let q of finalBankList) {
-                    await writeToCloudOrLocal('bank', `Q-${q.idx}`, q);
-                }
-            } else {
-                db.bank = finalBankList; 
-                saveLocalBackupOnly();
-                renderBankTable();
-            }
-
-            await addLog('UPDATE', `문제은행 데이터가 업데이트되었습니다. 업로드 방식: ${isMerge ? '기존유지병합' : '덮어쓰기'} (총 문항 수: ${finalBankList.length})`);
-            toast('문제은행이 성공적으로 업데이트 완료되었습니다.');
-            tempUploadBank = [];
-        }
-
-        // --- 다운로드 보장 처리 엔진 ---
-        window.openDownloadModal = function(type) {
-            state.currentDownloadType = type;
-            const input = document.getElementById('target-filename');
-            
-            let defaultName = "SDI_Report.xlsx";
-            if (type === 'stats') defaultName = `SDI_안전교육_월별통계_${new Date().getFullYear()}년.xlsx`;
-            else if (type === 'users') defaultName = `SDI_안전교육_응시자목록_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`;
-            else if (type === 'logs') defaultName = `SDI_안전교육_변경사항로그_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`;
-            else if (type === 'bank_history') defaultName = `SDI_안전교육_문제은행_수정이력_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`;
-            else if (type === 'history') defaultName = `SDI_안전교육_삭제이력_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`;
-            else if (type === 'bank') defaultName = `SDI_안전교육_현재문제은행_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`;
-            else if (type === 'template') defaultName = "SDI_Quiz_Bank_Template.xlsx";
-            else if (type === 'ppt') defaultName = `SDI_안전교육_종합분석보고서_${new Date().getFullYear()}년.ppt`;
-
-            input.value = defaultName;
-            document.getElementById('download-config-modal').classList.remove('hide');
-        }
-
-        window.closeDownloadModal = function() {
-            document.getElementById('download-config-modal').classList.add('hide');
-            state.currentDownloadType = "";
-        }
-
-        window.executeTargetDownload = function() {
-            const filename = document.getElementById('target-filename').value.trim() || "SDI_File.xlsx";
-            const type = state.currentDownloadType;
-            closeDownloadModal();
-
-            if (type === 'ppt') {
-                triggerPPTGeneration(filename);
-                return;
-            }
-
-            if (type === 'template') {
-                const template = [["문제", "예시설명(그림/사진/텍스트 등 필요시)", "보기1", "보기2", "보기3", "보기4", "정답(숫자)"]];
-                const ws = XLSX.utils.aoa_to_sheet(template);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "QuizBank");
-                executeFinalWrite(wb, filename);
-                return;
-            }
-
-            let data = [];
-            if (type === 'stats') {
-                data.push(["기준 연도", document.getElementById('filter-year').value]);
-                data.push([]);
-                data.push(["월", "전체 응시자", "이수(합격)", "미이수(불합격)", "이수율(합격률)"]);
-                
-                const passData = Array(12).fill(0);
-                const failData = Array(12).fill(0);
-                const selYear = parseInt(document.getElementById('filter-year').value);
-                
-                db.users.filter(u => new Date(u.ts).getFullYear() === selYear).forEach(u => {
-                    const m = new Date(u.ts).getMonth();
-                    if(u.passed) passData[m]++; else failData[m]++;
-                });
-
-                for(let i=0; i<12; i++) {
-                    const total = passData[i] + failData[i];
-                    const rate = total > 0 ? Math.round((passData[i]/total)*100) : 0;
-                    data.push([`${i+1}월`, total, passData[i], failData[i], `${rate}%`]);
-                }
-                
-                const totalPass = passData.reduce((a, b) => a + b, 0);
-                const totalFail = failData.reduce((a, b) => a + b, 0);
-                const grandTotal = totalPass + totalFail;
-                const grandRate = grandTotal > 0 ? Math.round((totalPass/grandTotal)*100) : 0;
-                data.push([]);
-                data.push(["합계 및 요약", grandTotal, totalPass, totalFail, `${grandRate}%`]);
-
-            } else if (type === 'users') {
-                data.push(["응시 일시", "성명", "ID", "취득 점수", "결과(합격 여부)"]);
-                db.users.slice().sort((a,b) => b.ts - a.ts).forEach(u => {
-                    data.push([new Date(u.ts).toLocaleString(), u.name, u.id, `${u.score}점`, u.passed ? "합격 (PASS)" : "불합격 (FAIL)"]);
-                });
-
-            } else if (type === 'logs') {
-                data.push(["발생 일시", "분류", "발생 주체", "로그 기록 내용"]);
-                db.logs.slice().sort((a,b) => b.ts - a.ts).forEach(log => {
-                    data.push([new Date(log.ts).toLocaleString(), log.type, log.isAuto ? "SYSTEM" : "ADMIN", log.content]);
-                });
-
-            } else if (type === 'bank_history') {
-                data.push(["수정 일시", "분류", "이력 기록 사항"]);
-                const bankLogs = db.logs.filter(log => log.type === 'UPDATE' || log.content.includes("문제은행"));
-                bankLogs.slice().sort((a,b) => b.ts - a.ts).forEach(log => {
-                    data.push([new Date(log.ts).toLocaleString(), log.type, log.content]);
-                });
-                if(bankLogs.length === 0) {
-                    data.push(["-", "-", "기록된 문제은행 업데이트 이력이 아직 없습니다."]);
-                }
-
-            } else if (type === 'history') {
-                data.push(["삭제 완료 일시", "원래 응시 일시", "응시자 성명", "응시자 고유 ID", "원래 취득 점수"]);
-                db.history.slice().sort((a,b) => b.deleteTs - a.deleteTs).forEach(h => {
-                    data.push([new Date(h.deleteTs).toLocaleString(), new Date(h.ts).toLocaleString(), h.name, h.id, `${h.score}점`]);
-                });
-
-            } else if (type === 'bank') {
-                data.push(["문제", "예시설명(그림/사진/텍스트 등 필요시)", "보기1", "보기2", "보기3", "보기4", "정답(숫자)"]);
-                db.bank.forEach(q => {
-                    data.push([q.q, q.imageDesc || "", q.a[0] || "", q.a[1] || "", q.a[2] || "", q.a[3] || "", q.c]);
-                });
-            }
-
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-            executeFinalWrite(wb, filename);
-        }
-
-        function executeFinalWrite(wb, filename) {
-            try {
-                XLSX.writeFile(wb, filename);
-                toast("디바이스에 실물 파일 저장이 성공적으로 완료되었습니다.");
-            } catch (error) {
-                console.error("Standard Write Process Error: ", error);
-                try {
-                    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-                    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                    
-                    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-                        window.navigator.msSaveOrOpenBlob(blob, filename);
-                        return;
-                    }
-
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = filename;
-                    a.target = '_blank';
-                    a.rel = 'noopener';
-                    
-                    document.body.appendChild(a);
-                    a.click();
-                    setTimeout(() => {
-                        document.body.removeChild(a);
-                        window.URL.revokeObjectURL(url);
-                    }, 100);
-                    toast("안전 모드로 파일 저장이 완료되었습니다.");
-                } catch (e) {
-                    toast("파일 저장 쓰기 권한이 차단되었습니다.");
-                }
-            }
-        }
-
-        // --- 비밀번호 변경 프로세스 ---
-        window.requestChangePassword = function() {
-            const cur = document.getElementById('pw-current').value;
-            const n1 = document.getElementById('pw-new').value;
-            const n2 = document.getElementById('pw-confirm').value;
-
-            if (!cur || !n1 || !n2) return toast('정보를 모두 누락 없이 입력해 주십시오.');
-            if (cur !== db.adminPw) return toast('현재 관리자 비밀번호가 일치하지 않습니다.');
-            if (n1 !== n2) return toast('새 비밀번호와 확인 입력이 일치하지 않습니다.');
-            if (n1.length < 4) return toast('새 비밀번호는 최소 4자 이상이어야 합니다.');
-
-            state.tempPwObj = { cur, n1 };
-            
-            document.getElementById('confirm-pw-cur').innerText = cur;
-            document.getElementById('confirm-pw-new').innerText = n1;
-            
-            document.getElementById('confirm-pw-modal').classList.remove('hide');
-        }
-
-        window.closePwConfirm = function() {
-            document.getElementById('confirm-pw-modal').classList.add('hide');
-            state.tempPwObj = null;
-        }
-
-        window.executeChangePassword = async function() {
-            if (!state.tempPwObj) return;
-            const { n1 } = state.tempPwObj;
-
-            db.adminPw = n1;
-
-            let saveSuccess = false;
-            if (isCloudMode) {
-                try {
-                    await setDoc(getDocRef('config', 'settings'), { adminPw: n1 });
-                    saveSuccess = true;
-                } catch (e) {
-                    console.error("Firestore Password Save Error: ", e);
-                }
-            } else {
-                saveLocalBackupOnly();
-                saveSuccess = true;
-            }
-
-            if (saveSuccess) {
-                localStorage.setItem('sdi_admin_pw_v10', n1);
-                db.adminPw = n1;
-                saveLocalBackupOnly();
-
-                await addLog('MAINTAIN', '관리자 시스템 계정 비밀번호가 안전하게 업데이트 변경되었습니다.');
-                
-                document.getElementById('pw-current').value = '';
-                document.getElementById('pw-new').value = '';
-                document.getElementById('pw-confirm').value = '';
-                
-                toast('관리자 비밀번호가 성공적으로 변경 완료되었습니다.');
-            } else {
-                toast('보안 통신 장애로 반영되지 못했습니다. 잠시 후 재시도하십시오.');
-            }
-
-            closePwConfirm();
-        }
-
-        // --- 수동 로그 기입 기능 추가 ---
-        window.saveManualLog = async function() {
-            const type = document.getElementById('log-type').value;
-            const content = document.getElementById('log-content').value.trim();
-            if (!content) return toast('로그 내용을 정확하게 기입해 주세요.');
-            
-            await addLog(type, content, false);
-            closeLogModal();
-            toast('로그가 안전하게 반영되었습니다.');
-        }
-
-        // --- PPTX 슬라이드 빌더 엔진 ---
-        function triggerPPTGeneration(filename) {
-            try {
-                const selYear = document.getElementById('filter-year').value;
-                const selMonth = document.getElementById('filter-month').value;
-                
-                let filteredUsers = db.users.filter(u => new Date(u.ts).getFullYear() === parseInt(selYear));
-                if (selMonth !== 'all') {
-                    filteredUsers = filteredUsers.filter(u => new Date(u.ts).getMonth() === parseInt(selMonth));
-                }
-
-                const total = filteredUsers.length;
-                const pass = filteredUsers.filter(u => u.passed).length;
-                const fail = total - pass;
-                const rate = total > 0 ? Math.round((pass/total)*100) : 0;
-
-                const pptContent = `
-                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:p='urn:schemas-microsoft-com:office:powerpoint' xmlns='http://www.w3.org/TR/REC-html40'>
-                <head>
-                    <meta charset="utf-8">
-                    <title>삼성SDI 안전교육 종합 분석 보고서</title>
-                    <style>
-                        body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 0; background: #001A72; color: #ffffff; }
-                        .slide { width: 10in; height: 7.5in; padding: 1in; box-sizing: border-box; background: #ffffff; color: #1e293b; page-break-after: always; position: relative; }
-                        .cover { background: linear-gradient(135deg, #001A72 0%, #1428A0 100%); color: #ffffff; }
-                        h1 { font-size: 36pt; font-weight: 800; margin-bottom: 5pt; }
-                        h2 { font-size: 24pt; font-weight: 700; color: #1428A0; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-top: 0; }
-                        p { font-size: 14pt; line-height: 1.6; }
-                        .meta { font-size: 11pt; opacity: 0.8; margin-top: 2in; }
-                        .stats-grid { display: grid; grid-cols: 4; display: flex; gap: 20px; margin-top: 40px; }
-                        .stat-card { flex: 1; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; text-align: center; }
-                        .stat-val { font-size: 28pt; font-weight: 800; color: #1428A0; margin-top: 10px; }
-                        .stat-lbl { font-size: 10pt; color: #64748b; font-weight: bold; }
-                        .footer { position: absolute; bottom: 0.5in; left: 1in; font-size: 9pt; color: #94a3b8; }
-                    </style>
-                </head>
-                <body>
-                    <div class="slide cover">
-                        <div style="margin-top: 1.5in;">
-                            <span style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 12pt; font-weight: bold;">S&E Management System</span>
-                            <h1 style="margin-top: 20px;">안전 교육 이수 현황 및<br/>종합 분석 통계 리포트</h1>
-                            <p style="opacity: 0.8; font-size: 16pt; margin-top: 20px;">삼성SDI 안전환경보건(S&E) 교육 통합 관리 대시보드</p>
-                            <div class="meta">
-                                출력 기준 연월: ${selYear}년 ${selMonth === 'all' ? '전체' : (parseInt(selMonth)+1) + '월'}<br/>
-                                보고서 생성 일시: ${new Date().toLocaleString()}<br/>
-                                작성 주체: 삼성SDI 안전환경 사무국
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="slide">
-                        <h2>안전 교육 평가 정량 지표 분석</h2>
-                        <p>선택된 분석 주기에 해당하는 정량 안전성 지표 요약본입니다.</p>
-                        
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-lbl">총 응시 건수</div>
-                                <div class="stat-val">${total}건</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-lbl">합격 이수자 수</div>
-                                <div class="stat-val" style="color: #059669;">${pass}명</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-lbl">미이수(불합격) 수</div>
-                                <div class="stat-val" style="color: #dc2626;">${fail}명</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-lbl">합격 교육 이수율</div>
-                                <div class="stat-val" style="color: #2563eb;">${rate}%</div>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 40px; background: #eff6ff; padding: 20px; border-radius: 10px; border-left: 5px solid #2563eb;">
-                            <p style="font-size: 12pt; margin: 0; color: #1e3a8a; font-weight: bold;">💡 평가 이수율 종합 평가 의견:</p>
-                            <p style="font-size: 11pt; margin: 5px 0 0 0; color: #1e40af; line-height: 1.5;">
-                                본 분석 주기 내 총 이수율은 ${rate}%를 기록하였습니다. 이수 완료 수치가 85% 하회 시 안전 교육 난이도 조정 및 현장 재교육 일정이 추가 소요될 수 있으므로, 주기적인 통제 관리가 권고됩니다.
-                            </p>
-                        </div>
-                        <div class="footer">Samsung SDI Safety First | Slide 2</div>
-                    </div>
-
-                    <div class="slide">
-                        <h2>사내 안전교육 시스템 변경 사항 및 공지 이력</h2>
-                        <p>최근 보고 주기 동안 발생한 주요 시스템 구성 업데이트 로그입니다.</p>
-                        
-                        <div style="margin-top: 20px; font-size: 11pt;">
-                            <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                                <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1; font-weight: bold; color: #475569;">
-                                    <th style="padding: 10px;">일시</th>
-                                    <th style="padding: 10px;">분류</th>
-                                    <th style="padding: 10px;">기록 내용</th>
-                                </tr>
-                                ${db.logs.slice(0, 5).map(log => `
-                                <tr style="border-bottom: 1px solid #e2e8f0;">
-                                    <td style="padding: 10px; color: #64748b;">${new Date(log.ts).toLocaleDateString()}</td>
-                                    <td style="padding: 10px; font-weight: bold; color: #1428A0;">${log.type}</td>
-                                    <td style="padding: 10px; color: #334155;">${log.content}</td>
-                                </tr>
-                                `).join('')}
-                            </table>
-                        </div>
-                        <div class="footer">Samsung SDI Safety First | Slide 3</div>
-                    </div>
-                </body>
-                </html>
-                `;
-
-                const blob = new Blob([pptContent], { type: 'application/vnd.ms-powerpoint;charset=utf-8' });
-                
-                if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-                    window.navigator.msSaveOrOpenBlob(blob, filename);
-                } else {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = filename;
-                    a.target = '_blank';
-                    a.rel = 'noopener';
-                    document.body.appendChild(a);
-                    a.click();
-                    setTimeout(() => {
-                        document.body.removeChild(a);
-                        window.URL.revokeObjectURL(url);
-                    }, 100);
-                }
-
-                toast('종합 분석 PPT 리포트 다운로드가 완료되었습니다.');
-            } catch (err) {
-                console.error(err);
-                toast('리포트 PPT 생성 도중 오류가 생겼습니다.');
-            }
-        }
-
-        // --- Modals ---
-        window.showLogAddModal = function() { document.getElementById('log-modal').classList.remove('hide'); }
-        window.closeLogModal = function() { document.getElementById('log-modal').classList.add('hide'); }
-
-        function renderLogs() {
-            const list = document.getElementById('log-list');
-            if(!list) return;
-            list.innerHTML = '';
-            db.logs.forEach(log => {
-                const badgeColor = log.type === 'UPDATE' ? 'bg-indigo-100 text-indigo-700' : (log.type === 'NOTICE' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700');
-                const row = document.createElement('div');
-                row.className = "flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50 rounded-2xl border text-xs gap-2";
-                row.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-1 rounded-lg font-black ${badgeColor}">${log.type}</span>
-                        <p class="font-bold text-slate-700">${log.content}</p>
-                    </div>
-                    <span class="text-[10px] text-slate-400 font-bold shrink-0">${new Date(log.ts).toLocaleString()}</span>
-                `;
-                list.appendChild(row);
-            });
-        }
-
-        // --- Initial Load ---
-        window.addEventListener('DOMContentLoaded', () => {
-            initFilters();
-            initFirebase();
-            resetToHome();
-        });
-    </script>
+<div id="app-container" class="animate-fade">
+
+<!-- Header -->
+<header class="w-full px-6 py-4 flex justify-between items-center bg-white border-b shrink-0 z-10">
+<div class="flex items-center gap-3">
+<div class="sdi-gradient p-2 rounded-xl shadow-lg">
+<i data-lucide="shield-check" class="text-white w-5 h-5"></i>
+</div>
+<div>
+<h1 class="text-base md:text-lg font-extrabold text-slate-800">삼성SDI 안전 교육</h1>
+<p class="text-[8px] text-blue-500 font-black uppercase tracking-widest">S&E Management System</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<!-- 클라우드 연동 상태 배지 -->
+<div id="cloud-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-amber-50 text-amber-600 border-amber-200">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+<span id="cloud-status-text">연결 확인 중</span>
+</div>
+<div id="admin-indicator" class="hide flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
+<span class="text-[10px] font-bold text-blue-800 uppercase tracking-widest">ADMIN PORTAL</span>
+</div>
+</div>
+</header>
+
+<!-- View Port -->
+<main id="view-port" class="flex-1 overflow-y-auto relative bg-slate-50/50 custom-scroll">
+
+<!-- VIEW: 메인 접속 -->
+<div id="view-auth" class="flex flex-col items-center justify-center min-h-full px-6 py-10 space-y-8 animate-fade">
+<div class="text-center space-y-3">
+<div class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-[10px] font-black uppercase tracking-tighter">Safety First</div>
+<h2 class="text-3xl font-black text-slate-900 tracking-tight leading-tight text-keep">안전 교육 평가<br/>시스템 접속</h2>
+<p class="text-slate-400 text-sm font-medium">본인의 성명을 입력하여 시작하십시오.</p>
+</div>
+<div class="w-full max-w-md space-y-4">
+<input type="text" id="input-name" placeholder="성명 입력"
+class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 text-lg font-bold transition-all">
+<button onclick="startEvaluation()" class="w-full sdi-gradient text-white py-5 rounded-2xl font-black text-lg btn-press shadow-lg shadow-blue-900/20 flex items-center justify-center gap-3">
+평가 시작 <i data-lucide="arrow-right-circle" class="w-6 h-6"></i>
+</button>
+<div class="pt-10 flex justify-center">
+<button onclick="switchView('admin-auth')" class="text-slate-300 hover:text-blue-600 text-[10px] font-bold transition-all flex items-center gap-2">
+<i data-lucide="settings" class="w-3 h-3"></i> ADMIN GATE
+</button>
+</div>
+</div>
+</div>
+
+<!-- VIEW: 퀴즈 세션 -->
+<div id="view-quiz" class="hide h-full flex flex-col p-6 animate-fade max-w-4xl mx-auto w-full">
+<div class="flex justify-between items-end mb-8">
+<div class="space-y-1">
+<p class="text-[10px] font-black text-blue-600 uppercase">Progress</p>
+<h4 class="text-3xl font-black text-slate-900"><span id="q-idx-text">1</span><span class="text-slate-300 font-light text-xl ml-1">/ 10</span></h4>
+</div>
+<div class="flex-1 max-w-[150px] space-y-2 pb-2 ml-6">
+<div class="bg-slate-200 h-1.5 rounded-full overflow-hidden">
+<div id="q-progress" class="sdi-gradient h-full transition-all duration-500" style="width: 10%"></div>
+</div>
+</div>
+</div>
+<div class="flex-1 space-y-4">
+<div class="min-h-[90px] mb-2">
+<h3 id="q-text" class="text-xl font-bold text-slate-800 leading-snug text-keep">질문 내용</h3>
+</div>
+
+<!-- 사진/텍스트 보조 예시설명 컨테이너 -->
+<div id="q-image-desc-container" class="hide w-full p-4 bg-blue-50/60 border border-blue-100 rounded-2xl animate-fade">
+<p class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-1.5">[참고 자료 및 예시설명]</p>
+<div id="q-image-desc" class="text-xs font-semibold text-slate-700 leading-relaxed text-keep"></div>
+</div>
+
+<div id="q-options" class="grid grid-cols-1 gap-3"></div>
+</div>
+<div class="py-6 flex justify-between">
+<button onclick="movePrev()" id="btn-back" class="text-slate-400 font-bold text-xs disabled:opacity-0 flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i> PREV</button>
+<div class="text-[10px] font-bold text-slate-400">합격 기준: 80점</div>
+</div>
+</div>
+
+<!-- VIEW: 결과 -->
+<div id="view-result" class="hide flex flex-col items-center min-h-full px-6 py-8 animate-fade">
+<div id="result-status" class="mb-4 px-6 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest"></div>
+<div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm border border-slate-100 shadow-2xl mb-8 relative">
+<div id="qr-canvas" class="flex justify-center py-4"></div>
+<h4 id="qr-name" class="text-2xl font-black text-center text-slate-900">성명</h4>
+<div class="flex justify-between mt-6 text-center border-t pt-4">
+<div><p class="text-[9px] text-slate-400">SCORE</p><p id="score-text" class="font-black text-blue-600">0</p></div>
+<div><p class="text-[9px] text-slate-400">DATE</p><p id="qr-date" class="font-black text-slate-800">-</p></div>
+</div>
+</div>
+<button onclick="resetToHome()" class="w-full max-w-sm py-4 bg-slate-900 text-white font-bold rounded-2xl">홈으로</button>
+</div>
+
+<!-- VIEW: 관리자 로그인 -->
+<div id="view-admin-auth" class="hide flex flex-col items-center justify-center min-h-full px-6 animate-fade">
+<h2 class="text-xl font-black text-slate-900 mb-6 tracking-widest">ADMIN LOGIN</h2>
+<input type="password" id="admin-pw-input" class="w-full max-w-xs p-5 rounded-2xl border text-center text-2xl font-black tracking-[0.5em] focus:outline-none mb-4" placeholder="****">
+<div class="flex gap-2 w-full max-w-xs">
+<button onclick="resetToHome()" class="flex-1 py-4 bg-slate-100 rounded-xl font-bold">BACK</button>
+<button onclick="verifyAdmin()" class="flex-1 py-4 sdi-gradient text-white rounded-xl font-black">ENTER</button>
+</div>
+</div>
+
+<!-- VIEW: 관리자 대시보드 -->
+<div id="view-admin-main" class="hide p-4 md:p-8 animate-fade">
+<div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-8">
+<div>
+<h2 class="text-2xl font-black text-slate-900">통합 대시보드</h2>
+<p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Global Safety Dashboard</p>
+</div>
+<div class="flex flex-wrap gap-1 bg-white p-1.5 rounded-xl shadow-sm border overflow-x-auto max-w-full">
+<button onclick="setAdminTab('stats')" id="btn-tab-stats" class="admin-tab px-4 py-2 text-[10px] font-black rounded-lg text-slate-400 transition-all whitespace-nowrap">통계현황</button>
+<button onclick="setAdminTab('users')" id="btn-tab-users" class="admin-tab px-4 py-2 text-[10px] font-black rounded-lg text-slate-400 transition-all whitespace-nowrap">응시자 관리</button>
+<button onclick="setAdminTab('logs')" id="btn-tab-logs" class="admin-tab px-4 py-2 text-[10px] font-black rounded-lg text-slate-400 transition-all whitespace-nowrap">변경 사항</button>
+<button onclick="setAdminTab('history')" id="btn-tab-history" class="admin-tab px-4 py-2 text-[10px] font-black rounded-lg text-slate-400 transition-all whitespace-nowrap">삭제 이력</button>
+<button onclick="setAdminTab('bank')" id="btn-tab-bank" class="admin-tab px-4 py-2 text-[10px] font-black rounded-lg text-slate-400 transition-all whitespace-nowrap">문제은행</button>
+<button onclick="setAdminTab('settings')" id="btn-tab-settings" class="admin-tab px-4 py-2 text-[10px] font-black rounded-lg text-slate-400 transition-all whitespace-nowrap">설정</button>
+</div>
+</div>
+
+<!-- Tab 1: 통계현황 -->
+<div id="atab-stats" class="space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-2xl border">
+<div class="space-y-1">
+<label class="text-[9px] font-black text-slate-400 uppercase">Year Filter</label>
+<select id="filter-year" onchange="renderStats()" class="w-full p-2.5 rounded-lg border text-xs font-bold focus:ring-2 focus:ring-blue-100 outline-none"></select>
+</div>
+<div class="space-y-1">
+<label class="text-[9px] font-black text-slate-400 uppercase">Month Filter</label>
+<select id="filter-month" onchange="renderStats()" class="w-full p-2.5 rounded-lg border text-xs font-bold focus:ring-2 focus:ring-blue-100 outline-none">
+<option value="all">전체 월</option>
+<option value="0">1월</option><option value="1">2월</option><option value="2">3월</option><option value="3">4월</option>
+<option value="4">5월</option><option value="5">6월</option><option value="6">7월</option><option value="7">8월</option>
+<option value="8">9월</option><option value="9">10월</option><option value="10">11월</option><option value="11">12월</option>
+</select>
+</div>
+<div class="flex flex-col sm:flex-row items-end gap-2">
+<button onclick="openDownloadModal('stats')" class="flex-1 w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-black flex items-center justify-center gap-2 btn-press">
+<i data-lucide="download" class="w-3 h-3"></i> 통계 엑셀 출력
+</button>
+<button onclick="openDownloadModal('ppt')" class="flex-1 w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-[10px] font-black flex items-center justify-center gap-2 btn-press">
+<i data-lucide="presentation" class="w-3 h-3"></i> 종합 분석 PPT 다운로드
+</button>
+</div>
+</div>
+
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="bg-white p-5 rounded-2xl border shadow-sm"><span class="text-[10px] font-black text-slate-400">전체 응시</span><h3 id="st-total" class="text-2xl font-black text-slate-900 mt-2">0</h3></div>
+<div class="bg-white p-5 rounded-2xl border shadow-sm"><span class="text-[10px] font-black text-slate-400">이수(합격)</span><h3 id="st-pass" class="text-2xl font-black text-blue-600 mt-2">0</h3></div>
+<div class="bg-white p-5 rounded-2xl border shadow-sm"><span class="text-[10px] font-black text-slate-400">미이수(불합격)</span><h3 id="st-fail" class="text-2xl font-black text-rose-500 mt-2">0</h3></div>
+<div class="bg-white p-5 rounded-2xl border shadow-sm"><span class="text-[10px] font-black text-slate-400">합격률</span><h3 id="st-rate" class="text-2xl font-black text-slate-900 mt-2">0%</h3></div>
+</div>
+
+<div class="bg-white p-6 rounded-3xl border shadow-sm h-96">
+<canvas id="statChart"></canvas>
+</div>
+</div>
+
+<!-- Tab: 변경 사항 (Logs) -->
+<div id="atab-logs" class="hide space-y-6">
+<div class="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+<h4 class="text-sm font-black text-slate-800">시스템 변경 로그 및 공지</h4>
+<div class="flex flex-wrap gap-2 w-full sm:w-auto">
+<button onclick="openDownloadModal('logs')" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-[10px] font-black flex items-center gap-2 btn-press">
+<i data-lucide="download" class="w-3 h-3"></i> 변경사항 엑셀 출력
+</button>
+<button onclick="openDownloadModal('bank_history')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-[10px] font-black flex items-center gap-2 btn-press">
+<i data-lucide="history" class="w-3 h-3"></i> 문제은행 업데이트 이력 엑셀 출력
+</button>
+<button onclick="showLogAddModal()" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-[10px] font-black flex items-center gap-2 btn-press">
+<i data-lucide="plus" class="w-3 h-3"></i> 변경 사항 수동 추가
+</button>
+</div>
+</div>
+<div class="space-y-3 max-h-[500px] overflow-y-auto custom-scroll pr-2" id="log-list"></div>
+</div>
+</div>
+
+<!-- Tab 2: 응시자 관리 -->
+<div id="atab-users" class="hide space-y-4">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+<p class="text-[11px] font-bold text-slate-500"><span id="user-count" class="text-blue-600">0</span>명의 응시 기록이 있습니다.</p>
+<div class="flex gap-2 w-full sm:w-auto">
+<button onclick="openDownloadModal('users')" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-[10px] font-black flex items-center gap-2 btn-press">
+<i data-lucide="download" class="w-3 h-3"></i> 응시자 목록 엑셀 출력
+</button>
+<button onclick="prepareDelete()" class="px-4 py-2 bg-rose-500 text-white rounded-lg text-[10px] font-black btn-press">삭제</button>
+<button id="btn-save-delete" onclick="confirmDeleteSave()" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-[10px] font-black btn-press hide animate-pulse">데이터 영구 저장</button>
+</div>
+</div>
+<div class="bg-white rounded-2xl border shadow-sm overflow-x-auto">
+<table class="w-full text-left min-w-[700px]">
+<thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase border-b">
+<tr>
+<th class="px-6 py-4 w-12 text-center"><input type="checkbox" id="check-all" onchange="toggleAll(this)"></th>
+<th class="px-6 py-4">일시</th>
+<th class="px-6 py-4">성명</th>
+<th class="px-6 py-4">ID</th>
+<th class="px-6 py-4">점수</th>
+<th class="px-6 py-4">결과</th>
+</tr>
+</thead>
+<tbody id="user-table" class="divide-y divide-slate-100 text-xs"></tbody>
+</table>
+</div>
+</div>
+
+<!-- Tab 3: 삭제 이력 -->
+<div id="atab-history" class="hide space-y-4">
+<div class="flex justify-between items-center px-1">
+<p class="text-[11px] font-bold text-slate-500">삭제된 안전 교육 응시 이력 데이터입니다.</p>
+<button onclick="openDownloadModal('history')" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-[10px] font-black flex items-center gap-2 btn-press">
+<i data-lucide="download" class="w-3 h-3"></i> 삭제이력 엑셀 출력
+</button>
+</div>
+<div class="bg-white rounded-2xl border shadow-sm overflow-x-auto">
+<table class="w-full text-left min-w-[700px]">
+<thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase border-b">
+<tr>
+<th class="px-6 py-4">삭제 일시</th>
+<th class="px-6 py-4">기존 응시 일시</th>
+<th class="px-6 py-4">성명</th>
+<th class="px-6 py-4">ID</th>
+<th class="px-6 py-4">점수</th>
+</tr>
+</thead>
+<tbody id="history-table" class="divide-y divide-slate-100 text-[11px]"></tbody>
+</table>
+</div>
+</div>
+
+<!-- Tab 4: 문제은행 관리 -->
+<div id="atab-bank" class="hide space-y-4">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div class="space-y-1">
+<h4 class="text-sm font-black text-slate-700">등록된 문제 (<span id="bank-count">0</span>)</h4>
+<p class="text-[10px] text-slate-400 font-bold">체크박스를 통해 문항을 직접 선택하여 편집하거나 삭제할 수 있습니다.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<!-- 직접 수동 등록 지원 -->
+<button onclick="openQuestionModal(null)" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-[10px] font-black flex items-center gap-2 btn-press">
+<i data-lucide="plus-circle" class="w-3 h-3"></i> 신규 문항 수동 추가
+</button>
+<button onclick="openDownloadModal('bank')" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-[10px] font-black flex items-center gap-2 border border-emerald-700 btn-press">
+<i data-lucide="download" class="w-3 h-3"></i> 문제은행 엑셀 출력
+</button>
+<button onclick="openDownloadModal('template')" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black flex items-center gap-2 border btn-press">
+<i data-lucide="file-down" class="w-3 h-3"></i> 양식 다운로드
+</button>
+<label class="px-4 py-2 bg-blue-600 text-white rounded-lg text-[10px] font-black cursor-pointer flex items-center gap-2 btn-press">
+<i data-lucide="file-up" class="w-3 h-3"></i> 엑셀 업로드
+<input type="file" id="bank-upload" class="hidden" accept=".xlsx, .xls" onchange="handleBankUpload(this)">
+</label>
+</div>
+</div>
+
+<!-- 문제 개별 조작 바 추가 -->
+<div id="bank-control-bar" class="flex gap-2 p-3 bg-slate-100 rounded-xl hide">
+<span class="text-xs font-bold text-slate-600 self-center ml-2"><span id="checked-bank-count" class="text-blue-600">0</span>개 문항 선택됨</span>
+<button onclick="deleteCheckedQuestions()" class="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-[10px] font-black btn-press">선택 삭제</button>
+</div>
+
+<div class="bg-white rounded-2xl border shadow-sm overflow-x-auto">
+<table class="w-full text-left min-w-[900px]">
+<thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase border-b">
+<tr>
+<th class="px-4 py-4 w-12 text-center"><input type="checkbox" id="bank-check-all" onchange="toggleAllBank(this)"></th>
+<th class="px-4 py-4 w-12">번호</th>
+<th class="px-4 py-4 w-1/3">문제 내용</th>
+<th class="px-4 py-4">예시설명 (미디어/텍스트)</th>
+<th class="px-4 py-4">보기 옵션</th>
+<th class="px-4 py-4 w-16 text-center">정답</th>
+<th class="px-4 py-4 w-20 text-center">작업</th>
+</tr>
+</thead>
+<tbody id="bank-table" class="divide-y divide-slate-100 text-[11px]"></tbody>
+</table>
+</div>
+</div>
+
+<!-- Tab 5: 설정 -->
+<div id="atab-settings" class="hide flex flex-col items-center gap-6 py-6">
+<!-- 클라우드 가이드 패널 -->
+<div class="w-full max-w-md bg-slate-50 p-6 rounded-2xl border text-xs leading-relaxed space-y-3">
+<div class="flex items-center gap-2 font-black text-slate-800">
+<i data-lucide="cloud" class="w-4 h-4 text-blue-600"></i>
+클라우드 자동 저장 활성화 안내
+</div>
+<p class="text-slate-500 font-medium">본 어플리케이션은 기본적으로 로컬 브라우저에 데이터를 안전하게 축적하지만, Firestore 클라우드가 주입되면 모든 사용자의 스마트폰 평가 내역이 이 통합 대시보드로 실시간 동기화됩니다.</p>
+<div class="text-[10px] text-blue-600 font-bold bg-blue-50 p-2.5 rounded-lg border border-blue-100">
+✓ 현재 상태: <span id="settings-sync-mode">상태를 불러오는 중...</span>
+</div>
+</div>
+
+<div class="w-full max-w-md bg-white p-8 rounded-3xl border shadow-sm space-y-6">
+<h4 class="text-center font-black text-slate-800 uppercase tracking-widest">비밀번호 변경</h4>
+<div class="space-y-4">
+<div>
+<label class="text-[10px] font-black text-slate-400">현재 비밀번호</label>
+<input type="password" id="pw-current" class="w-full p-4 mt-1 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 font-bold">
+</div>
+<div>
+<label class="text-[10px] font-black text-slate-400">새 비밀번호</label>
+<input type="password" id="pw-new" class="w-full p-4 mt-1 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 font-bold">
+</div>
+<div>
+<label class="text-[10px] font-black text-slate-400">새 비밀번호 확인</label>
+<input type="password" id="pw-confirm" class="w-full p-4 mt-1 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 font-bold">
+</div>
+<!-- 승인 다이얼로그 개방 확인 절차 연계 -->
+<button onclick="requestChangePassword()" class="w-full py-4 sdi-gradient text-white rounded-xl font-black btn-press mt-4 shadow-lg shadow-blue-900/20">변경 사항 저장</button>
+</div>
+</div>
+</div>
+
+<div class="mt-12 flex justify-center border-t pt-8 animate-fade">
+<button onclick="resetToHome()" class="text-slate-400 text-[10px] font-black uppercase flex items-center gap-2 hover:text-red-500">
+<i data-lucide="log-out" class="w-3 h-3"></i> Exit Admin System
+</button>
+</div>
+</div>
+</main>
+</div>
+
+<!-- Toast 알림 레이아웃 -->
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl text-xs font-bold shadow-2xl transition-all duration-300 opacity-0 pointer-events-none z-[999] flex items-center gap-2">
+<i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
+<span id="toast-msg">메시지</span>
+</div>
+
+<!-- Modal: Confirmation (Delete) -->
+<div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hide flex items-center justify-center p-6">
+<div class="bg-white w-full max-w-xs rounded-3xl p-8 text-center animate-fade shadow-2xl">
+<div class="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
+<i data-lucide="alert-triangle" class="w-8 h-8"></i>
+</div>
+<h3 class="text-lg font-black text-slate-900 mb-2">정말 삭제하시겠습니까?</h3>
+<p class="text-xs text-slate-400 font-medium leading-relaxed mb-8">선택한 응시자의 모든 기록이<br/>시스템에서 영구적으로 삭제됩니다.</p>
+<div class="flex gap-3">
+<button onclick="closeConfirm()" class="flex-1 py-4 bg-slate-100 rounded-xl font-bold text-slate-500">취소</button>
+<button onclick="executeDelete()" class="flex-1 py-4 bg-rose-500 text-white rounded-xl font-black">확인 및 삭제</button>
+</div>
+</div>
+</div>
+
+<!-- Modal: Confirmation (Password Change) -->
+<div id="confirm-pw-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] hide flex items-center justify-center p-6">
+<div class="bg-white w-full max-w-xs rounded-3xl p-8 text-center animate-fade shadow-2xl">
+<div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+<i data-lucide="key-round" class="w-8 h-8"></i>
+</div>
+<h3 class="text-base font-black text-slate-900 mb-2">관리자 비밀번호를 변경하시겠습니까?</h3>
+<div class="bg-slate-50 p-4 rounded-xl text-left text-xs font-semibold text-slate-600 mb-6 space-y-1.5">
+<p>• 기존 비밀번호: <span id="confirm-pw-cur" class="font-bold text-slate-900 font-mono"></span></p>
+<p>• 신규 비밀번호: <span id="confirm-pw-new" class="font-bold text-blue-600 font-mono"></span></p>
+<p class="text-[10px] text-slate-400 pt-1 border-t border-slate-200">정말로 변경을 승인하고 시스템에 최종 저장하시겠습니까?</p>
+</div>
+<div class="flex gap-3">
+<button onclick="closePwConfirm()" class="flex-1 py-3.5 bg-slate-100 rounded-xl font-bold text-xs text-slate-500">취소</button>
+<button onclick="executeChangePassword()" class="flex-1 py-3.5 sdi-gradient text-white rounded-xl font-black text-xs">확인 및 변경</button>
+</div>
+</div>
+</div>
+
+<!-- Modal: Add Log -->
+<div id="log-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hide flex items-center justify-center p-6">
+<div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-6">
+<div class="flex justify-between items-center">
+<h3 class="text-lg font-black text-slate-900">변경 사항 직접 입력</h3>
+<button onclick="closeLogModal()" class="text-slate-300 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+</div>
+<div class="space-y-4">
+<div>
+<label class="text-[10px] font-black text-slate-400 uppercase">분류</label>
+<select id="log-type" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 font-bold text-xs">
+<option value="UPDATE">기능 업데이트</option>
+<option value="NOTICE">공지사항</option>
+<option value="MAINTAIN">정기 점검/수정</option>
+</select>
+</div>
+<div>
+<label class="text-[10px] font-black text-slate-400 uppercase">내용</label>
+<textarea id="log-content" class="w-full p-4 mt-1 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 font-medium text-xs h-32 resize-none" placeholder="변경 내용을 입력하세요."></textarea>
+</div>
+<button onclick="saveManualLog()" class="w-full py-4 bg-slate-900 text-white rounded-xl font-black btn-press shadow-lg">로그 저장</button>
+</div>
+</div>
+</div>
+
+<!-- Modal: Download Configuration & File Writer -->
+<div id="download-config-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hide flex items-center justify-center p-6">
+<div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-5">
+<div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+<i data-lucide="download" class="w-7 h-7"></i>
+</div>
+<h3 class="text-lg font-black text-slate-900 text-center">파일 다운로드 보장 및 저장 설정</h3>
+<p class="text-xs text-slate-400 font-medium leading-relaxed text-center">
+보안 인트라넷, 가상 iframe 샌드박스, 또는 모바일 브라우저에서도 기기에 확실하게 다운로드되도록 보장하는 시스템입니다. 저장할 파일명과 경로 옵션을 설정하십시오.
+</p>
+<div class="space-y-4">
+<div>
+<label class="text-[10px] font-black text-slate-400 uppercase">저장될 파일 명칭 지정</label>
+<input type="text" id="target-filename" class="w-full p-3.5 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-bold text-xs">
+</div>
+<div class="p-3 bg-slate-50 rounded-xl text-[10px] font-bold text-slate-500 leading-relaxed">
+💡 <span class="text-emerald-600">안내:</span> [물리적 파일 생성 및 저장]을 누르면 디바이스의 기본 '다운로드' 디렉토리에 파일이 안전하게 실시간 생성 및 저장됩니다.
+</div>
+<div class="flex gap-2">
+<button onclick="closeDownloadModal()" class="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold rounded-xl text-xs btn-press">취소</button>
+<button onclick="executeTargetDownload()" class="flex-1 py-3.5 sdi-gradient text-white font-black rounded-xl text-xs btn-press flex items-center justify-center gap-1">
+<i data-lucide="file-check" class="w-4 h-4"></i> 물리적 파일 생성 및 저장
+</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Modal: Excel Upload Mode Selection (병합 vs 덮어쓰기) -->
+<div id="upload-mode-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hide flex items-center justify-center p-6">
+<div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-5">
+<div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto">
+<i data-lucide="file-spreadsheet" class="w-7 h-7"></i>
+</div>
+<h3 class="text-lg font-black text-slate-900 text-center">문제은행 업로드 방식 선택</h3>
+<p class="text-xs text-slate-400 font-medium leading-relaxed text-center">
+엑셀 데이터에 수록된 문제를 등록하는 방식을 선택해 주십시오.<br/>
+<strong>[기존 데이터 유지 후 추가]</strong> 방식을 사용하면 기존에 등록되어 있는 문제를 삭제하지 않고 새로운 내용만 병입할 수 있습니다.
+</p>
+<div class="grid grid-cols-1 gap-3 pt-2">
+<button id="upload-mode-merge" class="w-full p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 rounded-2xl text-left btn-press flex items-start gap-3">
+<div class="p-2 bg-blue-600 text-white rounded-xl"><i data-lucide="git-merge" class="w-4 h-4"></i></div>
+<div>
+<p class="text-xs font-black">기존 데이터 유지 후 추가 (추천)</p>
+<p class="text-[10px] text-blue-600 font-semibold mt-0.5">기존에 등록된 문제를 삭제하지 않고 엑셀 문제를 뒤에 추가합니다.</p>
+</div>
+</button>
+<button id="upload-mode-overwrite" class="w-full p-4 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-900 rounded-2xl text-left btn-press flex items-start gap-3">
+<div class="p-2 bg-rose-600 text-white rounded-xl"><i data-lucide="refresh-cw" class="w-4 h-4"></i></div>
+<div>
+<p class="text-xs font-black">기존 문항 덮어쓰기</p>
+<p class="text-[10px] text-rose-600 font-semibold mt-0.5">기존 문제 리스트를 완전히 삭제한 후 업로드한 파일로만 재구축합니다.</p>
+</div>
+</button>
+</div>
+<div class="flex justify-center pt-2">
+<button onclick="closeUploadModeModal()" class="px-6 py-2 bg-slate-100 rounded-xl font-bold text-xs text-slate-500">업로드 취소</button>
+</div>
+</div>
+</div>
+
+<!-- Modal: Question Edit/Add -->
+<div id="question-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hide flex items-center justify-center p-6">
+<div class="bg-white w-full max-w-lg rounded-3xl p-8 animate-fade shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto custom-scroll">
+<div class="flex justify-between items-center">
+<h3 id="question-modal-title" class="text-lg font-black text-slate-900">문제 상세 정보 수정</h3>
+<button onclick="closeQuestionModal()" class="text-slate-300 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+</div>
+<div class="space-y-4 text-xs">
+<input type="hidden" id="edit-q-idx">
+<div>
+<label class="text-[10px] font-black text-slate-400 uppercase">문제 내용</label>
+<textarea id="edit-q-text" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-bold h-20 resize-none"></textarea>
+</div>
+<div>
+<label class="text-[10px] font-black text-slate-400 uppercase">예시설명 (미디어 설명 / 추가 사진 지침 / 텍스트 등)</label>
+<input type="text" id="edit-q-image" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-bold" placeholder="텍스트 혹은 이미지 파일 지침 입력 (필요 없을 시 빈칸)">
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="text-[10px] font-black text-slate-400 uppercase">보기 1</label>
+<input type="text" id="edit-q-opt1" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-bold">
+</div>
+<div>
+<label class="text-[10px] font-black text-slate-400 uppercase">보기 2</label>
+<input type="text" id="edit-q-opt2" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-bold">
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="text-[10px] font-black text-slate-400 uppercase">보기 3</label>
+<input type="text" id="edit-q-opt3" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-bold">
+</div>
+<div>
+<label class="text-[10px] font-black text-slate-400 uppercase">보기 4</label>
+<input type="text" id="edit-q-opt4" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-bold">
+</div>
+</div>
+<div>
+<label class="text-[10px] font-black text-slate-400 uppercase">정답 번호 (1~4)</label>
+<select id="edit-q-correct" class="w-full p-3 mt-1 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-100 outline-none font-black text-xs">
+<option value="1">1번 보기</option>
+<option value="2">2번 보기</option>
+<option value="3">3번 보기</option>
+<option value="4">4번 보기</option>
+</select>
+</div>
+<button onclick="saveQuestionItem()" class="w-full py-4 sdi-gradient text-white rounded-xl font-black btn-press mt-2 shadow-lg shadow-blue-950/25">저장 완료</button>
+</div>
+</div>
+</div>
+
+<!-- Firebase SDK 및 전체 비즈니스 로직 -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+// --- Core Data & Init ---
+function updateFullHeight() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
+window.addEventListener('resize', updateFullHeight); updateFullHeight();
+
+// 삼성SDI 울산 사업장 현장 안전 지침 30문항 기본 탑재
+const ULSIAN_SDI_30_QUIZ = [
+{ idx: 1, q: "보행 중 스마트폰 사용에 대한 사내 규정은 무엇인가?", imageDesc: "사내 전 구역 보행 안전 강화수칙", a: ["상관없음", "완전 금지 (보행 정지 후 사용)", "전화 통화만 허용", "계단에서만 사용 금지"], c: 2 },
+{ idx: 2, q: "SDI 울산공장 내부 차량 운행의 절대 최고 속도 제한은?", imageDesc: "사내 교통 전도 사고 예방 지침", a: ["시속 10km 이하", "시속 20km 이하", "시속 30km 이하", "시속 40km 이하"], c: 2 },
+{ idx: 3, q: "LOTO(Lock-Out, Tag-Out) 설비 잠금의 궁극적인 목적은?", imageDesc: "LOTO 정비 간 오가동 차단 지침", a: ["에너지원 격리 및 불시 가동 방지", "청소 상태 검증", "생산 수율 측정", "설비 검수 기록"], c: 1 },
+{ idx: 4, q: "배터리 생산 공정 내 전해액 누출 시 현장 초동 조치 중 가장 적절한 것은?", imageDesc: "MSDS 화학 유해 물질 노출 가이드", a: ["손으로 전해액을 닦아낸다", "즉시 대피 후 방재팀 및 환경안전국에 신고", "냄새를 맡아 농도를 확인한다", "수돗물을 부어 중화한다"], c: 2 },
+{ idx: 5, q: "계단 이동 시 전도(넘어짐) 사고를 예방하기 위한 보행 규칙은?", imageDesc: "인적 위해 전도 전방 조치 예방", a: ["뛰어서 신속히 이동", "반드시 핸드레일을 잡고 걷기", "휴대폰을 주시하며 걷기", "두 칸씩 스텝 이동"], c: 2 },
+{ idx: 6, q: "사내 보행 중 외투 주머니나 바지 주머니에 손을 넣는 행위는?", imageDesc: "넘어짐 간 안면 부상 예방", a: ["상시 허용", "절대 금지 (장갑 착용 원칙)", "겨울철에만 허용", "실내 사무실 구역만 허용"], c: 2 },
+{ idx: 7, q: "고소 작업(높이 2m 이상) 시 추락 예방을 위해 무조건 체결해야 하는 장비는?", imageDesc: "고소 안전 벨트 및 안전고리 수칙", a: ["전신 안전대 (안전고리 2개 체결)", "보안경", "방진 마스크", "보안모 전면 쉴드"], c: 1 },
+{ idx: 8, q: "사내에서 자전거 및 전동 킥보드 이용 시 필수 착용 보호구는?", imageDesc: "개인형 이동장치 PM 운행 수칙", a: ["반사 조끼", "보호 헬멧", "무릎 보호대", "미끄럼 방지 장갑"], c: 2 },
+{ idx: 9, q: "화재 발생을 최초 인지했을 때 취해야 할 가장 긴급한 조치는?", imageDesc: "소방 방재 초동 전파 요령", a: ["즉시 중요 서류를 챙긴다", "발신기를 눌러 화재 경보 전파 후 대피", "자체 소화만 고집한다", "엘리베이터를 타고 탈출한다"], c: 2 },
+{ idx: 10, q: "밀폐 구역 산소 결핍 우려 장소 진입 전 필히 측정해야 할 산소 농도 기준은?", imageDesc: "밀폐공간 보건 작업 허가 지침", a: ["10% 미만", "18% 이상 23.5% 미만", "30% 이상", "농도 측정 없이 즉시 진입"], c: 2 },
+{ idx: 11, q: "배터리 전해액이나 화학 유독성 액체가 안구에 튀었을 때 응급조치 시간은?", imageDesc: "화학물질 안구 노출 긴급세척", a: ["수돗물이나 전용 안구 세척기로 15분 이상 세척", "약국 안약을 즉시 점안", "눈을 손으로 강하게 비벼서 배출", "그대로 마를 때까지 대기"], c: 1 },
+{ idx: 12, q: "설비 정비 및 점검 간 작업 개시 전 안전 조치로 틀린 것은?", imageDesc: "설비 정비 안전 가이드", a: ["기동 전원 스위치 차단", "LOTO 시건 및 태그 부착", "잔류 압력/에너지 배출", "가동 중인 설비에 직접 손 삽입"], c: 4 },
+{ idx: 13, q: "사내 전동 지게차 보행 통로 교차 구간에서의 통행 우선권은?", imageDesc: "지게차 충돌 충돌 예방 규정", a: ["무조건 지게차 우선", "보행자 절대 우선 (일시 정지 및 상호 유도)", "먼저 진입한 차선 우선", "속도가 빠른 차량 우선"], c: 2 },
+{ idx: 14, q: "전기 고압 배전반 작업 시 감전 예방을 위해 필히 착용할 절연용 장비는?", imageDesc: "고압 가공 감전 활선 수칙", a: ["면장갑", "절연용 안전 장갑 및 안전화", "가죽 안전 장갑", "코팅 목장갑"], c: 2 },
+{ idx: 15, q: "비상 대피 훈련 시 건물 외부 피난 유도 표지판의 색상은?", imageDesc: "안전 색채 유도 디자인 가이드", a: ["적색", "녹색", "황색", "청색"], c: 2 },
+{ idx: 16, q: "배터리 셀 용접 공정에서 발생하는 유해 흄 및 가스 정화용 마스크 종류는?", imageDesc: "공정 보건 송풍 필터링 가이드", a: ["면 마스크", "송풍 마스크 또는 특급 방진 마스크", "일반 비말 차단 마스크", "덴탈 마스크"], c: 2 },
+{ idx: 17, q: "사내 공사 작업 시작 전, 현장에서 실시하는 툴박스 미팅(TBM)의 주요 논의 사항은?", imageDesc: "작업 개시 전 안전 유도 TBM", a: ["당일 원가 절감 방안", "해당 작업의 위험성 평가 공유 및 안전 대책 확인", "전일 생산 실적 보고", "식당 식사 메뉴 선택"], c: 2 },
+{ idx: 18, q: "중량물을 반복 인양할 때 요통 예방을 위한 올바른 자세는?", imageDesc: "근골격계 부담작업 안전요령", a: ["허리를 굽히고 다리를 편 상태로 든다", "무릎을 굽히고 물체를 몸에 최대한 밀착시켜 다리 힘으로 든다", "반동을 이용하여 빠르게 던지듯 든다", "한 손으로만 무게 중심을 치우쳐 든다"], c: 2 },
+{ idx: 19, q: "안전 보건 표지 중 노란색 바탕에 검은색 그림이 상징하는 표지는?", imageDesc: "안전 보건 표지 색채 디자인 규격", a: ["금지 표지", "경고 표지", "지시 표지", "안내 표지"], c: 2 },
+{ idx: 20, q: "화학물질이 보관된 드럼통 외벽에 반드시 부착해야 하는 경고 표식은?", imageDesc: "GHS/MSDS 글로벌 물질 경고 의무", a: ["회사 로고", "GHS 유해성 경고 그림 및 MSDS 경고 표지", "생산 단가 표식", "납품처 주소지 명세"], c: 2 },
+{ idx: 21, q: "비상 탈출구 주변 통로에 자재나 적재물을 쌓아두는 행위는?", imageDesc: "대피 통로 장애물 배제 원칙", a: ["일시적인 보관은 가능", "소방 관계법 및 사내 규정상 절대 적치 금지", "퇴근 시간 전에만 치우면 됨", "지정 구역 외 통로 측면은 가능"], c: 2 },
+{ idx: 22, q: "사내 고압 가스 용기(산소, 질소 등)를 보관할 때 올바른 지침은?", imageDesc: "고압 가스 충전 용기 취급 요령", a: ["눕혀서 적재 보관", "직사광선을 차단하고 전도 방지 체인 결속 후 직립 보관", "난로 및 화기 바로 옆 배치", "용기 밸브를 항상 열어 보관"], c: 2 },
+{ idx: 23, q: "크레인 등 중량물 매달기 작업 하부 통행 제한 규정은?", imageDesc: "인양 낙하 충돌 협착 전방 관리", a: ["보호모 착용 시 통행 가능", "작업 반경 내 통제선 설치 및 통행 절대 금지", "지게차 유도 시 신속 통행 가능", "작업이 정지된 순간에는 상시 가능"], c: 2 },
+{ idx: 24, q: "화학물질 흡입으로 환자가 의식을 잃었을 때 우선 조치는?", imageDesc: "밀폐 질식 유독 가스 긴급대응", a: ["인공호흡 전, 즉시 대기 오염이 없는 신선한 공기가 통하는 곳으로 이송", "현장에서 계속 마사지 실시", "억지로 음료수를 주입", "현장 구역을 봉쇄하고 기다림"], c: 1 },
+{ idx: 25, q: "밀폐 배전반 보수 작업 완료 후 전원을 투입할 때 가장 선행되어야 할 확인 조치는?", imageDesc: "전기 활선 통전 전방 조치 요령", a: ["가동 스위치 작동 속도 체크", "설비 내부의 잔여 도구 수거 및 작업자 이탈 최종 확인", "외함 접지 도료 칠하기", "차단기 용량 라벨링"], c: 2 },
+{ idx: 26, q: "협착(끼임) 위험 구역에 설치된 방호 울타리(인터록 도어) 우회 개방 행위는?", imageDesc: "끼임 사고 방지 연동 도어 수칙", a: ["속도를 내기 위한 우회 연동 해제 허용", "임의 우회 해제 및 가동 절대 금지", "임원 동행 시 상시 가능", "주간 보수 시간에만 임시 가능"], c: 2 },
+{ idx: 27, q: "사내 공사 작업 시작 전, 현장에서 실시하는 툴박스 미팅(TBM)의 주요 논의 사항은?", imageDesc: "작업 개시 전 안전 유도 TBM", a: ["당일 원가 절감 방안", "해당 작업의 위험성 평가 공유 및 안전 대책 확인", "전일 생산 실적 보고", "식당 식사 메뉴 선택"], c: 2 },
+{ idx: 28, q: "전기 아크 발생 우려가 높은 작업 시 입어야 할 부적합한 의류 재질은?", imageDesc: "전기 감전 정전기 화재 예방", a: ["면 100% 소재", "폴리에스터 등 화학 합성섬유 (열융착 유발 제재)", "방염 특수 코팅 작업복", "정전기 방지 제전복"], c: 2 },
+{ idx: 29, q: "청력 보존 구역으로 지정된 소음 사업장 기준 데시벨(dB)은?", imageDesc: "소음성 난청 예방 귀마개 착용 기준", a: ["50dB 이상", "85dB 이상 강한 소음 연속 노출 장소", "30dB 야간 기준", "70dB 일반 대화"], c: 2 },
+{ idx: 30, q: "삼성SDI 안전 핵심 실천 수칙 중 '안전 제보 제도'의 참여 대상은?", imageDesc: "사내 무재해 환경안전 상생문화", a: ["경영진 및 사무국 전용", "SDI 임직원 및 모든 협력사/내방객 포함 전원", "안전 관리 담당자", "외부 소방 점검 공무원"], c: 2 }
+];
+
+// 기본 로컬 백업을 위한 안전 데이터 구조
+let db = {
+users: JSON.parse(localStorage.getItem('sdi_db_users_v10') || '[]'),
+history: JSON.parse(localStorage.getItem('sdi_db_history_v10') || '[]'),
+bank: JSON.parse(localStorage.getItem('sdi_db_bank_v10') || JSON.stringify(ULSIAN_SDI_30_QUIZ)),
+logs: JSON.parse(localStorage.getItem('sdi_db_logs_v10') || '[]'),
+adminPw: localStorage.getItem('sdi_admin_pw_v10') || '1234'
+};
+
+let state = { user: null, quizSet: [], currIdx: 0, answers: [], chart: null, pendingDelete: [], tempPwObj: null, currentDownloadType: "" };
+let tempUploadBank = [];
+
+// --- Firebase Cloud Connection Configuration (RULE 1 & 3) ---
+let firebaseApp = null;
+let auth = null;
+let firestoreDb = null;
+let isCloudMode = false;
+let currentUser = null;
+
+// 요청하신 Firebase 콘솔 프로젝트 연동 설정 정보 (sdi-safety-edu-12ac3)
+const appId = 'sdi-safety-edu-12ac3';
+
+// 환경 내 __firebase_config 주입 대안 및 전용 수동 Config 폴백 정의
+const manualFirebaseConfig = {
+  apiKey: "", // runtime 주입을 전제로 하므로 빈칸으로 제공
+  authDomain: "sdi-safety-edu-12ac3.firebaseapp.com",
+  projectId: "sdi-safety-edu-12ac3",
+  storageBucket: "sdi-safety-edu-12ac3.appspot.com",
+  messagingSenderId: "109876543210",
+  appId: "1:109876543210:web:abcdef123456"
+};
+
+const rawConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : JSON.stringify(manualFirebaseConfig);
+const rawToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+async function initFirebase() {
+if (!rawConfig) {
+setOfflineMode("로컬 우선 모드");
+return;
+}
+
+try {
+const firebaseConfig = JSON.parse(rawConfig);
+firebaseApp = initializeApp(firebaseConfig);
+auth = getAuth(firebaseApp);
+firestoreDb = getFirestore(firebaseApp);
+
+// RULE 3 준수: 쿼리 실행 전 반드시 Auth 완료
+if (rawToken) {
+await signInWithCustomToken(auth, rawToken);
+} else {
+await signInAnonymously(auth);
+}
+
+onAuthStateChanged(auth, async (user) => {
+if (user) {
+currentUser = user;
+isCloudMode = true;
+updateCloudBadge(true, "클라우드 실시간 동기화 활성화");
+await syncOfflineRecordsToCloud();
+startRealtimeSync();
+} else {
+setOfflineMode("인증 만료 (로컬 우선 동작)");
+}
+});
+
+} catch (err) {
+console.warn("Firebase 연결 실패, 안전한 로컬 오프라인 모드로 실행됩니다:", err);
+setOfflineMode("오프라인 상태 (네트워크 불안정)");
+}
+}
+
+// 오프라인 로컬 저장 내역 클라우드 점진 병합 엔진
+async function syncOfflineRecordsToCloud() {
+if (!isCloudMode || !currentUser) return;
+const offlineUsers = JSON.parse(localStorage.getItem('sdi_db_users_v10') || '[]');
+if (offlineUsers.length > 0) {
+for (let u of offlineUsers) {
+await writeToCloudOrLocal('users', u.id, u);
+}
+}
+const offlineHistory = JSON.parse(localStorage.getItem('sdi_db_history_v10') || '[]');
+if (offlineHistory.length > 0) {
+for (let h of offlineHistory) {
+await writeToCloudOrLocal('history', h.id, h);
+}
+}
+const offlineLogs = JSON.parse(localStorage.getItem('sdi_db_logs_v10') || '[]');
+if (offlineLogs.length > 0) {
+for (let l of offlineLogs) {
+const cleanLogId = l.id || `LOG-${l.ts || Date.now()}`;
+await writeToCloudOrLocal('logs', cleanLogId, {
+type: l.type,
+content: l.content,
+ts: l.ts || Date.now(),
+isAuto: l.isAuto !== undefined ? l.isAuto : true
+});
+}
+}
+}
+
+function setOfflineMode(reason) {
+isCloudMode = false;
+updateCloudBadge(false, reason);
+renderStats();
+}
+
+function updateCloudBadge(active, text) {
+const badge = document.getElementById('cloud-badge');
+const statusText = document.getElementById('cloud-status-text');
+const settingText = document.getElementById('settings-sync-mode');
+if (statusText) statusText.innerText = text;
+if (settingText) settingText.innerText = text;
+if (badge) {
+if (active) {
+badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-emerald-50 text-emerald-600 border-emerald-200 animate-fade";
+const span = badge.querySelector('span');
+if (span) span.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
+} else {
+badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-slate-50 text-slate-500 border-slate-200 animate-fade";
+const span = badge.querySelector('span');
+if (span) span.className = "w-1.5 h-1.5 rounded-full bg-slate-400";
+}
+}
+}
+
+// RULE 1 준수: Firestore 엄격 경로 정의 함수
+function getCollectionRef(colName) {
+return collection(firestoreDb, 'artifacts', appId, 'public', 'data', colName);
+}
+
+function getDocRef(colName, docId) {
+return doc(firestoreDb, 'artifacts', appId, 'public', 'data', colName, docId);
+}
+
+// 실시간 바인딩 이벤트 감지기 (양방향 완벽 동기화 보장)
+function startRealtimeSync() {
+if (!isCloudMode || !currentUser) return;
+
+// RULE 2 준수: compound query 없이 원본 fetch 후 메모리 제어
+onSnapshot(getCollectionRef('users'), (snapshot) => {
+const users = [];
+snapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
+db.users = users;
+localStorage.setItem('sdi_db_users_v10', JSON.stringify(db.users));
+renderUserTable();
+renderStats();
+}, (err) => console.error("Users sync fail: ", err));
+
+onSnapshot(getCollectionRef('history'), (snapshot) => {
+const history = [];
+snapshot.forEach(doc => history.push({ id: doc.id, ...doc.data() }));
+db.history = history;
+localStorage.setItem('sdi_db_history_v10', JSON.stringify(db.history));
+renderHistoryTable();
+}, (err) => console.error("History sync fail: ", err));
+
+onSnapshot(getCollectionRef('bank'), (snapshot) => {
+if (!snapshot.empty) {
+const bank = [];
+snapshot.forEach(doc => bank.push({ id: doc.id, ...doc.data() }));
+db.bank = bank.sort((a,b) => a.idx - b.idx);
+localStorage.setItem('sdi_db_bank_v10', JSON.stringify(db.bank));
+} else {
+initializeCloudBank();
+}
+renderBankTable();
+}, (err) => console.error("Bank sync fail: ", err));
+
+onSnapshot(getCollectionRef('logs'), (snapshot) => {
+const logs = [];
+snapshot.forEach(doc => logs.push({ id: doc.id, ...doc.data() }));
+db.logs = logs.sort((a, b) => b.ts - a.ts);
+localStorage.setItem('sdi_db_logs_v10', JSON.stringify(db.logs));
+renderLogs();
+}, (err) => console.error("Logs sync fail: ", err));
+
+onSnapshot(getDocRef('config', 'settings'), (docSnap) => {
+if (docSnap.exists()) {
+db.adminPw = docSnap.data().adminPw || '1234';
+localStorage.setItem('sdi_admin_pw_v10', db.adminPw);
+} else {
+setDoc(getDocRef('config', 'settings'), { adminPw: '1234' });
+}
+}, (err) => console.error("Config sync fail: ", err));
+}
+
+async function initializeCloudBank() {
+for (let q of ULSIAN_SDI_30_QUIZ) {
+await writeToCloudOrLocal('bank', `Q-${q.idx}`, q);
+}
+}
+
+async function writeToCloudOrLocal(collectionName, docId, dataPayload) {
+if (isCloudMode && currentUser) {
+try {
+await setDoc(getDocRef(collectionName, docId), dataPayload);
+return true;
+} catch (e) {
+console.error("클라우드 쓰기 에러: ", e);
+}
+}
+return false;
+}
+
+async function deleteFromCloud(collectionName, docId) {
+if (isCloudMode && currentUser) {
+try {
+await deleteDoc(getDocRef(collectionName, docId));
+return true;
+} catch (e) {
+console.error("클라우드 삭제 에러: ", e);
+}
+}
+return false;
+}
+
+function saveLocalBackupOnly() {
+localStorage.setItem('sdi_db_users_v10', JSON.stringify(db.users));
+localStorage.setItem('sdi_db_history_v10', JSON.stringify(db.history));
+localStorage.setItem('sdi_db_bank_v10', JSON.stringify(db.bank));
+localStorage.setItem('sdi_db_logs_v10', JSON.stringify(db.logs));
+localStorage.setItem('sdi_admin_pw_v10', db.adminPw);
+}
+
+async function addLog(type, content, isAuto = true) {
+const timestamp = Date.now();
+const logId = `LOG-${timestamp}`;
+const newLog = {
+type: type,
+content: content,
+ts: timestamp,
+isAuto: isAuto
+};
+const cloudSuccess = await writeToCloudOrLocal('logs', logId, newLog);
+if (!cloudSuccess) {
+db.logs.unshift({ id: logId, ...newLog });
+if(db.logs.length > 100) db.logs.pop();
+saveLocalBackupOnly();
+renderLogs();
+}
+}
+
+// --- Core UI & Navigation ---
+window.toast = function(msg) {
+const t = document.getElementById('toast');
+document.getElementById('toast-msg').innerText = msg;
+t.classList.replace('opacity-0', 'opacity-100');
+setTimeout(() => t.classList.replace('opacity-100', 'opacity-0'), 2500);
+}
+
+window.switchView = function(vid) {
+document.querySelectorAll('#view-port > div').forEach(div => div.classList.add('hide'));
+document.getElementById('view-' + vid).classList.remove('hide');
+document.getElementById('admin-indicator').classList.toggle('hide', vid !== 'admin-main');
+if(vid === 'admin-main') setAdminTab('stats');
+lucide.createIcons();
+document.getElementById('view-port').scrollTop = 0;
+}
+
+window.resetToHome = function() {
+state.user = null;
+document.getElementById('input-name').value = '';
+document.getElementById('admin-pw-input').value = '';
+switchView('auth');
+}
+
+// --- Evaluation Logic ---
+window.startEvaluation = function() {
+const name = document.getElementById('input-name').value.trim();
+if(!name) return toast('성명을 입력하세요.');
+state.user = { name, ts: Date.now(), id: 'SDI-' + Math.random().toString(36).substr(2,6).toUpperCase() };
+
+// 피셔-예이츠 셔플링 기반 무작위 10문항 선별 (중복 완전 배제)
+let indices = Array.from({ length: db.bank.length }, (_, i) => i);
+for (let i = indices.length - 1; i > 0; i--) {
+const j = Math.floor(Math.random() * (i + 1));
+[indices[i], indices[j]] = [indices[j], indices[i]];
+}
+
+state.quizSet = indices.slice(0, 10).map(idx => db.bank[idx]);
+
+if(state.quizSet.length < 10) {
+toast('문제은행의 문제가 부족합니다. (최소 10문항 필요)');
+return;
+}
+state.currIdx = 0;
+state.answers = Array(10).fill(null);
+switchView('quiz');
+renderQuiz();
+}
+
+function renderQuiz() {
+const q = state.quizSet[state.currIdx];
+document.getElementById('q-idx-text').innerText = state.currIdx + 1;
+document.getElementById('q-progress').style.width = ((state.currIdx + 1) * 10) + '%';
+document.getElementById('q-text').innerText = q.q;
+
+const descContainer = document.getElementById('q-image-desc-container');
+const descEl = document.getElementById('q-image-desc');
+if (q.imageDesc && q.imageDesc.trim() !== "") {
+descContainer.classList.remove('hide');
+descEl.innerText = q.imageDesc;
+} else {
+descContainer.classList.add('hide');
+}
+
+const optBox = document.getElementById('q-options');
+optBox.innerHTML = '';
+q.a.forEach((ans, idx) => {
+const btn = document.createElement('button');
+btn.className = `p-4 text-left border-2 rounded-2xl font-bold transition-all btn-press text-xs ${state.answers[state.currIdx] === idx+1 ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-100 bg-white'}`; 
+btn.innerText = `${idx+1}. ${ans}`;
+btn.onclick = () => selectAnswer(idx + 1);
+optBox.appendChild(btn);
+});
+document.getElementById('btn-back').disabled = state.currIdx === 0;
+lucide.createIcons();
+}
+
+function selectAnswer(ans) {
+state.answers[state.currIdx] = ans;
+renderQuiz();
+setTimeout(() => {
+if(state.currIdx < 9) {
+state.currIdx++;
+renderQuiz();
+} else {
+completeEvaluation();
+}
+}, 250);
+}
+
+window.movePrev = function() {
+if(state.currIdx > 0) {
+state.currIdx--;
+renderQuiz();
+}
+}
+
+async function completeEvaluation() {
+let score = 0;
+state.quizSet.forEach((q, i) => { if(state.answers[i] === q.c) score += 10; });
+const result = { ...state.user, score, passed: score >= 80 };
+
+// 클라우드 및 디바이스 동시 영구 저장 유도
+const cloudSuccess = await writeToCloudOrLocal('users', result.id, result);
+if (!cloudSuccess) {
+db.users.push(result);
+saveLocalBackupOnly();
+}
+renderResult(result);
+}
+
+function renderResult(data) {
+switchView('result');
+const rs = document.getElementById('result-status');
+rs.innerText = data.passed ? 'PASSED' : 'FAILED';
+rs.className = `mb-4 px-6 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${data.passed ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`;
+document.getElementById('qr-name').innerText = data.name;
+document.getElementById('score-text').innerText = data.score + '점';
+document.getElementById('qr-date').innerText = new Date(data.ts).toLocaleDateString();
+const qrc = document.getElementById('qr-canvas'); qrc.innerHTML = '';
+if(data.passed) {
+new QRCode(qrc, { text: data.id, width: 120, height: 120, colorDark: "#1428A0" });
+} else {
+qrc.innerHTML = '<div class="w-24 h-24 bg-slate-50 border-2 border-dashed rounded-2xl flex items-center justify-center text-slate-300 font-bold text-[8px] text-center px-2">재교육 대상</div>';
+}
+}
+
+// --- Admin Dash Logic ---
+window.verifyAdmin = function() {
+if(document.getElementById('admin-pw-input').value === db.adminPw) {
+switchView('admin-main');
+} else {
+toast('비밀번호가 일치하지 않습니다.');
+}
+}
+
+function initFilters() {
+const ySelect = document.getElementById('filter-year');
+const currentYear = new Date().getFullYear();
+if (ySelect) {
+ySelect.innerHTML = '';
+for(let i=0; i<3; i++) {
+const year = currentYear - i;
+const opt = new Option(year + '년', year);
+ySelect.add(opt);
+}
+}
+}
+
+window.setAdminTab = function(tab) {
+document.querySelectorAll('.admin-tab').forEach(btn => btn.classList.remove('admin-tab-active', 'text-slate-400'));
+const activeBtn = document.getElementById('btn-tab-' + tab);
+if (activeBtn) activeBtn.classList.add('admin-tab-active');
+
+document.querySelectorAll('[id^="atab-"]').forEach(div => div.classList.add('hide'));
+const activeDiv = document.getElementById('atab-' + tab);
+if (activeDiv) activeDiv.classList.remove('hide');
+
+if(tab === 'stats') renderStats();
+if(tab === 'users') renderUserTable();
+if(tab === 'history') renderHistoryTable();
+if(tab === 'bank') renderBankTable();
+if(tab === 'logs') renderLogs();
+}
+
+// --- Statistics Rendering ---
+window.renderStats = function() {
+const filterYearEl = document.getElementById('filter-year');
+if (!filterYearEl) return;
+const selYear = parseInt(filterYearEl.value);
+const selMonth = document.getElementById('filter-month').value;
+
+let filteredAll = db.users.filter(u => new Date(u.ts).getFullYear() === selYear);
+let summaryFiltered = [...filteredAll];
+if(selMonth !== 'all') {
+summaryFiltered = summaryFiltered.filter(u => new Date(u.ts).getMonth() === parseInt(selMonth));
+}
+
+const total = summaryFiltered.length;
+const passTotal = summaryFiltered.filter(u => u.passed).length;
+const failTotal = total - passTotal;
+const rateTotal = total > 0 ? Math.round((passTotal/total)*100) : 0;
+
+document.getElementById('st-total').innerText = total;
+document.getElementById('st-pass').innerText = passTotal;
+document.getElementById('st-fail').innerText = failTotal;
+document.getElementById('st-rate').innerText = rateTotal + '%';
+
+const passData = Array(12).fill(0);
+const failData = Array(12).fill(0);
+const rateData = Array(12).fill(0);
+
+filteredAll.forEach(u => {
+const m = new Date(u.ts).getMonth();
+if(u.passed) passData[m]++; else failData[m]++;
+});
+
+for(let i=0; i<12; i++) {
+const monthTotal = passData[i] + failData[i];
+rateData[i] = monthTotal > 0 ? Math.round((passData[i]/monthTotal)*100) : 0;
+}
+
+const getAlpha = (idx) => {
+if(selMonth === 'all') return 1;
+return parseInt(selMonth) === idx ? 1 : 0.2;
+};
+
+const canvas = document.getElementById('statChart');
+if (!canvas) return;
+const ctx = canvas.getContext('2d');
+if(state.chart) state.chart.destroy();
+
+state.chart = new Chart(ctx, {
+type: 'bar',
+data: {
+labels: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+datasets: [
+{
+label: '이수자',
+data: passData,
+backgroundColor: passData.map((_, i) => `rgba(20, 40, 160, ${getAlpha(i)})`), borderRadius: 6, borderSkipped: false, barPercentage: 0.8, categoryPercentage: 0.6 }, 
+{ 
+label: '미이수자', 
+data: failData, 
+backgroundColor: failData.map((_, i) => `rgba(244, 63, 94, ${getAlpha(i)})`),
+borderRadius: 6,
+borderSkipped: false,
+barPercentage: 0.8,
+categoryPercentage: 0.6
+}
+ ]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+plugins: {
+legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } },
+tooltip: { backgroundColor: '#1e293b', titleFont: { size: 12 }, bodyFont: { size: 11 }, padding: 12, cornerRadius: 10 }
+},
+scales: {
+y: {
+beginAtZero: true,
+grid: { color: '#f1f5f9', drawBorder: false },
+ticks: { stepSize: 1, font: { size: 9 }, color: '#94a3b8' }
+},
+x: {
+grid: { display: false },
+ticks: { font: { size: 10, weight: 'bold' }, color: '#64748b' }
+}
+},
+animation: {
+onComplete: function() {
+const chartInstance = this;
+const ctx = chartInstance.ctx;
+ctx.font = 'bold 9px Pretendard';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'bottom';
+
+chartInstance.data.datasets[0].data.forEach((data, index) => {
+const mTotal = passData[index] + failData[index];
+if (mTotal > 0) {
+const meta0 = chartInstance.getDatasetMeta(0);
+const meta1 = chartInstance.getDatasetMeta(1);
+const x0 = meta0.data[index].x;
+const x1 = meta1.data[index].x;
+const y = Math.min(meta0.data[index].y, meta1.data[index].y);
+
+const alpha = getAlpha(index);
+ctx.fillStyle = `rgba(148, 163, 184, ${alpha * 0.8})`; 
+ctx.fillText(`${rateData[index]}%`, (x0 + x1) / 2, y - 5);
+}
+});
+}
+}
+}
+});
+}
+
+// --- Other Admin Functions ---
+function renderUserTable() {
+const tbody = document.getElementById('user-table');
+if(!tbody) return;
+tbody.innerHTML = '';
+document.getElementById('user-count').innerText = db.users.length;
+db.users.slice().sort((a,b) => b.ts - a.ts).forEach(u => {
+const tr = document.createElement('tr');
+tr.innerHTML = `<td class="px-6 py-4 text-center"><input type="checkbox" value="${u.id}" class="user-check"></td>
+<td class="px-6 py-4 text-slate-400">${new Date(u.ts).toLocaleString()}</td> 
+<td class="px-6 py-4 font-black">${u.name}</td>
+<td class="px-6 py-4 font-mono text-[10px]">${u.id}</td> 
+<td class="px-6 py-4 font-black text-blue-700">${u.score}점</td>
+<td class="px-6 py-4"><span class="px-2 py-0.5 rounded-full text-[10px] font-black ${u.passed?'bg-emerald-50 text-emerald-600':'bg-rose-50 text-rose-500'}">${u.passed?'PASS':'FAIL'}</span></td>
+`;
+tbody.appendChild(tr);
+});
+document.getElementById('btn-save-delete').classList.add('hide');
+}
+
+window.toggleAll = function(el) {
+document.querySelectorAll('.user-check').forEach(c => c.checked = el.checked);
+}
+
+window.prepareDelete = function() {
+const checked = Array.from(document.querySelectorAll('.user-check:checked')).map(c => c.value);
+if(checked.length === 0) return toast('삭제할 응시자를 선택하세요.');
+state.pendingDelete = checked;
+document.getElementById('btn-save-delete').classList.remove('hide');
+toast('삭제 대기 목록이 준비되었습니다. 저장 버튼을 클릭하여 완료하십시오.');
+}
+
+window.confirmDeleteSave = function() {
+document.getElementById('confirm-modal').classList.remove('hide');
+lucide.createIcons();
+}
+
+window.closeConfirm = function() { document.getElementById('confirm-modal').classList.add('hide'); }
+
+window.executeDelete = async function() {
+const idsToDelete = new Set(state.pendingDelete);
+const deletedData = db.users.filter(u => idsToDelete.has(u.id)).map(u => ({ ...u, deleteTs: Date.now() }));
+
+for(let h of deletedData) {
+await writeToCloudOrLocal('history', h.id, h);
+await deleteFromCloud('users', h.id);
+}
+
+if(!isCloudMode) {
+db.history = [...db.history, ...deletedData];
+db.users = db.users.filter(u => !idsToDelete.has(u.id));
+saveLocalBackupOnly();
+}
+
+const deletedNames = deletedData.map(d => d.name).join(', ');
+await addLog('UPDATE', `응시자 정보 삭제가 정상 진행되었습니다. [${deletedNames}] (총 ${idsToDelete.size}건)`);
+
+state.pendingDelete = [];
+closeConfirm();
+setAdminTab('users');
+toast('정상적으로 삭제 및 반영되었습니다.');
+}
+
+function renderHistoryTable() {
+const tbody = document.getElementById('history-table');
+if(!tbody) return;
+tbody.innerHTML = '';
+db.history.slice().sort((a,b) => b.deleteTs - a.deleteTs).forEach(h => {
+tbody.innerHTML += `<tr> 
+<td class="px-6 py-4 text-rose-500 font-bold">${new Date(h.deleteTs).toLocaleString()}</td>
+<td class="px-6 py-4 text-slate-400">${new Date(h.ts).toLocaleString()}</td>
+<td class="px-6 py-4 font-black">${h.name}</td>
+<td class="px-6 py-4 font-mono">${h.id}</td>
+<td class="px-6 py-4 font-bold">${h.score}점</td>
+</tr>`;
+});
+}
+
+function renderBankTable() {
+const tbody = document.getElementById('bank-table');
+if(!tbody) return;
+tbody.innerHTML = '';
+document.getElementById('bank-count').innerText = db.bank.length;
+
+db.bank.forEach((q, idx) => {
+const tr = document.createElement('tr');
+tr.innerHTML = `<td class="px-4 py-4 text-center"><input type="checkbox" value="${q.idx}" class="bank-item-check" onchange="updateBankSelectedCount()"></td>
+<td class="px-4 py-4 font-bold text-slate-400">${idx+1}</td> 
+<td class="px-4 py-4 font-bold text-slate-800 text-keep">${q.q}</td>
+<td class="px-4 py-4 text-blue-600 font-medium">${q.imageDesc && q.imageDesc.trim() !== "" ? q.imageDesc : "<span class='text-slate-300 font-light'>-</span>"}</td> 
+<td class="px-4 py-4 text-slate-500 leading-relaxed">${q.a.map((o, i) => `<span class="${q.c === i+1 ? 'text-blue-600 font-bold' : ''}">${o}</span>`).join('<br/>')}</td> 
+<td class="px-4 py-4 text-center"><span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-black">${q.c}</span></td>
+<td class="px-4 py-4 text-center">
+<button onclick="openQuestionModal(${idx})" class="text-blue-600 hover:text-blue-800 font-bold mr-2">수정</button> 
+</td>`;
+tbody.appendChild(tr);
+});
+updateBankSelectedCount();
+}
+
+window.toggleAllBank = function(el) {
+document.querySelectorAll('.bank-item-check').forEach(c => c.checked = el.checked);
+updateBankSelectedCount();
+}
+
+window.updateBankSelectedCount = function() {
+const checked = document.querySelectorAll('.bank-item-check:checked');
+const controlBar = document.getElementById('bank-control-bar');
+const countSpan = document.getElementById('checked-bank-count');
+
+if (countSpan) countSpan.innerText = checked.length;
+if (controlBar) {
+if (checked.length > 0) controlBar.classList.remove('hide');
+else controlBar.classList.add('hide');
+}
+}
+
+window.deleteCheckedQuestions = async function() {
+const checkedBoxes = document.querySelectorAll('.bank-item-check:checked');
+const idxsToDelete = Array.from(checkedBoxes).map(c => parseInt(c.value));
+
+if (isCloudMode) {
+for (let idx of idxsToDelete) {
+await deleteFromCloud('bank', `Q-${idx}`);
+}
+} else {
+db.bank = db.bank.filter(q => !idxsToDelete.includes(q.idx));
+saveLocalBackupOnly();
+renderBankTable();
+}
+
+await addLog('UPDATE', `문제은행 문항 ${idxsToDelete.length}개가 전체 목록에서 직접 선택 삭제되었습니다.`);
+toast('문항이 성공적으로 삭제되었습니다.');
+}
+
+window.openQuestionModal = function(idx) {
+const title = document.getElementById('question-modal-title');
+const textInput = document.getElementById('edit-q-text');
+const imgInput = document.getElementById('edit-q-image');
+const opt1 = document.getElementById('edit-q-opt1');
+const opt2 = document.getElementById('edit-q-opt2');
+const opt3 = document.getElementById('edit-q-opt3');
+const opt4 = document.getElementById('edit-q-opt4');
+const correct = document.getElementById('edit-q-correct');
+const idxInput = document.getElementById('edit-q-idx');
+
+if (idx === null) {
+title.innerText = "신규 평가 문항 수동 등록";
+textInput.value = "";
+imgInput.value = "";
+opt1.value = "";
+opt2.value = "";
+opt3.value = "";
+opt4.value = "";
+correct.value = "1";
+idxInput.value = "-1";
+} else {
+const item = db.bank[idx];
+title.innerText = "평가 문항 수정";
+textInput.value = item.q;
+imgInput.value = item.imageDesc || "";
+opt1.value = item.a[0] || "";
+opt2.value = item.a[1] || "";
+opt3.value = item.a[2] || "";
+opt4.value = item.a[3] || "";
+correct.value = String(item.c);
+idxInput.value = String(item.idx);
+}
+
+document.getElementById('question-modal').classList.remove('hide');
+}
+
+window.closeQuestionModal = function() {
+document.getElementById('question-modal').classList.add('hide');
+}
+
+window.saveQuestionItem = async function() {
+const text = document.getElementById('edit-q-text').value.trim();
+const img = document.getElementById('edit-q-image').value.trim();
+const o1 = document.getElementById('edit-q-opt1').value.trim();
+const o2 = document.getElementById('edit-q-opt2').value.trim();
+const o3 = document.getElementById('edit-q-opt3').value.trim();
+const o4 = document.getElementById('edit-q-opt4').value.trim();
+const correct = parseInt(document.getElementById('edit-q-correct').value);
+const idxStr = document.getElementById('edit-q-idx').value;
+
+if (!text || !o1 || !o2) return toast('문제 내용 및 보기를 정확히 입력하세요.');
+
+const aList = [o1, o2];
+if (o3) aList.push(o3);
+if (o4) aList.push(o4);
+
+if (idxStr === "-1") {
+const nextIdx = db.bank.length > 0 ? Math.max(...db.bank.map(q => q.idx)) + 1 : 1;
+const newItem = { idx: nextIdx, q: text, imageDesc: img, a: aList, c: correct };
+
+if (isCloudMode) {
+await writeToCloudOrLocal('bank', `Q-${nextIdx}`, newItem); 
+} else { 
+db.bank.push(newItem); 
+saveLocalBackupOnly(); 
+renderBankTable(); 
+} 
+await addLog('UPDATE', `신규 안전 문항이 시스템에 수동 개별 추가되었습니다: "${text.substring(0,18)}..."`);
+} else {
+const curIdx = parseInt(idxStr);
+const updatedItem = { idx: curIdx, q: text, imageDesc: img, a: aList, c: correct };
+
+if (isCloudMode) {
+await writeToCloudOrLocal('bank', `Q-${curIdx}`, updatedItem); 
+} else { 
+const findIdx = db.bank.findIndex(q => q.idx === curIdx); 
+if (findIdx !== -1) db.bank[findIdx] = updatedItem; 
+saveLocalBackupOnly(); 
+renderBankTable(); 
+} 
+await addLog('UPDATE', `문제은행 문항(${curIdx}번)이 관리자에 의해 수동으로 직접 편집 수정되었습니다.`);
+}
+
+closeQuestionModal();
+toast('안전하게 저장되었습니다.');
+}
+
+// --- 엑셀 업로더 ---
+window.handleBankUpload = function(input) {
+const file = input.files[0];
+if(!file) return;
+const reader = new FileReader();
+reader.onload = (e) => {
+try {
+const data = new Uint8Array(e.target.result);
+const workbook = XLSX.read(data, { type: 'array' });
+const ws = workbook.Sheets[workbook.SheetNames[0]];
+const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+if (rows.length < 2) {
+toast('업로드된 엑셀 파일에 데이터가 부족합니다.');
+return;
+}
+
+const headers = rows[0];
+let questionIdx = -1, imageDescIdx = -1, optionIdxs = [], answerIdx = -1;
+
+headers.forEach((h, index) => {
+const cleanH = String(h).trim();
+if (cleanH.includes("문제") || cleanH.includes("질문") || cleanH.includes("Question")) {
+questionIdx = index;
+} else if (cleanH.includes("예시설명") || cleanH.includes("그림") || cleanH.includes("사진") || cleanH.includes("참고")) {
+imageDescIdx = index;
+} else if (cleanH.includes("보기") || cleanH.includes("예시") || cleanH.includes("Option")) {
+optionIdxs.push(index);
+} else if (cleanH.includes("정답") || cleanH.includes("답") || cleanH.includes("Answer")) {
+answerIdx = index;
+}
+});
+
+if (questionIdx === -1) questionIdx = 0;
+if (imageDescIdx === -1) imageDescIdx = 1;
+if (optionIdxs.length === 0) optionIdxs = [2, 3, 4, 5];
+if (answerIdx === -1) answerIdx = 6;
+
+tempUploadBank = rows.slice(1).filter(r => r[questionIdx] && r[answerIdx]).map((r, i) => {
+const options = optionIdxs.map(idx => r[idx]).filter(v => v !== undefined && v !== null && String(v).trim() !== "");
+return {
+q: String(r[questionIdx]).trim(),
+imageDesc: r[imageDescIdx] ? String(r[imageDescIdx]).trim() : "",
+a: options.map(opt => String(opt).trim()),
+c: parseInt(r[answerIdx])
+};
+}).filter(q => q.a.length >= 2 && !isNaN(q.c));
+
+if(tempUploadBank.length === 0) {
+toast('엑셀에서 파싱 가능한 유효한 평가 문항이 없습니다.');
+return;
+}
+
+document.getElementById('upload-mode-modal').classList.remove('hide');
+document.getElementById('upload-mode-merge').onclick = () => executeUploadAndClose(true);
+document.getElementById('upload-mode-overwrite').onclick = () => executeUploadAndClose(false);
+
+} catch (err) {
+console.error(err);
+toast('엑셀 해독에 오류가 발생했습니다.');
+}
+input.value = '';
+};
+reader.readAsArrayBuffer(file);
+}
+
+window.closeUploadModeModal = function() {
+document.getElementById('upload-mode-modal').classList.add('hide');
+tempUploadBank = [];
+}
+
+async function executeUploadAndClose(isMerge) {
+document.getElementById('upload-mode-modal').classList.add('hide');
+
+let finalBankList = [];
+if (isMerge) {
+const maxIdx = db.bank.length > 0 ? Math.max(...db.bank.map(q => q.idx)) : 0;
+const mappedNew = tempUploadBank.map((q, i) => ({
+idx: maxIdx + 1 + i,
+...q
+}));
+finalBankList = [...db.bank, ...mappedNew];
+} else {
+finalBankList = tempUploadBank.map((q, i) => ({
+idx: i + 1,
+...q
+}));
+}
+
+if (isCloudMode) {
+if (!isMerge) {
+for(let q of db.bank) {
+await deleteFromCloud('bank', `Q-${q.idx}`); 
+} 
+} 
+for(let q of finalBankList) { 
+await writeToCloudOrLocal('bank', `Q-${q.idx}`, q);
+}
+} else {
+db.bank = finalBankList;
+saveLocalBackupOnly();
+renderBankTable();
+}
+
+await addLog('UPDATE', `문제은행 데이터가 업데이트되었습니다. 업로드 방식: ${isMerge ? '기존유지병합' : '덮어쓰기'} (총 문항 수: ${finalBankList.length})`);
+toast('문제은행이 성공적으로 업데이트 완료되었습니다.');
+tempUploadBank = [];
+}
+
+// --- 다운로드 보장 처리 엔진 ---
+window.openDownloadModal = function(type) {
+state.currentDownloadType = type;
+const input = document.getElementById('target-filename');
+
+let defaultName = "SDI_Report.xlsx";
+if (type === 'stats') defaultName = `SDI_안전교육_월별통계_${new Date().getFullYear()}년.xlsx`; 
+else if (type === 'users') defaultName = `SDI_안전교육_응시자목록_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`;
+else if (type === 'logs') defaultName = `SDI_안전교육_변경사항로그_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`; 
+else if (type === 'bank_history') defaultName = `SDI_안전교육_문제은행_수정이력_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`;
+else if (type === 'history') defaultName = `SDI_안전교육_삭제이력_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`; 
+else if (type === 'bank') defaultName = `SDI_안전교육_현재문제은행_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`;
+else if (type === 'template') defaultName = "SDI_Quiz_Bank_Template.xlsx";
+else if (type === 'ppt') defaultName = `SDI_안전교육_종합분석보고서_${new Date().getFullYear()}년.ppt`;
+
+input.value = defaultName;
+document.getElementById('download-config-modal').classList.remove('hide');
+}
+
+window.closeDownloadModal = function() {
+document.getElementById('download-config-modal').classList.add('hide');
+state.currentDownloadType = "";
+}
+
+window.executeTargetDownload = function() {
+const filename = document.getElementById('target-filename').value.trim() || "SDI_File.xlsx";
+const type = state.currentDownloadType;
+closeDownloadModal();
+
+if (type === 'ppt') {
+triggerPPTGeneration(filename);
+return;
+}
+
+if (type === 'template') {
+const template = [["문제", "예시설명(그림/사진/텍스트 등 필요시)", "보기1", "보기2", "보기3", "보기4", "정답(숫자)"]];
+const ws = XLSX.utils.aoa_to_sheet(template);
+const wb = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb, ws, "QuizBank");
+executeFinalWrite(wb, filename);
+return;
+}
+
+let data = [];
+if (type === 'stats') {
+data.push(["기준 연도", document.getElementById('filter-year').value]);
+data.push([]);
+data.push(["월", "전체 응시자", "이수(합격)", "미이수(불합격)", "이수율(합격률)"]);
+
+const passData = Array(12).fill(0);
+const failData = Array(12).fill(0);
+const selYear = parseInt(document.getElementById('filter-year').value);
+
+db.users.filter(u => new Date(u.ts).getFullYear() === selYear).forEach(u => {
+const m = new Date(u.ts).getMonth();
+if(u.passed) passData[m]++; else failData[m]++;
+});
+
+for(let i=0; i<12; i++) {
+const total = passData[i] + failData[i];
+const rate = total > 0 ? Math.round((passData[i]/total)*100) : 0;
+data.push([`${i+1}월`, total, passData[i], failData[i], `${rate}%`]);
+}
+
+const totalPass = passData.reduce((a, b) => a + b, 0);
+const totalFail = failData.reduce((a, b) => a + b, 0);
+const grandTotal = totalPass + totalFail;
+const grandRate = grandTotal > 0 ? Math.round((totalPass/grandTotal)*100) : 0;
+data.push([]);
+data.push(["합계 및 요약", grandTotal, totalPass, totalFail, `${grandRate}%`]);
+
+} else if (type === 'users') {
+data.push(["응시 일시", "성명", "ID", "취득 점수", "결과(합격 여부)"]);
+db.users.slice().sort((a,b) => b.ts - a.ts).forEach(u => {
+data.push([new Date(u.ts).toLocaleString(), u.name, u.id, `${u.score}점`, u.passed ? "합격 (PASS)" : "불합격 (FAIL)"]);
+});
+
+} else if (type === 'logs') {
+data.push(["발생 일시", "분류", "발생 주체", "로그 기록 내용"]);
+db.logs.slice().sort((a,b) => b.ts - a.ts).forEach(log => {
+data.push([new Date(log.ts).toLocaleString(), log.type, log.isAuto ? "SYSTEM" : "ADMIN", log.content]);
+});
+
+} else if (type === 'bank_history') {
+data.push(["수정 일시", "분류", "이력 기록 사항"]);
+const bankLogs = db.logs.filter(log => log.type === 'UPDATE' || log.content.includes("문제은행"));
+bankLogs.slice().sort((a,b) => b.ts - a.ts).forEach(log => {
+data.push([new Date(log.ts).toLocaleString(), log.type, log.content]);
+});
+if(bankLogs.length === 0) {
+data.push(["-", "-", "기록된 문제은행 업데이트 이력이 아직 없습니다."]);
+}
+
+} else if (type === 'history') {
+data.push(["삭제 완료 일시", "원래 응시 일시", "응시자 성명", "응시자 고유 ID", "원래 취득 점수"]);
+db.history.slice().sort((a,b) => b.deleteTs - a.deleteTs).forEach(h => {
+data.push([new Date(h.deleteTs).toLocaleString(), new Date(h.ts).toLocaleString(), h.name, h.id, `${h.score}점`]);
+});
+
+} else if (type === 'bank') {
+data.push(["문제", "예시설명(그림/사진/텍스트 등 필요시)", "보기1", "보기2", "보기3", "보기4", "정답(숫자)"]);
+db.bank.forEach(q => {
+data.push([q.q, q.imageDesc || "", q.a[0] || "", q.a[1] || "", q.a[2] || "", q.a[3] || "", q.c]);
+});
+}
+
+const ws = XLSX.utils.aoa_to_sheet(data);
+const wb = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+executeFinalWrite(wb, filename);
+}
+
+function executeFinalWrite(wb, filename) {
+try {
+XLSX.writeFile(wb, filename);
+toast("디바이스에 실물 파일 저장이 성공적으로 완료되었습니다.");
+} catch (error) {
+console.error("Standard Write Process Error: ", error);
+try {
+const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+window.navigator.msSaveOrOpenBlob(blob, filename);
+return;
+}
+
+const url = window.URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = filename;
+a.target = '_blank';
+a.rel = 'noopener';
+
+document.body.appendChild(a);
+a.click();
+setTimeout(() => {
+document.body.removeChild(a);
+window.URL.revokeObjectURL(url);
+}, 100);
+toast("안전 모드로 파일 저장이 완료되었습니다.");
+} catch (e) {
+toast("파일 저장 쓰기 권한이 차단되었습니다.");
+}
+}
+}
+
+// --- 비밀번호 변경 프로세스 ---
+window.requestChangePassword = function() {
+const cur = document.getElementById('pw-current').value;
+const n1 = document.getElementById('pw-new').value;
+const n2 = document.getElementById('pw-confirm').value;
+
+if (!cur || !n1 || !n2) return toast('정보를 모두 누락 없이 입력해 주십시오.');
+if (cur !== db.adminPw) return toast('현재 관리자 비밀번호가 일치하지 않습니다.');
+if (n1 !== n2) return toast('새 비밀번호와 확인 입력이 일치하지 않습니다.');
+if (n1.length < 4) return toast('새 비밀번호는 최소 4자 이상이어야 합니다.');
+
+state.tempPwObj = { cur, n1 };
+
+document.getElementById('confirm-pw-cur').innerText = cur;
+document.getElementById('confirm-pw-new').innerText = n1;
+
+document.getElementById('confirm-pw-modal').classList.remove('hide');
+}
+
+window.closePwConfirm = function() {
+document.getElementById('confirm-pw-modal').classList.add('hide');
+state.tempPwObj = null;
+}
+
+window.executeChangePassword = async function() {
+if (!state.tempPwObj) return;
+const { n1 } = state.tempPwObj;
+
+db.adminPw = n1;
+
+let saveSuccess = false;
+if (isCloudMode) {
+try {
+await setDoc(getDocRef('config', 'settings'), { adminPw: n1 });
+saveSuccess = true;
+} catch (e) {
+console.error("Firestore Password Save Error: ", e);
+}
+} else {
+saveLocalBackupOnly();
+saveSuccess = true;
+}
+
+if (saveSuccess) {
+localStorage.setItem('sdi_admin_pw_v10', n1);
+db.adminPw = n1;
+saveLocalBackupOnly();
+
+await addLog('MAINTAIN', '관리자 시스템 계정 비밀번호가 안전하게 업데이트 변경되었습니다.');
+
+document.getElementById('pw-current').value = '';
+document.getElementById('pw-new').value = '';
+document.getElementById('pw-confirm').value = '';
+
+toast('관리자 비밀번호가 성공적으로 변경 완료되었습니다.');
+} else {
+toast('보안 통신 장애로 반영되지 못했습니다. 잠시 후 재시도하십시오.');
+}
+
+closePwConfirm();
+}
+
+// --- 수동 로그 기입 기능 추가 ---
+window.saveManualLog = async function() {
+const type = document.getElementById('log-type').value;
+const content = document.getElementById('log-content').value.trim();
+if (!content) return toast('로그 내용을 정확하게 기입해 주세요.');
+
+await addLog(type, content, false);
+closeLogModal();
+toast('로그가 안전하게 반영되었습니다.');
+}
+
+// --- PPTX 슬라이드 빌더 엔진 ---
+function triggerPPTGeneration(filename) {
+try {
+const selYear = document.getElementById('filter-year').value;
+const selMonth = document.getElementById('filter-month').value;
+
+let filteredUsers = db.users.filter(u => new Date(u.ts).getFullYear() === parseInt(selYear));
+if (selMonth !== 'all') {
+filteredUsers = filteredUsers.filter(u => new Date(u.ts).getMonth() === parseInt(selMonth));
+}
+
+const total = filteredUsers.length;
+const pass = filteredUsers.filter(u => u.passed).length;
+const fail = total - pass;
+const rate = total > 0 ? Math.round((pass/total)*100) : 0;
+
+const pptContent = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:p='urn:schemas-microsoft-com:office:powerpoint' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>삼성SDI 안전교육 종합 분석 보고서</title>
+<style>
+body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 0; background: #001A72; color: #ffffff; }
+.slide { width: 10in; height: 7.5in; padding: 1in; box-sizing: border-box; background: #ffffff; color: #1e293b; page-break-after: always; position: relative; }
+.cover { background: linear-gradient(135deg, #001A72 0%, #1428A0 100%); color: #ffffff; }
+h1 { font-size: 36pt; font-weight: 800; margin-bottom: 5pt; }
+h2 { font-size: 24pt; font-weight: 700; color: #1428A0; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-top: 0; }
+p { font-size: 14pt; line-height: 1.6; }
+.meta { font-size: 11pt; opacity: 0.8; margin-top: 2in; }
+.stats-grid { display: flex; gap: 20px; margin-top: 40px; }
+.stat-card { flex: 1; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; text-align: center; }
+.stat-val { font-size: 28pt; font-weight: 800; color: #1428A0; margin-top: 10px; }
+.stat-lbl { font-size: 10pt; color: #64748b; font-weight: bold; }
+.footer { position: absolute; bottom: 0.5in; left: 1in; font-size: 9pt; color: #94a3b8; }
+</style>
+</head>
+<body>
+<div class="slide cover">
+<div style="margin-top: 1.5in;">
+<span style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 12pt; font-weight: bold;">S&E Management System</span>
+<h1 style="margin-top: 20px;">안전 교육 이수 현황 및<br/>종합 분석 통계 리포트</h1>
+<p style="opacity: 0.8; font-size: 16pt; margin-top: 20px;">삼성SDI 안전환경보건(S&E) 교육 통합 관리 대시보드</p>
+<div class="meta">
+출력 기준 연월: ${selYear}년 ${selMonth === 'all' ? '전체' : (parseInt(selMonth)+1) + '월'}<br/>
+보고서 생성 일시: ${new Date().toLocaleString()}<br/>
+작성 주체: 삼성SDI 안전환경 사무국
+</div>
+</div>
+</div>
+
+<div class="slide">
+<h2>안전 교육 평가 정량 지표 분석</h2>
+<p>선택된 분석 주기에 해당하는 정량 안전성 지표 요약본입니다.</p>
+
+<div class="stats-grid">
+<div class="stat-card">
+<div class="stat-lbl">총 응시 건수</div>
+<div class="stat-val">${total}건</div>
+</div>
+<div class="stat-card">
+<div class="stat-lbl">합격 이수자 수</div>
+<div class="stat-val" style="color: #059669;">${pass}명</div>
+</div>
+<div class="stat-card">
+<div class="stat-lbl">미이수(불합격) 수</div>
+<div class="stat-val" style="color: #dc2626;">${fail}명</div>
+</div>
+<div class="stat-card">
+<div class="stat-lbl">합격 교육 이수율</div>
+<div class="stat-val" style="color: #2563eb;">${rate}%</div>
+</div>
+</div>
+
+<div style="margin-top: 40px; background: #eff6ff; padding: 20px; border-radius: 10px; border-left: 5px solid #2563eb;">
+<p style="font-size: 12pt; margin: 0; color: #1e3a8a; font-weight: bold;">💡 평가 이수율 종합 평가 의견:</p>
+<p style="font-size: 11pt; margin: 5px 0 0 0; color: #1e40af; line-height: 1.5;">
+본 분석 주기 내 총 이수율은 ${rate}%를 기록하였습니다. 이수 완료 수치가 85% 하회 시 안전 교육 난이도 조정 및 현장 재교육 일정이 추가 소요될 수 있으므로, 주기적인 통제 관리가 권고됩니다.
+</p>
+</div>
+<div class="footer">Samsung SDI Safety First | Slide 2</div>
+</div>
+
+<div class="slide">
+<h2>사내 안전교육 시스템 변경 사항 및 공지 이력</h2>
+<p>최근 보고 주기 동안 발생한 주요 시스템 구성 업데이트 로그입니다.</p>
+
+<div style="margin-top: 20px; font-size: 11pt;">
+<table style="width: 100%; border-collapse: collapse; text-align: left;">
+<tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1; font-weight: bold; color: #475569;">
+<th style="padding: 10px;">일시</th>
+<th style="padding: 10px;">분류</th>
+<th style="padding: 10px;">기록 내용</th>
+</tr>
+${db.logs.slice(0, 5).map(log => `
+<tr style="border-bottom: 1px solid #e2e8f0;">
+<td style="padding: 10px; color: #64748b;">${new Date(log.ts).toLocaleDateString()}</td>
+<td style="padding: 10px; font-weight: bold; color: #1428A0;">${log.type}</td>
+<td style="padding: 10px; color: #334155;">${log.content}</td>
+</tr>
+`).join('')}
+</table>
+</div>
+<div class="footer">Samsung SDI Safety First | Slide 3</div>
+</div>
+</body>
+</html>`;
+
+const blob = new Blob([pptContent], { type: 'application/vnd.ms-powerpoint;charset=utf-8' });
+
+if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+window.navigator.msSaveOrOpenBlob(blob, filename);
+} else {
+const url = window.URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = filename;
+a.target = '_blank';
+a.rel = 'noopener';
+document.body.appendChild(a);
+a.click();
+setTimeout(() => {
+document.body.removeChild(a);
+window.URL.revokeObjectURL(url);
+}, 100);
+}
+
+toast('종합 분석 PPT 리포트 다운로드가 완료되었습니다.');
+} catch (err) {
+console.error(err);
+toast('리포트 PPT 생성 도중 오류가 생겼습니다.');
+}
+}
+
+// --- Modals ---
+window.showLogAddModal = function() { document.getElementById('log-modal').classList.remove('hide'); }
+window.closeLogModal = function() { document.getElementById('log-modal').classList.add('hide'); }
+
+function renderLogs() {
+const list = document.getElementById('log-list');
+if(!list) return;
+list.innerHTML = '';
+db.logs.forEach(log => {
+const badgeColor = log.type === 'UPDATE' ? 'bg-indigo-100 text-indigo-700' : (log.type === 'NOTICE' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700');
+const row = document.createElement('div');
+row.className = "flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50 rounded-2xl border text-xs gap-2";
+row.innerHTML = `<div class="flex items-center gap-2">
+<span class="px-2.5 py-1 rounded-lg font-black ${badgeColor}">${log.type}</span>
+<p class="font-bold text-slate-700">${log.content}</p>
+</div>
+<span class="text-[10px] text-slate-400 font-bold shrink-0">${new Date(log.ts).toLocaleString()}</span>`;
+list.appendChild(row);
+});
+}
+
+// --- Initial Load ---
+window.addEventListener('DOMContentLoaded', () => {
+initFilters();
+initFirebase();
+resetToHome();
+});
+</script>
 </body>
 </html>
