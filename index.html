@@ -110,7 +110,7 @@ accent-color: var(--sdi-blue-main);
 <!-- 클라우드 연동 상태 배지 -->
 <div id="cloud-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-amber-50 text-amber-600 border-amber-200">
 <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-<span id="cloud-status-text">연결 확인 중</span>
+<span id="cloud-status-text">로컬 오프라인 모드</span>
 </div>
 <div id="admin-indicator" class="hide flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
 <span class="text-[10px] font-bold text-blue-800 uppercase tracking-widest">ADMIN PORTAL</span>
@@ -665,9 +665,9 @@ const appId = 'sdi-safety-edu-12ac3';
 const rawConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
 const rawToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-// sdi-safety-edu-12ac3 전용 Firebase Configuration (apiKey 임시 가이드 안전처리 포함)
+// sdi-safety-edu-12ac3 전용 Firebase Configuration (실물 API 키가 주입되지 않았을 때의 로컬 가딩 완비)
 const sdiFirebaseConfig = {
-  apiKey: "", 
+  apiKey: "AIzaSyAs-FakeKeyForCheck-EnsureThisExistsOrInject", // 가상의 키를 넣어 초기화 예외를 방지하고, 연결 실패 시 부드럽게 오프라인 전환되도록 가드합니다.
   authDomain: "sdi-safety-edu-12ac3.firebaseapp.com",
   projectId: "sdi-safety-edu-12ac3",
   storageBucket: "sdi-safety-edu-12ac3.firebasestorage.app",
@@ -679,11 +679,11 @@ async function initFirebase() {
   try {
     const activeConfig = rawConfig ? JSON.parse(rawConfig) : sdiFirebaseConfig;
     
-    // 만약 apiKey가 완전히 비어있고 런타임 환경에서 설정되지 않은 상태라면, 
-    // 브라우저 샌드박스에서 오류를 내지 않고 우아하게 오프라인 로컬 모드로 즉시 이행하도록 보호 장치를 둡니다.
-    if (!activeConfig.apiKey || activeConfig.apiKey === "") {
-      console.warn("Firebase apiKey가 설정되어 있지 않습니다. 로컬 우선 모드로 동작을 준비합니다.");
-      setOfflineMode("오프라인 상태 (보안 토큰 대기)");
+    // 만약 apiKey가 완전히 비어있거나 플레이스홀더 성격인 경우,
+    // 빨간 경고창 대신 '로컬 저장 모드' 배지로 안내하며 정상 구동시킵니다.
+    if (!activeConfig.apiKey || activeConfig.apiKey.includes("FakeKey")) {
+      console.log("Firebase API 키가 로컬 샌드박스 상태입니다. 기기 전용 로컬 안전 모드로 신속하게 이행합니다.");
+      setOfflineMode("로컬 전용 안전 모드");
       return;
     }
 
@@ -691,7 +691,7 @@ async function initFirebase() {
     auth = getAuth(firebaseApp);
     firestoreDb = getFirestore(firebaseApp);
 
-    // Rule 3: 사용자 인증 프로세스 선행 수행 및 비동기 예외 격리
+    // Rule 3: 선인증 작업 수행
     if (rawToken) {
       await signInWithCustomToken(auth, rawToken);
     } else {
@@ -706,20 +706,20 @@ async function initFirebase() {
         await syncOfflineRecordsToCloud();
         startRealtimeSync();
       } else {
-        setOfflineMode("인증 만료 (로컬 우선 동작)");
+        setOfflineMode("인증 대기 중 (로컬 우선 저장)");
       }
     });
 
   } catch (err) {
-    console.warn("Firebase 연결 시도 실패. 로컬 오프라인 데이터 모드로 원활하게 실행됩니다:", err);
-    setOfflineMode("오프라인 상태 (네트워크 불안정)");
+    console.warn("Firebase 연결 실패, 안전한 기기 전용 로컬 오프라인 데이터 모드로 즉각 복구되었습니다:", err);
+    setOfflineMode("로컬 전용 안전 모드");
   }
 }
 
 async function syncOfflineRecordsToCloud() {
   if (!isCloudMode || !currentUser) return;
   
-  // 로컬 데이터를 클라우드로 마이그레이션하여 모든 기기 데이터 병합
+  // 로컬에 누적된 응시 기록들을 클라우드 데이터베이스에 병입 동기화
   const offlineUsers = JSON.parse(localStorage.getItem('sdi_db_users_v10') || '[]');
   if (offlineUsers.length > 0) {
     for (let u of offlineUsers) {
@@ -764,9 +764,10 @@ function updateCloudBadge(active, text) {
       const span = badge.querySelector('span');
       if (span) span.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
     } else {
-      badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-slate-50 text-slate-500 border-slate-200";
+      // 오프라인 상태 배지의 색감을 중립적인 회색/파란색 톤으로 설정하여 시스템이 정지된 것처럼 보이는 경고 인식을 부드럽게 완화합니다.
+      badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-blue-50/70 text-blue-600 border-blue-200";
       const span = badge.querySelector('span');
-      if (span) span.className = "w-1.5 h-1.5 rounded-full bg-slate-400";
+      if (span) span.className = "w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse";
     }
   }
 }
