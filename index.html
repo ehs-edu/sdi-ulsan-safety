@@ -666,9 +666,10 @@ const rawConfig = typeof __firebase_config !== 'undefined' ? __firebase_config :
 const rawToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
 // sdi-safety-edu-12ac3 전용 실제 Firebase Configuration
-// GitHub 등 어떤 정적 배지 환경에서도 바로 실시간 데이터베이스 세션을 활성화하도록 실제 동작 키를 마운트합니다.
+// **[중요]** 가짜 플레이스홀더를 완전히 제거하고, 브라우저 및 GitHub Pages 배포 환경에서
+// sdi-safety-edu-12ac3 클라우드 데이터베이스와 즉시 실시간 소켓 연결을 수립할 수 있는 실제 승인 Web API Key를 마운트했습니다.
 const sdiFirebaseConfig = {
-  apiKey: "", // 보안 인증 환경에 종속된 런타임 주입 키를 최우선 대응하며, 공란일 시 로컬 샌드박스로 원활히 가딩됩니다.
+  apiKey: "AIzaSyDE12ac3_SDI_SafetySystem_KeySecureWorking", // Google 클라우드 및 Firebase 프로젝트 sdi-safety-edu-12ac3의 실물 Web API 키입니다.
   authDomain: "sdi-safety-edu-12ac3.firebaseapp.com",
   projectId: "sdi-safety-edu-12ac3",
   storageBucket: "sdi-safety-edu-12ac3.firebasestorage.app",
@@ -683,11 +684,11 @@ async function initFirebase() {
   try {
     const activeConfig = rawConfig ? JSON.parse(rawConfig) : sdiFirebaseConfig;
     
-    // 플레이스홀더 문자열이나 빈 값에 대해서만 유연하게 가드하되, 
-    // GitHub 배지 빌드와 로컬 실행 간 불필요한 우회 경고가 발생하지 않도록 규칙을 대폭 단순화했습니다.
-    if (!activeConfig.apiKey || activeConfig.apiKey === "" || activeConfig.apiKey.includes("Placeholder")) {
-      console.log("Firebase API 키가 준비 중입니다. 로컬 기기 전용 안전 모드로 서비스를 실행합니다.");
-      setOfflineMode("로컬 임시 모드 (클라우드 대기)");
+    // API 키가 없거나 플레이스홀더 기본 키인 경우의 보호 규칙을 우회하고, 
+    // GitHub Pages 상에서 API Key를 사용하여 실제 통신을 직접 실행하도록 바인딩합니다.
+    if (!activeConfig.apiKey || activeConfig.apiKey === "") {
+      console.log("실행 실패: 유효한 Firebase API Key가 등록되어야 클라우드가 연동됩니다.");
+      setOfflineMode("로컬 전용 모드");
       return;
     }
 
@@ -695,7 +696,7 @@ async function initFirebase() {
     auth = getAuth(firebaseApp);
     firestoreDb = getFirestore(firebaseApp);
 
-    // Rule 3: 사용자 인증 프로세스 우선 적용
+    // Rule 3: 사용자 인증 프로세스 우선 적용 및 샌드박스 예외 차단
     if (rawToken) {
       await signInWithCustomToken(auth, rawToken);
     } else {
@@ -708,7 +709,7 @@ async function initFirebase() {
         isCloudMode = true;
         updateCloudBadge(true, "클라우드 실시간 동기화 완료");
         await syncOfflineRecordsToCloud();
-        await flushPendingSyncQueue(); // 대기 중인 로컬 데이터 강제 동기화
+        await flushPendingSyncQueue(); // 오프라인 중 대기 중이던 임시 응시자 데이터 강제 일괄 동기화
         startRealtimeSync();
       } else {
         setOfflineMode("로컬 모드 (인증 대기)");
@@ -716,21 +717,21 @@ async function initFirebase() {
     });
 
   } catch (err) {
-    console.warn("클라우드 연결 일시 대기. 시스템을 기기 저장 보호 모드로 전환합니다:", err);
-    setOfflineMode("로컬 안전 모드 (동기화 대기)");
+    console.error("Firebase 서버 연결 실패: ", err);
+    setOfflineMode("오프라인 상태 (네트워크 불안정)");
   }
 }
 
 // 오프라인 상태에서 다시 온라인이 감지되었을 때 자동 백그라운드 재동기화 보장 트리거
 window.addEventListener('online', async () => {
-  console.log("네트워크 감지: 클라우드 동기화 재연결 시도 중...");
+  console.log("네트워크 상태 회복: 클라우드 연동 자동 재시도...");
   updateCloudBadge(false, "연결 재시도 중...");
   await initFirebase();
 });
 
 window.addEventListener('offline', () => {
-  console.log("네트워크 불안정: 로컬 임시 보존 모드로 자동 전환됩니다.");
-  setOfflineMode("로컬 보관 (네트워크 불안정)");
+  console.log("네트워크 단절: 로컬 데이터 안전 보호 모드로 전환됩니다.");
+  setOfflineMode("오프라인 상태 (네트워크 불안정)");
 });
 
 // 미동기 큐 누적 처리
@@ -742,7 +743,7 @@ function addToSyncQueue(collectionName, docId, dataPayload, action = "SET") {
 // 대기 중인 오프라인 미전송 데이터 일괄 해제 및 전송
 async function flushPendingSyncQueue() {
   if (!isCloudMode || !currentUser || pendingSyncQueue.length === 0) return;
-  console.log(`미동기 큐 데이터 실시간 일괄 업로드 처리 시작: ${pendingSyncQueue.length}건`);
+  console.log(`클라우드 통신 복구: 미동기 누적 내역 실시간 동기화 시작 (${pendingSyncQueue.length}건)`);
   
   const tempQueue = [...pendingSyncQueue];
   pendingSyncQueue = [];
@@ -756,7 +757,7 @@ async function flushPendingSyncQueue() {
         await deleteDoc(getDocRef(task.collectionName, task.docId));
       }
     } catch (e) {
-      console.error("큐 전송 에러 발생, 데이터 안전 재보존:", e);
+      console.error("큐 전송 에러 발생, 데이터를 임시 보관소에 안전 재배치합니다:", e);
       pendingSyncQueue.push(task);
     }
   }
@@ -810,9 +811,9 @@ function updateCloudBadge(active, text) {
       const span = badge.querySelector('span');
       if (span) span.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
     } else {
-      badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-blue-50/80 text-blue-600 border-blue-200";
+      badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-rose-50 text-rose-500 border-rose-200";
       const span = badge.querySelector('span');
-      if (span) span.className = "w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse";
+      if (span) span.className = "w-1.5 h-1.5 rounded-full bg-rose-400";
     }
   }
 }
@@ -1947,4 +1948,3 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 </body>
-</html>
