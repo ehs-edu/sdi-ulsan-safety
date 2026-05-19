@@ -335,7 +335,6 @@ class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none f
 <p class="text-[10px] text-slate-400 font-bold">체크박스를 통해 문항을 직접 선택하여 편집하거나 삭제할 수 있습니다.</p>
 </div>
 <div class="flex flex-wrap gap-2">
-<!-- 직접 수동 등록 지원 -->
 <button onclick="openQuestionModal(null)" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-[10px] font-black flex items-center gap-2 btn-press">
 <i data-lucide="plus-circle" class="w-3 h-3"></i> 신규 문항 수동 추가
 </button>
@@ -352,7 +351,6 @@ class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none f
 </div>
 </div>
 
-<!-- 문제 개별 조작 바 추가 -->
 <div id="bank-control-bar" class="flex gap-2 p-3 bg-slate-100 rounded-xl hide">
 <span class="text-xs font-bold text-slate-600 self-center ml-2"><span id="checked-bank-count" class="text-blue-600">0</span>개 문항 선택됨</span>
 <button onclick="deleteCheckedQuestions()" class="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-[10px] font-black btn-press">선택 삭제</button>
@@ -378,7 +376,6 @@ class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none f
 
 <!-- Tab 5: 설정 -->
 <div id="atab-settings" class="hide flex flex-col items-center gap-6 py-6">
-<!-- 클라우드 가이드 패널 -->
 <div class="w-full max-w-md bg-slate-50 p-6 rounded-2xl border text-xs leading-relaxed space-y-3">
 <div class="flex items-center gap-2 font-black text-slate-800">
 <i data-lucide="cloud" class="w-4 h-4 text-blue-600"></i>
@@ -405,7 +402,6 @@ class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none f
 <label class="text-[10px] font-black text-slate-400">새 비밀번호 확인</label>
 <input type="password" id="pw-confirm" class="w-full p-4 mt-1 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 font-bold">
 </div>
-<!-- 승인 다이얼로그 개방 확인 절차 연계 -->
 <button onclick="requestChangePassword()" class="w-full py-4 sdi-gradient text-white rounded-xl font-black btn-press mt-4 shadow-lg shadow-blue-900/20">변경 사항 저장</button>
 </div>
 </div>
@@ -420,7 +416,7 @@ class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none f
 </main>
 </div>
 
-<!-- Toast 알림 레이아웃 -->
+<!-- Toast Alert -->
 <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl text-xs font-bold shadow-2xl transition-all duration-300 opacity-0 pointer-events-none z-[999] flex items-center gap-2">
 <i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
 <span id="toast-msg">메시지</span>
@@ -485,7 +481,7 @@ class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none f
 </div>
 </div>
 
-<!-- Modal: Download Configuration & File Writer -->
+<!-- Modal: Download Config -->
 <div id="download-config-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hide flex items-center justify-center p-6">
 <div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-5">
 <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
@@ -513,7 +509,7 @@ class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none f
 </div>
 </div>
 
-<!-- Modal: Excel Upload Mode Selection (병합 vs 덮어쓰기) -->
+<!-- Modal: Excel Upload Mode Selection -->
 <div id="upload-mode-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hide flex items-center justify-center p-6">
 <div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-5">
 <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto">
@@ -605,12 +601,11 @@ import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, getDocs, upd
 
 // --- Core Data & Init ---
 function updateFullHeight() { 
-  document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px'); 
+  document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); 
 }
 window.addEventListener('resize', updateFullHeight); 
 updateFullHeight();
 
-// 삼성SDI 울산 사업장 현장 안전 지침 30문항 기본 탑재
 const ULSIAN_SDI_30_QUIZ = [
   { idx: 1, q: "보행 중 스마트폰 사용에 대한 사내 규정은 무엇인가?", imageDesc: "사내 전 구역 보행 안전 강화수칙", a: ["상관없음", "완전 금지 (보행 정지 후 사용)", "전화 통화만 허용", "계단에서만 사용 금지"], c: 2 },
   { idx: 2, q: "SDI 울산공장 내부 차량 운행의 절대 최고 속도 제한은?", imageDesc: "사내 교통 전도 사고 예방 지침", a: ["시속 10km 이하", "시속 20km 이하", "시속 30km 이하", "시속 40km 이하"], c: 2 },
@@ -644,7 +639,6 @@ const ULSIAN_SDI_30_QUIZ = [
   { idx: 30, q: "삼성SDI 안전 핵심 실천 수칙 중 '안전 제보 제도'의 참여 대상은?", imageDesc: "사내 무재해 환경안전 상생문화", a: ["경영진 및 사무국 전용", "SDI 임직원 및 모든 협력사/내방객 포함 전원", "안전 관리 담당자", "외부 소방 점검 공무원"], c: 2 }
 ];
 
-// 기본 안전 데이터 상태 동기화 정의
 let db = {
   users: JSON.parse(localStorage.getItem('sdi_db_users_v10') || '[]'),
   history: JSON.parse(localStorage.getItem('sdi_db_history_v10') || '[]'),
@@ -656,7 +650,7 @@ let db = {
 let state = { user: null, quizSet: [], currIdx: 0, answers: [], chart: null, pendingDelete: [], tempPwObj: null, currentDownloadType: "" };
 let tempUploadBank = [];
 
-// --- Firebase Cloud Connection Configuration (RULE 1 & 3) ---
+// --- Firebase Cloud Connection Configuration ---
 let firebaseApp = null;
 let auth = null;
 let firestoreDb = null;
@@ -667,9 +661,9 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'sdi-safety-ulsan-saf
 const rawConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
 const rawToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-// sdi-safety-edu-12ac3에 매칭되는 기본 Firebase Configuration 정의 (독립적인 외부 도메인 배포시 상시 대응)
+// [복사 완료] 발급받으신 실제 API Key가 완벽하게 주입되었습니다.
 const defaultFirebaseConfig = {
-  apiKey: "", // 사용자 환경에 따른 자동 토큰 주입 또는 빈 값 상태 유지 (Canvas는 API Key 없이 보안 터널 활용)
+  apiKey: "AlzaSyCrvz4uslI_DvpqxQzr4nNAxygUFbEqURE",
   authDomain: "sdi-safety-edu-12ac3.firebaseapp.com",
   projectId: "sdi-safety-edu-12ac3",
   storageBucket: "sdi-safety-edu-12ac3.appspot.com",
@@ -678,15 +672,22 @@ const defaultFirebaseConfig = {
 };
 
 async function initFirebase() {
-  // 플랫폼에서 config를 미수령할 경우 sdi-safety-edu-12ac3의 default config를 주입하여 호환 유지
-  const activeConfig = rawConfig ? JSON.parse(rawConfig) : defaultFirebaseConfig;
+  let activeConfig = defaultFirebaseConfig;
+
+  // 빌드 타임 혹은 컨테이너 주입 여부를 크로스 체크하여 호환성 유지
+  if (rawConfig) {
+    if (typeof rawConfig === 'string') {
+      try { activeConfig = JSON.parse(rawConfig); } catch (e) { console.error("Config JSON Parsing Fail:", e); }
+    } else if (typeof rawConfig === 'object' && rawConfig !== null) {
+      activeConfig = rawConfig;
+    }
+  }
 
   try {
     firebaseApp = initializeApp(activeConfig);
     auth = getAuth(firebaseApp);
     firestoreDb = getFirestore(firebaseApp);
 
-    // RULE 3 - Firestore 쿼리 실행 전에 로그인 선행 필수 보장
     if (rawToken) {
       await signInWithCustomToken(auth, rawToken);
     } else {
@@ -706,7 +707,7 @@ async function initFirebase() {
     });
 
   } catch (err) {
-    console.warn("Firebase 연결 실패, 안전한 로컬 오프라인 모드로 실행됩니다:", err);
+    console.error("Firebase 연결 실패, 안전 오프라인 모드로 자동 보호 전환:", err);
     setOfflineMode("오프라인 상태 (네트워크 불안정)");
   }
 }
@@ -764,7 +765,6 @@ function updateCloudBadge(active, text) {
   }
 }
 
-// RULE 1 - 공용 데이터에 대한 고정된 안전 하위 경로 설계 보장
 function getCollectionRef(colName) {
   return collection(firestoreDb, 'artifacts', appId, 'public', 'data', colName);
 }
@@ -773,7 +773,6 @@ function getDocRef(colName, docId) {
   return doc(firestoreDb, 'artifacts', appId, 'public', 'data', colName, docId);
 }
 
-// RULE 2 - 복합 인덱스 오류를 차단하기 위해 복잡한 Query, OrderBy, Where 절은 전면 배제하고 JS 상에서 정렬/필터링
 function startRealtimeSync() {
   if (!isCloudMode || !currentUser) return;
 
@@ -784,7 +783,7 @@ function startRealtimeSync() {
     localStorage.setItem('sdi_db_users_v10', JSON.stringify(db.users));
     renderUserTable();
     renderStats();
-  }, (err) => console.error("Users sync fail:", err));
+  }, (err) => console.error("Users Sync Error:", err));
 
   onSnapshot(getCollectionRef('history'), (snapshot) => {
     const history = [];
@@ -792,7 +791,7 @@ function startRealtimeSync() {
     db.history = history;
     localStorage.setItem('sdi_db_history_v10', JSON.stringify(db.history));
     renderHistoryTable();
-  }, (err) => console.error("History sync fail:", err));
+  }, (err) => console.error("History Sync Error:", err));
 
   onSnapshot(getCollectionRef('bank'), (snapshot) => {
     if (!snapshot.empty) {
@@ -804,7 +803,7 @@ function startRealtimeSync() {
       initializeCloudBank();
     }
     renderBankTable();
-  }, (err) => console.error("Bank sync fail:", err));
+  }, (err) => console.error("Bank Sync Error:", err));
 
   onSnapshot(getCollectionRef('logs'), (snapshot) => {
     const logs = [];
@@ -812,7 +811,7 @@ function startRealtimeSync() {
     db.logs = logs.sort((a, b) => b.ts - a.ts);
     localStorage.setItem('sdi_db_logs_v10', JSON.stringify(db.logs));
     renderLogs();
-  }, (err) => console.error("Logs sync fail:", err));
+  }, (err) => console.error("Logs Sync Error:", err));
 
   onSnapshot(getDocRef('config', 'settings'), (docSnap) => {
     if (docSnap.exists()) {
@@ -821,7 +820,7 @@ function startRealtimeSync() {
     } else {
       setDoc(getDocRef('config', 'settings'), { adminPw: '1234' });
     }
-  }, (err) => console.error("Config sync fail:", err));
+  }, (err) => console.error("Config Settings Sync Error:", err));
 }
 
 async function initializeCloudBank() {
@@ -880,7 +879,7 @@ async function addLog(type, content, isAuto = true) {
   }
 }
 
-// --- Core UI & Navigation ---
+// --- UI & Logic Flow Control ---
 window.toast = function(msg) {
   const t = document.getElementById('toast');
   document.getElementById('toast-msg').innerText = msg;
@@ -904,13 +903,11 @@ window.resetToHome = function() {
   switchView('auth');
 }
 
-// --- Evaluation Logic ---
 window.startEvaluation = function() {
   const name = document.getElementById('input-name').value.trim();
   if(!name) return toast('성명을 입력하세요.');
   state.user = { name, ts: Date.now(), id: 'SDI-' + Math.random().toString(36).substr(2,6).toUpperCase() };
 
-  // 피셔-예이츠 셔플링 기반 무작위 10문항 선별 (중복 완전 배제)
   let indices = Array.from({ length: db.bank.length }, (_, i) => i);
   for (let i = indices.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -982,7 +979,6 @@ async function completeEvaluation() {
   state.quizSet.forEach((q, i) => { if(state.answers[i] === q.c) score += 10; });
   const result = { ...state.user, score, passed: score >= 80 };
 
-  // 클라우드 및 디바이스 동시 영구 저장 유도
   const cloudSuccess = await writeToCloudOrLocal('users', result.id, result);
   if (!cloudSuccess) {
     db.users.push(result);
@@ -1007,7 +1003,6 @@ function renderResult(data) {
   }
 }
 
-// --- Admin Dash Logic ---
 window.verifyAdmin = function() {
   if(document.getElementById('admin-pw-input').value === db.adminPw) {
     switchView('admin-main');
@@ -1045,7 +1040,6 @@ window.setAdminTab = function(tab) {
   if(tab === 'logs') renderLogs();
 }
 
-// --- Statistics Rendering ---
 window.renderStats = function() {
   const filterYearEl = document.getElementById('filter-year');
   if (!filterYearEl) return;
@@ -1163,7 +1157,6 @@ window.renderStats = function() {
   });
 }
 
-// --- Other Admin Functions ---
 function renderUserTable() {
   const tbody = document.getElementById('user-table');
   if(!tbody) return;
@@ -1218,8 +1211,8 @@ window.executeDelete = async function() {
     saveLocalBackupOnly();
   }
 
-  const deletedNames = deletedData.map(d => d.name).join(', ');
-  await addLog('UPDATE', `응시 기록이 시스템에서 삭제되었습니다. (대상: ${deletedNames} (총 ${idsToDelete.size}건))`);
+  const deletedSummary = deletedData.map(d => `${d.name}(${d.id})`).join(', ');
+  await addLog('UPDATE', `응시 이력 데이터가 삭제 이동되었습니다. [대상: ${deletedSummary}] (총 ${idsToDelete.size}건)`);
 
   state.pendingDelete = [];
   closeConfirm();
@@ -1254,15 +1247,14 @@ function renderBankTable() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="px-4 py-4 text-center"><input type="checkbox" value="${q.idx}" class="bank-item-check" onchange="updateBankSelectedCount()"></td>
-      <td class="px-4 py-4 font-bold text-slate-400">${idx+1}</td> 
+      <td class="px-4 py-4 font-bold text-slate-400">${idx+1}</td>
       <td class="px-4 py-4 font-bold text-slate-800 text-keep">${q.q}</td>
-      <td class="px-4 py-4 text-blue-600 font-medium">${q.imageDesc && q.imageDesc.trim() !== "" ? q.imageDesc : "<span class='text-slate-300 font-light'>-</span>"}</td> 
-      <td class="px-4 py-4 text-slate-500 leading-relaxed">${q.a.map((o, i) => `<span class="${q.c === i+1 ? 'text-blue-600 font-bold' : ''}">${i+1}. ${o}</span>`).join('<br/>')}</td> 
+      <td class="px-4 py-4 text-blue-600 font-medium">${q.imageDesc && q.imageDesc.trim() !== "" ? q.imageDesc : "<span class='text-slate-300 font-light'>-</span>"}</td>
+      <td class="px-4 py-4 text-slate-500 leading-relaxed">${q.a.map((o, i) => `<span class="${q.c === i+1 ? 'text-blue-600 font-bold' : ''}">${i+1}. ${o}</span>`).join('<br/>')}</td>
       <td class="px-4 py-4 text-center"><span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-black">${q.c}</span></td>
       <td class="px-4 py-4 text-center">
         <button onclick="openQuestionModal(${idx})" class="text-blue-600 hover:text-blue-800 font-bold mr-2">수정</button> 
-      </td>
-    `;
+      </td>`;
     tbody.appendChild(tr);
   });
   updateBankSelectedCount();
@@ -1288,7 +1280,6 @@ window.updateBankSelectedCount = function() {
 window.deleteCheckedQuestions = async function() {
   const checkedBoxes = document.querySelectorAll('.bank-item-check:checked');
   const idxsToDelete = Array.from(checkedBoxes).map(c => parseInt(c.value));
-
   if (isCloudMode) {
     for (let idx of idxsToDelete) {
       await deleteFromCloud('bank', `Q-${idx}`);
@@ -1313,7 +1304,6 @@ window.openQuestionModal = function(idx) {
   const opt4 = document.getElementById('edit-q-opt4');
   const correct = document.getElementById('edit-q-correct');
   const idxInput = document.getElementById('edit-q-idx');
-
   if (idx === null) {
     title.innerText = "신규 평가 문항 수동 등록";
     textInput.value = "";
@@ -1355,31 +1345,27 @@ window.saveQuestionItem = async function() {
   const idxStr = document.getElementById('edit-q-idx').value;
 
   if (!text || !o1 || !o2) return toast('문제 내용 및 보기를 정확히 입력하세요.');
-
   const aList = [o1, o2];
   if (o3) aList.push(o3);
   if (o4) aList.push(o4);
-
   if (idxStr === "-1") {
     const nextIdx = db.bank.length > 0 ? Math.max(...db.bank.map(q => q.idx)) + 1 : 1;
     const newItem = { idx: nextIdx, q: text, imageDesc: img, a: aList, c: correct };
-
     if (isCloudMode) {
       await writeToCloudOrLocal('bank', `Q-${nextIdx}`, newItem); 
     } else { 
       db.bank.push(newItem); 
       saveLocalBackupOnly(); 
-      renderBankTable(); 
+      renderBankTable();
     } 
     await addLog('UPDATE', `신규 안전 문항이 시스템에 수동 개별 추가되었습니다: "${text.substring(0,18)}..."`);
   } else {
     const curIdx = parseInt(idxStr);
     const updatedItem = { idx: curIdx, q: text, imageDesc: img, a: aList, c: correct };
-
     if (isCloudMode) {
       await writeToCloudOrLocal('bank', `Q-${curIdx}`, updatedItem); 
     } else { 
-      const findIdx = db.bank.findIndex(q => q.idx === curIdx); 
+      const findIdx = db.bank.findIndex(q => q.idx === curIdx);
       if (findIdx !== -1) db.bank[findIdx] = updatedItem; 
       saveLocalBackupOnly(); 
       renderBankTable(); 
@@ -1391,7 +1377,6 @@ window.saveQuestionItem = async function() {
   toast('안전하게 저장되었습니다.');
 }
 
-// --- 엑셀 업로더 ---
 window.handleBankUpload = function(input) {
   const file = input.files[0];
   if(!file) return;
@@ -1402,7 +1387,6 @@ window.handleBankUpload = function(input) {
       const workbook = XLSX.read(data, { type: 'array' });
       const ws = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
-
       if (rows.length < 2) {
         toast('업로드된 엑셀 파일에 데이터가 부족합니다.');
         return;
@@ -1410,7 +1394,6 @@ window.handleBankUpload = function(input) {
 
       const headers = rows[0];
       let questionIdx = -1, imageDescIdx = -1, optionIdxs = [], answerIdx = -1;
-
       headers.forEach((h, index) => {
         const cleanH = String(h).trim();
         if (cleanH.includes("문제") || cleanH.includes("질문") || cleanH.includes("Question")) {
@@ -1423,12 +1406,10 @@ window.handleBankUpload = function(input) {
           answerIdx = index;
         }
       });
-
       if (questionIdx === -1) questionIdx = 0;
       if (imageDescIdx === -1) imageDescIdx = 1;
       if (optionIdxs.length === 0) optionIdxs = [2, 3, 4, 5];
       if (answerIdx === -1) answerIdx = 6;
-
       tempUploadBank = rows.slice(1).filter(r => r[questionIdx] && r[answerIdx]).map((r, i) => {
         const options = optionIdxs.map(idx => r[idx]).filter(v => v !== undefined && v !== null && String(v).trim() !== "");
         return {
@@ -1438,7 +1419,6 @@ window.handleBankUpload = function(input) {
           c: parseInt(r[answerIdx])
         };
       }).filter(q => q.a.length >= 2 && !isNaN(q.c));
-
       if(tempUploadBank.length === 0) {
         toast('엑셀에서 파싱 가능한 유효한 평가 문항이 없습니다.');
         return;
@@ -1483,7 +1463,7 @@ async function executeUploadAndClose(isMerge) {
   if (isCloudMode) {
     if (!isMerge) {
       for(let q of db.bank) {
-        await deleteFromCloud('bank', `Q-${q.idx}`); 
+        await deleteFromCloud('bank', `Q-${q.idx}`);
       } 
     } 
     for(let q of finalBankList) { 
@@ -1500,17 +1480,15 @@ async function executeUploadAndClose(isMerge) {
   tempUploadBank = [];
 }
 
-// --- 다운로드 보장 처리 엔진 ---
 window.openDownloadModal = function(type) {
   state.currentDownloadType = type;
   const input = document.getElementById('target-filename');
-
   let defaultName = "SDI_Report.xlsx";
-  if (type === 'stats') defaultName = `SDI_안전교육_월별통계_${new Date().getFullYear()}년.xlsx`; 
+  if (type === 'stats') defaultName = `SDI_안전교육_월별통계_${new Date().getFullYear()}년.xlsx`;
   else if (type === 'users') defaultName = `SDI_안전교육_응시자목록_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`;
-  else if (type === 'logs') defaultName = `SDI_안전교육_변경사항로그_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`; 
+  else if (type === 'logs') defaultName = `SDI_안전교육_변경사항로그_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`;
   else if (type === 'bank_history') defaultName = `SDI_안전교육_문제은행_수정이력_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`;
-  else if (type === 'history') defaultName = `SDI_안전교육_삭제이력_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`; 
+  else if (type === 'history') defaultName = `SDI_안전교육_삭제이력_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`;
   else if (type === 'bank') defaultName = `SDI_안전교육_현재문제은행_${new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`;
   else if (type === 'template') defaultName = "SDI_Quiz_Bank_Template.xlsx";
   else if (type === 'ppt') defaultName = `SDI_안전교육_종합분석보고서_${new Date().getFullYear()}년.ppt`;
@@ -1557,7 +1535,6 @@ window.executeTargetDownload = function() {
       const m = new Date(u.ts).getMonth();
       if(u.passed) passData[m]++; else failData[m]++;
     });
-
     for(let i=0; i<12; i++) {
       const total = passData[i] + failData[i];
       const rate = total > 0 ? Math.round((passData[i]/total)*100) : 0;
@@ -1570,19 +1547,16 @@ window.executeTargetDownload = function() {
     const grandRate = grandTotal > 0 ? Math.round((totalPass/grandTotal)*100) : 0;
     data.push([]);
     data.push(["합계 및 요약", grandTotal, totalPass, totalFail, `${grandRate}%`]);
-
   } else if (type === 'users') {
     data.push(["응시 일시", "성명", "ID", "취득 점수", "결과(합격 여부)"]);
     db.users.slice().sort((a,b) => b.ts - a.ts).forEach(u => {
       data.push([new Date(u.ts).toLocaleString(), u.name, u.id, `${u.score}점`, u.passed ? "합격 (PASS)" : "불합격 (FAIL)"]);
     });
-
   } else if (type === 'logs') {
     data.push(["발생 일시", "분류", "발생 주체", "로그 기록 내용"]);
     db.logs.slice().sort((a,b) => b.ts - a.ts).forEach(log => {
       data.push([new Date(log.ts).toLocaleString(), log.type, log.isAuto ? "SYSTEM" : "ADMIN", log.content]);
     });
-
   } else if (type === 'bank_history') {
     data.push(["수정 일시", "분류", "이력 기록 사항"]);
     const bankLogs = db.logs.filter(log => log.type === 'UPDATE' || log.content.includes("문제은행"));
@@ -1592,13 +1566,11 @@ window.executeTargetDownload = function() {
     if(bankLogs.length === 0) {
       data.push(["-", "-", "기록된 문제은행 업데이트 이력이 아직 없습니다."]);
     }
-
   } else if (type === 'history') {
     data.push(["삭제 완료 일시", "원래 응시 일시", "응시자 성명", "응시자 고유 ID", "원래 취득 점수"]);
     db.history.slice().sort((a,b) => b.deleteTs - a.deleteTs).forEach(h => {
       data.push([new Date(h.deleteTs).toLocaleString(), new Date(h.ts).toLocaleString(), h.name, h.id, `${h.score}점`]);
     });
-
   } else if (type === 'bank') {
     data.push(["문제", "예시설명(그림/사진/텍스트 등 필요시)", "보기1", "보기2", "보기3", "보기4", "정답(숫자)"]);
     db.bank.forEach(q => {
@@ -1621,7 +1593,6 @@ function executeFinalWrite(wb, filename) {
     try {
       const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
       if (window.navigator && window.navigator.msSaveOrOpenBlob) {
         window.navigator.msSaveOrOpenBlob(blob, filename);
         return;
@@ -1647,7 +1618,6 @@ function executeFinalWrite(wb, filename) {
   }
 }
 
-// --- 비밀번호 변경 프로세스 ---
 window.requestChangePassword = function() {
   const cur = document.getElementById('pw-current').value;
   const n1 = document.getElementById('pw-new').value;
@@ -1659,10 +1629,8 @@ window.requestChangePassword = function() {
   if (n1.length < 4) return toast('새 비밀번호는 최소 4자 이상이어야 합니다.');
 
   state.tempPwObj = { cur, n1 };
-
   document.getElementById('confirm-pw-cur').innerText = cur;
   document.getElementById('confirm-pw-new').innerText = n1;
-
   document.getElementById('confirm-pw-modal').classList.remove('hide');
 }
 
@@ -1674,7 +1642,6 @@ window.closePwConfirm = function() {
 window.executeChangePassword = async function() {
   if (!state.tempPwObj) return;
   const { n1 } = state.tempPwObj;
-
   db.adminPw = n1;
 
   let saveSuccess = false;
@@ -1694,22 +1661,18 @@ window.executeChangePassword = async function() {
     localStorage.setItem('sdi_admin_pw_v10', n1);
     db.adminPw = n1;
     saveLocalBackupOnly();
-
     await addLog('MAINTAIN', '관리자 시스템 계정 비밀번호가 안전하게 업데이트 변경되었습니다.');
 
     document.getElementById('pw-current').value = '';
     document.getElementById('pw-new').value = '';
     document.getElementById('pw-confirm').value = '';
-
     toast('관리자 비밀번호가 성공적으로 변경 완료되었습니다.');
   } else {
     toast('보안 통신 장애로 반영되지 못했습니다. 잠시 후 재시도하십시오.');
   }
-
   closePwConfirm();
 }
 
-// --- 수동 로그 기입 기능 추가 ---
 window.saveManualLog = async function() {
   const type = document.getElementById('log-type').value;
   const content = document.getElementById('log-content').value.trim();
@@ -1720,12 +1683,10 @@ window.saveManualLog = async function() {
   toast('로그가 안전하게 반영되었습니다.');
 }
 
-// --- PPTX 슬라이드 빌더 엔진 ---
 function triggerPPTGeneration(filename) {
   try {
     const selYear = document.getElementById('filter-year').value;
     const selMonth = document.getElementById('filter-month').value;
-
     let filteredUsers = db.users.filter(u => new Date(u.ts).getFullYear() === parseInt(selYear));
     if (selMonth !== 'all') {
       filteredUsers = filteredUsers.filter(u => new Date(u.ts).getMonth() === parseInt(selMonth));
@@ -1736,7 +1697,7 @@ function triggerPPTGeneration(filename) {
     const fail = total - pass;
     const rate = total > 0 ? Math.round((pass/total)*100) : 0;
 
-    const logListHtml = db.logs.slice(0, 5).map(log => `
+    const tableRows = db.logs.slice(0, 5).map(log => `
       <tr style="border-bottom: 1px solid #e2e8f0;">
         <td style="padding: 10px; color: #64748b;">${new Date(log.ts).toLocaleDateString()}</td>
         <td style="padding: 10px; font-weight: bold; color: #1428A0;">${log.type}</td>
@@ -1777,11 +1738,9 @@ p { font-size: 14pt; line-height: 1.6; }
     </div>
   </div>
 </div>
-
 <div class="slide">
   <h2>안전 교육 평가 정량 지표 분석</h2>
   <p>선택된 분석 주기에 해당하는 정량 안전성 지표 요약본입니다.</p>
-  
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-lbl">총 응시 건수</div>
@@ -1800,7 +1759,6 @@ p { font-size: 14pt; line-height: 1.6; }
       <div class="stat-val" style="color: #2563eb;">${rate}%</div>
     </div>
   </div>
-  
   <div style="margin-top: 40px; background: #eff6ff; padding: 20px; border-radius: 10px; border-left: 5px solid #2563eb;">
     <p style="font-size: 12pt; margin: 0; color: #1e3a8a; font-weight: bold;">💡 평가 이수율 종합 평가 의견:</p>
     <p style="font-size: 11pt; margin: 5px 0 0 0; color: #1e40af; line-height: 1.5;">
@@ -1809,11 +1767,9 @@ p { font-size: 14pt; line-height: 1.6; }
   </div>
   <div class="footer">Samsung SDI Safety First | Slide 2</div>
 </div>
-
 <div class="slide">
   <h2>사내 안전교육 시스템 변경 사항 및 공지 이력</h2>
   <p>최근 보고 주기 동안 발생한 주요 시스템 구성 업데이트 로그입니다.</p>
-  
   <div style="margin-top: 20px; font-size: 11pt;">
     <table style="width: 100%; border-collapse: collapse; text-align: left;">
       <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1; font-weight: bold; color: #475569;">
@@ -1821,7 +1777,7 @@ p { font-size: 14pt; line-height: 1.6; }
         <th style="padding: 10px;">분류</th>
         <th style="padding: 10px;">기록 내용</th>
       </tr>
-      ${logListHtml}
+      ${tableRows}
     </table>
   </div>
   <div class="footer">Samsung SDI Safety First | Slide 3</div>
@@ -1830,7 +1786,6 @@ p { font-size: 14pt; line-height: 1.6; }
 </html>`;
 
     const blob = new Blob([pptContent], { type: 'application/vnd.ms-powerpoint;charset=utf-8' });
-
     if (window.navigator && window.navigator.msSaveOrOpenBlob) {
       window.navigator.msSaveOrOpenBlob(blob, filename);
     } else {
@@ -1847,7 +1802,6 @@ p { font-size: 14pt; line-height: 1.6; }
         window.URL.revokeObjectURL(url);
       }, 100);
     }
-
     toast('종합 분석 PPT 리포트 다운로드가 완료되었습니다.');
   } catch (err) {
     console.error(err);
@@ -1855,7 +1809,6 @@ p { font-size: 14pt; line-height: 1.6; }
   }
 }
 
-// --- Modals ---
 window.showLogAddModal = function() { document.getElementById('log-modal').classList.remove('hide'); }
 window.closeLogModal = function() { document.getElementById('log-modal').classList.add('hide'); }
 
@@ -1872,13 +1825,11 @@ function renderLogs() {
         <span class="px-2.5 py-1 rounded-lg font-black ${badgeColor}">${log.type}</span> 
         <p class="font-bold text-slate-700">${log.content}</p>
       </div>
-      <span class="text-[10px] text-slate-400 font-bold shrink-0">${new Date(log.ts).toLocaleString()}</span>
-    `;
+      <span class="text-[10px] text-slate-400 font-bold shrink-0">${new Date(log.ts).toLocaleString()}</span>`;
     list.appendChild(row);
   });
 }
 
-// --- Initial Load ---
 window.addEventListener('DOMContentLoaded', () => {
   initFilters();
   initFirebase();
