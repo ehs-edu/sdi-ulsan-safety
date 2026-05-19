@@ -107,8 +107,8 @@ accent-color: var(--sdi-blue-main);
 </div>
 </div>
 <div class="flex items-center gap-2">
-<!-- 클라우드 연동 상태 배지 -->
-<div id="cloud-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-amber-50 text-amber-600 border-amber-200">
+<!-- 클라우드 연동 상태 배지 (진단 도구 오픈 기능 연동) -->
+<div id="cloud-badge" onclick="openDiagnostics()" class="cursor-pointer flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100/50 transition-all">
 <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
 <span id="cloud-status-text">연결 확인 중</span>
 </div>
@@ -593,9 +593,54 @@ class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none f
 </div>
 </div>
 
+<!-- Modal: 시스템 연결 진단 도구 (Diagnostics) -->
+<div id="diagnostics-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[250] hide flex items-center justify-center p-6">
+<div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-5 text-slate-800">
+<div class="flex justify-between items-center">
+<h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+<i data-lucide="activity" class="text-blue-600"></i> 시스템 연결 진단 도구
+</h3>
+<button onclick="closeDiagnostics()" class="text-slate-300 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+</div>
+<div class="space-y-4 text-xs">
+<div class="p-4 bg-slate-50 rounded-2xl space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-slate-500 font-bold">Firebase 라이브러리 초기화</span>
+<span id="diag-init" class="font-black text-slate-400">대기 중</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-slate-500 font-bold">익명 사용자 인증 (Auth)</span>
+<span id="diag-auth" class="font-black text-slate-400">대기 중</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-slate-500 font-bold">데이터베이스 읽기/쓰기 (Firestore)</span>
+<span id="diag-db" class="font-black text-slate-400">대기 중</span>
+</div>
+</div>
+<div class="p-3 bg-blue-50 text-blue-800 rounded-xl leading-relaxed text-[11px] font-medium">
+<p class="font-bold mb-1">💡 연동 상태 해결 가이드</p>
+<p class="text-[10px] text-blue-700 leading-normal">
+• <strong>사용자 인증이 실패</strong>하는 경우: Firebase 콘솔의 <u>Authentication ➡️ Sign-in method</u> 탭에서 <strong>'익명(Anonymous)' 로그인 제공업체</strong>를 '사용 설정(Enabled)'으로 전환해야 합니다.<br/>
+• <strong>데이터베이스가 실패</strong>하는 경우: Firestore Database 메뉴의 <u>Rules(규칙)</u> 탭에서 외부 쓰기 권한이 열려 있는지 확인하세요.
+</p>
+</div>
+<div id="diag-error-box" class="hide p-3 bg-rose-50 border border-rose-100 text-rose-600 rounded-xl text-[10px] break-all max-h-32 overflow-y-auto custom-scroll">
+<p class="font-bold mb-0.5">상세 오류 메시지 (콘솔 로그):</p>
+<span id="diag-error-msg" class="font-mono">-</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button onclick="closeDiagnostics()" class="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold rounded-xl text-xs btn-press">닫기</button>
+<button onclick="retryConnection()" class="flex-1 py-3.5 sdi-gradient text-white font-black rounded-xl text-xs btn-press flex items-center justify-center gap-1.5">
+<i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 수동 재연결 시도
+</button>
+</div>
+</div>
+</div>
+
 <!-- Firebase SDK 및 전체 비즈니스 로직 -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -657,11 +702,18 @@ let firestoreDb = null;
 let isCloudMode = false;
 let currentUser = null;
 
+let diagState = {
+  init: "대기 중",
+  auth: "대기 중",
+  db: "대기 중",
+  error: null
+};
+
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'sdi-safety-ulsan-safety';
 const rawConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
 const rawToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-// [복사 완료] 발급받으신 실제 API Key가 완벽하게 주입되었습니다.
+// 전달받으신 정확한 API Key가 실배포 도메인 타겟으로 주입되었습니다.
 const defaultFirebaseConfig = {
   apiKey: "AlzaSyCrvz4uslI_DvpqxQzr4nNAxygUFbEqURE",
   authDomain: "sdi-safety-edu-12ac3.firebaseapp.com",
@@ -674,7 +726,6 @@ const defaultFirebaseConfig = {
 async function initFirebase() {
   let activeConfig = defaultFirebaseConfig;
 
-  // 빌드 타임 혹은 컨테이너 주입 여부를 크로스 체크하여 호환성 유지
   if (rawConfig) {
     if (typeof rawConfig === 'string') {
       try { activeConfig = JSON.parse(rawConfig); } catch (e) { console.error("Config JSON Parsing Fail:", e); }
@@ -684,14 +735,38 @@ async function initFirebase() {
   }
 
   try {
-    firebaseApp = initializeApp(activeConfig);
+    diagState.init = "진행 중";
+    updateDiagUI();
+
+    const apps = getApps();
+    if (apps.length === 0) {
+      firebaseApp = initializeApp(activeConfig);
+    } else {
+      firebaseApp = apps[0];
+    }
+
     auth = getAuth(firebaseApp);
     firestoreDb = getFirestore(firebaseApp);
+    diagState.init = "성공";
+    updateDiagUI();
 
-    if (rawToken) {
-      await signInWithCustomToken(auth, rawToken);
-    } else {
-      await signInAnonymously(auth);
+    // 익명 사용자 인증을 단계적으로 시도합니다.
+    diagState.auth = "진행 중";
+    updateDiagUI();
+
+    try {
+      if (rawToken) {
+        await signInWithCustomToken(auth, rawToken);
+      } else {
+        await signInAnonymously(auth);
+      }
+      diagState.auth = "성공";
+      updateDiagUI();
+    } catch (authError) {
+      console.warn("인증 실패, 우회 DB 핑 테스트를 즉각 시도합니다:", authError);
+      diagState.auth = `실패 (${authError.code || "인증 세션 오류"})`;
+      diagState.error = `인증 단계 실패: ${authError.message}. (Authentication 세션 비활성화 상태일 수 있습니다)`;
+      updateDiagUI();
     }
 
     onAuthStateChanged(auth, async (user) => {
@@ -699,21 +774,116 @@ async function initFirebase() {
         currentUser = user;
         isCloudMode = true;
         updateCloudBadge(true, "클라우드 실시간 동기화 완료");
+        diagState.db = "성공";
+        updateDiagUI();
         await syncOfflineRecordsToCloud();
         startRealtimeSync();
       } else {
-        setOfflineMode("인증 만료 (로컬 우선 동작)");
+        verifyFirestoreAccess();
       }
     });
 
+    // 지연 상태 방지를 위해 0.5초 후 강제 실시간 DB 직접 핑 체크 구동
+    setTimeout(verifyFirestoreAccess, 500);
+
   } catch (err) {
-    console.error("Firebase 연결 실패, 안전 오프라인 모드로 자동 보호 전환:", err);
-    setOfflineMode("오프라인 상태 (네트워크 불안정)");
+    console.error("Firebase 초기화 에러:", err);
+    diagState.init = "실패";
+    diagState.error = `라이브러리 기동 실패: ${err.message}`;
+    updateDiagUI();
+    setOfflineMode("오프라인 상태 (설정 오류)");
   }
 }
 
+// [핵심 변경] 익명 로그인이 차단되어 있더라도, 데이터베이스 자체는 열려 있는 경우가 많습니다.
+// 직접 핑 테스트를 날려 쓰기 성공 여부로 클라우드 접속을 직진 매핑합니다.
+async function verifyFirestoreAccess() {
+  if (isCloudMode) return;
+
+  diagState.db = "연결 시도 중";
+  updateDiagUI();
+
+  try {
+    // 공용 안전 경로에 연결 핑을 생성합니다.
+    const testDocRef = doc(firestoreDb, 'artifacts', appId, 'public', 'data', 'config', 'connection_test');
+    await setDoc(testDocRef, { lastPing: Date.now() }, { merge: true });
+
+    diagState.db = "성공";
+    diagState.error = null;
+    updateDiagUI();
+
+    isCloudMode = true;
+    updateCloudBadge(true, "클라우드 연결 완료 (인증 우회)");
+    await syncOfflineRecordsToCloud();
+    startRealtimeSync();
+  } catch (e) {
+    console.error("데이터베이스 직결 검사 실패:", e);
+    diagState.db = `실패 (${e.code || "보안 거부"})`;
+    if (!diagState.error) {
+      diagState.error = `Firestore 오류: ${e.message}. (Rules 보안 설정 구문을 다시 점검하십시오)`;
+    }
+    updateDiagUI();
+
+    let errorDetail = "네트워크 불안정";
+    if (e.code === "permission-denied") {
+      errorDetail = "권한 거부 (보안 규칙 확인)";
+    } else if (e.code === "unavailable") {
+      errorDetail = "서버 상태 불안정";
+    } else {
+      errorDetail = `연결 대기 (${e.code || "대기"})`;
+    }
+    setOfflineMode(errorDetail);
+  }
+}
+
+function updateDiagUI() {
+  const initEl = document.getElementById('diag-init');
+  const authEl = document.getElementById('diag-auth');
+  const dbEl = document.getElementById('diag-db');
+  const errBox = document.getElementById('diag-error-box');
+  const errMsg = document.getElementById('diag-error-msg');
+
+  if (initEl) {
+    initEl.innerText = diagState.init;
+    initEl.className = `font-black ${diagState.init === '성공' ? 'text-emerald-600' : (diagState.init.includes('실패') ? 'text-rose-500' : 'text-slate-400')}`;
+  }
+  if (authEl) {
+    authEl.innerText = diagState.auth;
+    authEl.className = `font-black ${diagState.auth === '성공' ? 'text-emerald-600' : (diagState.auth.includes('실패') ? 'text-rose-500' : 'text-slate-400')}`;
+  }
+  if (dbEl) {
+    dbEl.innerText = diagState.db;
+    dbEl.className = `font-black ${diagState.db === '성공' ? 'text-emerald-600' : (diagState.db.includes('실패') ? 'text-rose-500' : 'text-slate-400')}`;
+  }
+
+  if (errBox && errMsg) {
+    if (diagState.error) {
+      errBox.classList.remove('hide');
+      errMsg.innerText = diagState.error;
+    } else {
+      errBox.classList.add('hide');
+    }
+  }
+}
+
+window.openDiagnostics = function() {
+  document.getElementById('diagnostics-modal').classList.remove('hide');
+  updateDiagUI();
+  lucide.createIcons();
+}
+
+window.closeDiagnostics = function() {
+  document.getElementById('diagnostics-modal').classList.add('hide');
+}
+
+window.retryConnection = function() {
+  diagState = { init: "진행 중", auth: "대기 중", db: "대기 중", error: null };
+  updateDiagUI();
+  initFirebase();
+}
+
 async function syncOfflineRecordsToCloud() {
-  if (!isCloudMode || !currentUser) return;
+  if (!isCloudMode) return;
   const offlineUsers = JSON.parse(localStorage.getItem('sdi_db_users_v10') || '[]');
   if (offlineUsers.length > 0) {
     for (let u of offlineUsers) {
@@ -754,11 +924,11 @@ function updateCloudBadge(active, text) {
   if (settingText) settingText.innerText = text;
   if (badge) {
     if (active) {
-      badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-emerald-50 text-emerald-600 border-emerald-200";
+      badge.className = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100/50 transition-all";
       const span = badge.querySelector('span');
       if (span) span.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
     } else {
-      badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-slate-50 text-slate-500 border-slate-200";
+      badge.className = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100 transition-all";
       const span = badge.querySelector('span');
       if (span) span.className = "w-1.5 h-1.5 rounded-full bg-slate-400";
     }
@@ -774,7 +944,7 @@ function getDocRef(colName, docId) {
 }
 
 function startRealtimeSync() {
-  if (!isCloudMode || !currentUser) return;
+  if (!isCloudMode) return;
 
   onSnapshot(getCollectionRef('users'), (snapshot) => {
     const users = [];
@@ -830,7 +1000,7 @@ async function initializeCloudBank() {
 }
 
 async function writeToCloudOrLocal(collectionName, docId, dataPayload) {
-  if (isCloudMode && currentUser) {
+  if (isCloudMode) {
     try {
       await setDoc(getDocRef(collectionName, docId), dataPayload);
       return true;
@@ -842,7 +1012,7 @@ async function writeToCloudOrLocal(collectionName, docId, dataPayload) {
 }
 
 async function deleteFromCloud(collectionName, docId) {
-  if (isCloudMode && currentUser) {
+  if (isCloudMode) {
     try {
       await deleteDoc(getDocRef(collectionName, docId));
       return true;
