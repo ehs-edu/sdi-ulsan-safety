@@ -3,13 +3,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>삼성SDI 안전 교육 통합 관리 시스템</title>
-<!-- 안정적인 외부 리소스 직접 바인딩 -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
-<!-- PPTX 및 ZIP 생성 라이브러리 추가 -->
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/libs/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
 
@@ -126,7 +124,6 @@ border-radius: 2px;
 
 <div id="app-container" class="animate-fade">
 
-<!-- Header -->
 <header class="w-full px-6 py-4 flex justify-between items-center bg-white border-b shrink-0 z-10">
 <div class="flex items-center gap-3">
 <div class="sdi-gradient p-2 rounded-xl shadow-lg">
@@ -138,8 +135,7 @@ border-radius: 2px;
 </div>
 </div>
 <div class="flex items-center gap-2">
-<!-- 클라우드 연동 상태 배지 -->
-<div id="cloud-badge" onclick="openDiagnostics()" class="cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100/50 transition-all">
+<div id="cloud-badge" onclick="openDiagnostics()" class="cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100/50 transition-all shadow-sm">
 <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
 <span id="cloud-status-text" class="whitespace-nowrap">연결 확인 중</span>
 </div>
@@ -149,10 +145,8 @@ border-radius: 2px;
 </div>
 </header>
 
-<!-- View Port -->
 <main id="view-port" class="flex-1 overflow-y-auto relative bg-slate-50/50 custom-scroll">
 
-<!-- VIEW: 메인 접속 -->
 <div id="view-auth" class="flex flex-col items-center justify-center min-h-full px-6 py-10 space-y-8 animate-fade">
 <div class="text-center space-y-3">
 <div class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-[10px] font-black uppercase tracking-tighter">Safety First</div>
@@ -180,7 +174,6 @@ oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 </div>
 </div>
 
-<!-- VIEW: 교육 시청 (동영상 or PPT) -->
 <div id="view-media" class="hide flex flex-col items-center justify-center min-h-full px-4 py-6 sm:py-8 animate-fade">
 <div class="w-full max-w-3xl space-y-4 sm:space-y-6">
 <div class="text-center space-y-2">
@@ -189,16 +182,13 @@ oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 <p class="text-slate-500 text-[11px] sm:text-xs font-bold text-keep">지정된 시간까지 시청을 완료해야 평가 응시가 가능합니다.</p>
 </div>
 
-<!-- 미디어 뷰어 영역 -->
 <div class="relative w-full bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border-[3px] border-slate-800 flex flex-col">
 
-<!-- Video Player -->
 <div id="media-video-container" class="relative w-full aspect-video hide flex-1">
 <video id="safety-video" class="w-full h-full object-contain bg-black" playsinline preload="metadata">
 <source src="" type="video/mp4">
 브라우저가 동영상을 지원하지 않습니다.
 </video>
-<!-- Custom Overlay / Play Button -->
 <div id="video-overlay" class="absolute inset-0 bg-black/70 flex items-center justify-center flex-col gap-4 z-10 transition-opacity duration-300">
 <button onclick="playSafetyVideo()" class="w-16 h-16 sm:w-20 sm:h-20 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:scale-95">
 <i data-lucide="play" class="w-8 h-8 sm:w-10 sm:h-10 ml-1"></i>
@@ -207,14 +197,12 @@ oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 </div>
 </div>
 
-<!-- PPT Viewer -->
 <div id="media-ppt-container" class="relative w-full aspect-video hide flex-1 bg-white items-center justify-center">
 <div class="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-black/60 backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-xs font-black shadow-lg flex items-center gap-2">
 <i data-lucide="layers" class="w-4 h-4"></i>
 <span id="ppt-page-text">1 / 1</span>
 </div>
 <img id="safety-ppt-img" src="" class="w-full h-full object-contain" alt="PPT Slide">
-<!-- 오버레이: PPT 시작 버튼 -->
 <div id="ppt-overlay" class="absolute inset-0 bg-black/70 flex items-center justify-center flex-col gap-4 z-20 transition-opacity duration-300">
 <button onclick="startPPTSlide()" class="w-16 h-16 sm:w-20 sm:h-20 bg-orange-500 hover:bg-orange-600 text-white rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:scale-95">
 <i data-lucide="play" class="w-8 h-8 sm:w-10 sm:h-10 ml-1"></i>
@@ -223,7 +211,6 @@ oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 </div>
 </div>
 
-<!-- 통합 하단 컨트롤 (타임라인) -->
 <div class="bg-slate-900 px-4 py-3 border-t border-slate-700 flex items-center gap-3 shrink-0">
 <span id="media-time-current" class="text-white text-[10px] sm:text-xs font-mono font-bold w-10 text-right">00:00</span>
 <div class="flex-1 h-2 sm:h-2.5 bg-slate-700 rounded-full overflow-hidden relative">
@@ -249,7 +236,6 @@ class="w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transitio
 </div>
 </div>
 
-<!-- VIEW: 퀴즈 세션 -->
 <div id="view-quiz" class="hide h-full flex flex-col p-4 sm:p-6 animate-fade max-w-4xl mx-auto w-full">
 <div class="flex justify-between items-end mb-6 sm:mb-8 mt-2">
 <div class="space-y-1">
@@ -278,7 +264,6 @@ class="w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transitio
 </div>
 </div>
 
-<!-- VIEW: 결과 -->
 <div id="view-result" class="hide flex flex-col items-center justify-center min-h-full px-6 py-8 animate-fade">
 <div id="result-status" class="mb-4 px-6 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest"></div>
 <div class="bg-white p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] w-full max-w-sm border border-slate-100 shadow-2xl mb-8 relative">
@@ -293,7 +278,6 @@ class="w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transitio
 <button onclick="resetToHome()" class="w-full max-w-sm py-4 bg-slate-900 text-white font-bold rounded-2xl btn-press">홈으로 돌아가기</button>
 </div>
 
-<!-- VIEW: 관리자 로그인 -->
 <div id="view-admin-auth" class="hide flex flex-col items-center justify-center min-h-full px-6 animate-fade">
 <h2 class="text-xl font-black text-slate-900 mb-6 tracking-widest">ADMIN LOGIN</h2>
 <input type="password" id="admin-pw-input" class="w-full max-w-xs p-5 rounded-2xl border text-center text-2xl font-black tracking-[0.5em] focus:outline-none mb-4" placeholder="****">
@@ -303,10 +287,8 @@ class="w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transitio
 </div>
 </div>
 
-<!-- VIEW: 관리자 대시보드 -->
 <div id="view-admin-main" class="hide flex-col min-h-full animate-fade relative">
 
-<!-- 콘텐츠 영역 -->
 <div class="flex-1 p-4 md:p-8 pb-8">
 <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-6 sm:mb-8 shrink-0">
 <div>
@@ -324,7 +306,6 @@ class="w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transitio
 </div>
 </div>
 
-<!-- Tab 1: 통계현황 -->
 <div id="atab-stats" class="space-y-6">
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-2xl border">
 <div class="space-y-1">
@@ -362,7 +343,6 @@ class="w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transitio
 </div>
 </div>
 
-<!-- Tab 2: 응시자 관리 -->
 <div id="atab-users" class="hide space-y-4">
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
 <div class="space-y-1">
@@ -394,7 +374,6 @@ class="w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transitio
 </div>
 </div>
 
-<!-- Tab 3: 교육자료 관리 (Media) -->
 <div id="atab-media" class="hide space-y-6 pb-10">
 <div class="bg-white p-6 sm:p-8 rounded-3xl border shadow-sm space-y-6 max-w-3xl mx-auto mt-4">
 <div class="text-center space-y-2">
@@ -405,13 +384,11 @@ class="w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transitio
 <p class="text-[11px] sm:text-xs text-slate-500 font-medium leading-relaxed">응시자가 평가 진입 전 의무적으로 시청해야 할 자료를 설정합니다.</p>
 </div>
 
-<!-- 자료 유형 선택 탭 -->
 <div class="flex p-1 bg-slate-100 rounded-xl gap-1">
 <button id="tab-media-video" onclick="setMediaType('video')" class="flex-1 py-3 text-xs font-black rounded-lg transition-all bg-white shadow-sm text-blue-700">동영상 재생 모드</button>
 <button id="tab-media-ppt" onclick="setMediaType('ppt')" class="flex-1 py-3 text-xs font-black rounded-lg transition-all text-slate-500 hover:bg-slate-200">PPT 슬라이드 모드</button>
 </div>
 
-<!-- 동영상 설정 영역 -->
 <div id="media-type-video" class="space-y-5 animate-fade">
 <div class="grid grid-cols-2 gap-3">
 <label class="border p-4 rounded-2xl cursor-pointer flex items-center gap-3 hover:bg-slate-50 transition-colors" id="label-mode-url">
@@ -451,7 +428,6 @@ class="w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transitio
 </div>
 </div>
 
-<!-- 동영상 강제 시청 시간 설정 -->
 <div class="pt-2 border-t">
 <label class="text-[10px] font-black text-slate-400 uppercase">필수 시청 시간 (초) 설정</label>
 <div class="flex items-center gap-2 mt-1">
@@ -461,7 +437,6 @@ class="w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transitio
 </div>
 </div>
 
-<!-- PPT 설정 영역 -->
 <div id="media-type-ppt" class="hide space-y-5 animate-fade">
 <div class="bg-orange-50 border border-orange-100 rounded-xl p-4 flex gap-3">
 <i data-lucide="alert-circle" class="text-orange-500 w-5 h-5 shrink-0"></i>
@@ -489,7 +464,6 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 </div>
 
-<!-- PPT 페이지당 시간 설정 -->
 <div class="pt-2 border-t">
 <label class="text-[10px] font-black text-slate-400 uppercase">페이지당 체류(시청) 시간 (초)</label>
 <div class="flex items-center gap-2 mt-1">
@@ -503,7 +477,6 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 </div>
 
-<!-- Tab 4: 문제은행 관리 -->
 <div id="atab-bank" class="hide space-y-4">
 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
 <div class="space-y-1">
@@ -533,7 +506,6 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 
 <div class="bg-white rounded-2xl border shadow-sm overflow-x-auto">
-<!-- 칸 맞춤 고정 -->
 <table class="w-full text-left min-w-[800px] table-fixed">
 <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase border-b">
 <tr>
@@ -550,7 +522,6 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 </div>
 
-<!-- Tab 5: 삭제 이력 -->
 <div id="atab-history" class="hide space-y-4">
 <div class="flex justify-between items-center px-1">
 <p class="text-[11px] font-bold text-slate-500">응시자 관리에서 삭제 처리된 이력 데이터입니다.</p>
@@ -574,7 +545,6 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 </div>
 
-<!-- Tab 6: 시스템 로그 -->
 <div id="atab-logs" class="hide space-y-6 pb-6">
 <div class="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -592,7 +562,6 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 </div>
 
-<!-- Tab 7: 설정 -->
 <div id="atab-settings" class="hide flex flex-col items-center gap-6 py-6 pb-12">
 <div class="w-full max-w-md bg-slate-50 p-6 rounded-2xl border text-xs leading-relaxed space-y-3">
 <div class="flex items-center gap-2 font-black text-slate-800">
@@ -622,10 +591,7 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 </div>
 </div>
-</div> <!-- 콘텐츠 영역 끝 -->
-
-<!-- 관리자 모드 공통 하단 바 (로그아웃 및 상태) -->
-<div class="sticky bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center z-50">
+</div> <div class="sticky bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center z-50">
 <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
 <div class="flex items-center gap-1.5 text-slate-500">
 <i data-lucide="cloud" class="w-4 h-4"></i>
@@ -644,13 +610,11 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </main>
 </div>
 
-<!-- Toast Alert -->
 <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl text-xs sm:text-sm font-bold shadow-2xl transition-all duration-300 opacity-0 pointer-events-none z-[999] flex items-center gap-2 whitespace-nowrap">
 <i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
 <span id="toast-msg">메시지</span>
 </div>
 
-<!-- 공용 Confirm 모달 (삭제, 비밀번호 변경 등) -->
 <div id="common-confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] hide flex items-center justify-center p-6">
 <div class="bg-white w-full max-w-xs rounded-3xl p-8 text-center animate-fade shadow-2xl">
 <div id="cc-icon-box" class="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -665,8 +629,6 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 </div>
 
-<!-- Modals -->
-<!-- 다운로드 설정 모달 -->
 <div id="download-config-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hide flex items-center justify-center p-6">
 <div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-5">
 <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
@@ -689,7 +651,6 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 </div>
 
-<!-- 문제 편집 모달 -->
 <div id="question-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hide flex items-center justify-center p-4 sm:p-6">
 <div class="bg-white w-full max-w-lg rounded-3xl p-6 sm:p-8 animate-fade shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto custom-scroll">
 <div class="flex justify-between items-center">
@@ -717,7 +678,6 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 </div>
 
-<!-- 엑셀 업로드 모드 선택 모달 -->
 <div id="upload-mode-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hide flex items-center justify-center p-6">
 <div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-5">
 <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto">
@@ -740,7 +700,6 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 </div>
 
-<!-- 로그 수동 추가 모달 -->
 <div id="log-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hide flex items-center justify-center p-6">
 <div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-6">
 <div class="flex justify-between items-center">
@@ -765,7 +724,6 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 </div>
 
-<!-- 클라우드 진단 도구 모달 -->
 <div id="diagnostics-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[250] hide flex items-center justify-center p-6">
 <div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-5 text-slate-800">
 <div class="flex justify-between items-center">
@@ -886,39 +844,34 @@ let currentPPTIndex = 0;
 let pptImagesData = []; // Loaded from IDB
 let pptPageTimer = 0;
 
+
 // =========================================================================
-// ★ Firebase Init (클라우드 동기화 하드코딩 적용 부분)
+// ★ Firebase 외부 호스팅 전용 강제 세팅 (오류 원천 차단)
 // =========================================================================
 let firebaseApp = null; let auth = null; let firestoreDb = null; let isCloudMode = false;
 let diagState = { init: "대기 중", auth: "대기 중", db: "대기 중", error: null };
 
-// 1. 공통 앱 고유 ID
 const appId = 'sdi-ulsan-safety-edu'; 
 
-// 2. 외부 호스팅(GitHub Pages 등)용 Firebase 프로젝트 설정
-// ★ 배포 시 반드시 아래 3가지 항목(apiKey, messagingSenderId, appId)을 본인 프로젝트 정보로 교체해주세요!
-const myFirebaseConfig = {
-  apiKey: "TODO_파이어베이스_API_KEY_입력", // TODO: 교체 필수!
+// ★ 전달해주신 실제 설정값 완벽 반영 완료
+const activeConfig = {
+  apiKey: "AIzaSyCrvz4uslI_Dv9qxQzr4nNAxygUFbEqURE",
   authDomain: "sdi-safety-edu-12ac3.firebaseapp.com",
   projectId: "sdi-safety-edu-12ac3",
-  storageBucket: "sdi-safety-edu-12ac3.appspot.com",
-  messagingSenderId: "TODO_MESSAGING_SENDER_ID_입력", // TODO: 교체 필수!
-  appId: "TODO_APP_ID_입력" // TODO: 교체 필수! (예: 1:12345678...)
+  storageBucket: "sdi-safety-edu-12ac3.firebasestorage.app",
+  messagingSenderId: "146881724668",
+  appId: "1:146881724668:web:10d82eac1e03201f959779"
 };
-
-// 캔버스 환경과 외부 호스팅 환경 모두 지원
-const rawConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : myFirebaseConfig;
-const rawToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 // =========================================================================
 
+
 async function initFirebase() {
-if(!rawConfig || (rawConfig.apiKey && rawConfig.apiKey.includes("TODO"))) { 
+if(!activeConfig.apiKey || activeConfig.apiKey.includes("TODO")) { 
   setOfflineMode("환경변수 없음 (API Key 입력 필요)"); 
   return; 
 }
 
 try {
-const activeConfig = typeof rawConfig === 'string' ? JSON.parse(rawConfig) : rawConfig;
 diagState.init = "진행 중"; updateDiagUI();
 firebaseApp = getApps().length === 0 ? initializeApp(activeConfig) : getApps()[0];
 auth = getAuth(firebaseApp);
@@ -926,8 +879,7 @@ firestoreDb = getFirestore(firebaseApp);
 diagState.init = "성공"; diagState.auth = "진행 중"; updateDiagUI();
 
 try {
-if (rawToken) await signInWithCustomToken(auth, rawToken);
-else await signInAnonymously(auth); // Firebase Console에서 익명로그인 활성화 필수
+await signInAnonymously(auth); // Firebase Console에서 익명로그인 활성화 필수
 diagState.auth = "성공"; updateDiagUI();
 } catch (e) {
 diagState.auth = `실패 (${e.code})`; updateDiagUI();
