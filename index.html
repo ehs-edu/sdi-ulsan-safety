@@ -165,6 +165,7 @@ class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none f
 <p class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-1.5">[참고 자료 및 예시설명]</p>
 <div id="q-image-desc" class="text-xs font-semibold text-slate-700 leading-relaxed text-keep"></div>
 </div>
+
 <div id="q-options" class="grid grid-cols-1 gap-3"></div>
 </div>
 <div class="py-6 flex justify-between">
@@ -479,6 +480,7 @@ class="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none f
 </div>
 </div>
 </div>
+
 <!-- Modal: Download Config -->
 <div id="download-config-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hide flex items-center justify-center p-6">
 <div class="bg-white w-full max-w-md rounded-3xl p-8 animate-fade shadow-2xl space-y-5">
@@ -662,7 +664,7 @@ const ULSIAN_SDI_30_QUIZ = [
 { idx: 10, q: "밀폐 구역 산소 결핍 우려 장소 진입 전 필히 측정해야 할 산소 농도 기준은?", imageDesc: "밀폐공간 보건 작업 허가 지침", a: ["10% 미만", "18% 이상 23.5% 미만", "30% 이상", "농도 측정 없이 즉시 진입"], c: 2 },
 { idx: 11, q: "배터리 전해액이나 화학 유독성 액체가 안구에 튀었을 때 응급조치 시간은?", imageDesc: "화학물질 안구 노출 긴급세척", a: ["수돗물이나 전용 안구 세척기로 15분 이상 세척", "약국 안약을 즉시 점안", "눈을 손으로 강하게 비벼서 배출", "그대로 마를 때까지 대기"], c: 1 },
 { idx: 12, q: "설비 정비 및 점검 간 작업 개시 전 안전 조치로 틀린 것은?", imageDesc: "설비 정비 안전 가이드", a: ["기동 전원 스위치 차단", "LOTO 시건 및 태그 부착", "잔류 압력/에너지 배출", "가동 중인 설비에 직접 손 삽입"], c: 4 },
-{ idx: 13, q: "사내 전동 지게차 보행 통로 교차 구간에서의 통행 우선권은?", imageDesc: "지게차 충돌 충돌 예방 규정", a: ["무조건 지게차 우선", "보행자 절대 우선 (일시 정지 및 상호 유도)", "먼저 진입한 차선 우선", "속도가 빠른 차량 우선"], c: 2 },
+{ idx: 13, q:"사내 전동 지게차 보행 통로 교차 구간에서의 통행 우선권은?", imageDesc: "지게차 충돌 충돌 예방 규정", a: ["무조건 지게차 우선", "보행자 절대 우선 (일시 정지 및 상호 유도)", "먼저 진입한 차선 우선", "속도가 빠른 차량 우선"], c: 2 },
 { idx: 14, q: "전기 고압 배전반 작업 시 감전 예방을 위해 필히 착용할 절연용 장비는?", imageDesc: "고압 가공 감전 활선 수칙", a: ["면장갑", "절연용 안전 장갑 및 안전화", "가죽 안전 장갑", "코팅 목장갑"], c: 2 },
 { idx: 15, q: "비상 대피 훈련 시 건물 외부 피난 유도 표지판의 색상은?", imageDesc: "안전 색채 유도 디자인 가이드", a: ["적색", "녹색", "황색", "청색"], c: 2 },
 { idx: 16, q: "배터리 셀 용접 공정에서 발생하는 유해 흄 및 가스 정화용 마스크 종류는?", imageDesc: "공정 보건 송풍 필터링 가이드", a: ["면 마스크", "송풍 마스크 또는 특급 방진 마스크", "일반 비말 차단 마스크", "덴탈 마스크"], c: 2 },
@@ -751,6 +753,7 @@ updateDiagUI();
 // 익명 사용자 인증을 단계적으로 시도합니다.
 diagState.auth = "진행 중";
 updateDiagUI();
+
 try {
 if (rawToken) {
 await signInWithCustomToken(auth, rawToken);
@@ -981,6 +984,7 @@ setDoc(getDocRef('config', 'settings'), { adminPw: '1234' });
 }
 }, (err) => console.error("Config Settings Sync Error:", err));
 }
+
 async function initializeCloudBank() {
 for (let q of ULSIAN_SDI_30_QUIZ) {
 await writeToCloudOrLocal('bank', Q-${q.idx}`, q);
@@ -1103,7 +1107,7 @@ const optBox = document.getElementById('q-options');
 optBox.innerHTML = '';
 q.a.forEach((ans, idx) => {
 const btn = document.createElement('button');
-btn.className = p-4 text-left border-2 rounded-2xl font-bold transition-all btn-press text-xs${state.answers[state.currIdx] === idx+1 ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-100 bg-white'}; btn.innerText ={ans}`;
+btn.className = p-4 text-left border-2 rounded-2xl font-bold transition-all btn-press text-xs${state.answers[state.currIdx] === idx+1 ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-100 bg-white'}; btn.innerText = {ans}`;
 btn.onclick = () => selectAnswer(idx + 1);
 optBox.appendChild(btn);
 });
@@ -1232,6 +1236,7 @@ for(let i=0; i<12; i++) {
 const monthTotal = passData[i] + failData[i];
 rateData[i] = monthTotal > 0 ? Math.round((passData[i]/monthTotal)*100) : 0;
 }
+
 const getAlpha = (idx) => {
 if(selMonth === 'all') return 1;
 return parseInt(selMonth) === idx ? 1 : 0.2;
@@ -1311,9 +1316,9 @@ document.getElementById('user-count').innerText = db.users.length;
 db.users.slice().sort((a,b) => b.ts - a.ts).forEach(u => {
 const tr = document.createElement('tr');
 tr.innerHTML = &lt;td class="px-6 py-4 text-center"&gt;&lt;input type="checkbox" value="${u.id}" class="user-check"></td>
-<td class="px-6 py-4 text-slate-400">{u.name}</td>
-<td class="px-6 py-4 font-mono text-[10px]">{u.score}점</td>
-<td class="px-6 py-4"><span class="px-2 py-0.5 rounded-full text-[10px] font-black {u.passed?'PASS':'FAIL'}</span></td>
+<td class="px-6 py-4 text-slate-400"> {u.name}</td>
+<td class="px-6 py-4 font-mono text-[10px]"> {u.score}점</td>
+<td class="px-6 py-4"><span class="px-2 py-0.5 rounded-full text-[10px] font-black  {u.passed?'PASS':'FAIL'}</span></td>
 `;
 tbody.appendChild(tr);
 });
@@ -1336,6 +1341,7 @@ window.confirmDeleteSave = function() {
 document.getElementById('confirm-modal').classList.remove('hide');
 lucide.createIcons();
 }
+
 window.closeConfirm = function() { document.getElementById('confirm-modal').classList.add('hide'); }
 
 window.executeDelete = async function() {
@@ -1384,8 +1390,8 @@ document.getElementById('bank-count').innerText = db.bank.length;
 db.bank.forEach((q, idx) => {
 const tr = document.createElement('tr');
 tr.innerHTML = &lt;td class="px-4 py-4 text-center"&gt;&lt;input type="checkbox" value="${q.idx}" class="bank-item-check" onchange="updateBankSelectedCount()"></td>
-<td class="px-4 py-4 font-bold text-slate-400">{q.q}</td>
-<td class="px-4 py-4 text-blue-600 font-medium">{q.a.map((o, i) => <span class="${q.c === i+1 ? 'text-blue-600 font-bold' : ''}">${i+1}. ${o}</span>).join('&lt;br/&gt;')}&lt;/td&gt; &lt;td class="px-4 py-4 text-center"&gt;&lt;span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-black"&gt;${q.c}</span></td>
+<td class="px-4 py-4 font-bold text-slate-400"> {q.q}</td>
+<td class="px-4 py-4 text-blue-600 font-medium"> {q.a.map((o, i) => <span class="${q.c === i+1 ? 'text-blue-600 font-bold' : ''}">${i+1}. ${o}</span>).join('&lt;br/&gt;')}&lt;/td&gt; &lt;td class="px-4 py-4 text-center"&gt;&lt;span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-black"&gt;${q.c}</span></td>
 <td class="px-4 py-4 text-center">
 <button onclick="openQuestionModal(${idx})" class="text-blue-600 hover:text-blue-800 font-bold mr-2"&gt;수정&lt;/button&gt; &lt;/td>;
 tbody.appendChild(tr);
@@ -1545,6 +1551,7 @@ return;
 document.getElementById('upload-mode-modal').classList.remove('hide');
 document.getElementById('upload-mode-merge').onclick = () => executeUploadAndClose(true);
 document.getElementById('upload-mode-overwrite').onclick = () => executeUploadAndClose(false);
+
 } catch (err) {
 console.error(err);
 toast('엑셀 해독에 오류가 발생했습니다.');
@@ -1607,6 +1614,7 @@ if (type === 'stats') defaultName = SDI_안전교육_월별통계_${new Date().g
 {new Date().toLocaleDateString().replace(/ /g,'')}.xlsx`; else if (type === 'template') defaultName = "SDI_Quiz_Bank_Template.xlsx"; else if (type === 'ppt') defaultName = `SDI_안전교육_종합분석보고서_
 
 {new Date().getFullYear()}년.ppt`;
+
 input.value = defaultName;
 document.getElementById('download-config-modal').classList.remove('hide');
 }
@@ -1732,6 +1740,7 @@ window.requestChangePassword = function() {
 const cur = document.getElementById('pw-current').value;
 const n1 = document.getElementById('pw-new').value;
 const n2 = document.getElementById('pw-confirm').value;
+
 if (!cur || !n1 || !n2) return toast('정보를 모두 누락 없이 입력해 주십시오.');
 if (cur !== db.adminPw) return toast('현재 관리자 비밀번호가 일치하지 않습니다.');
 if (n1 !== n2) return toast('새 비밀번호와 확인 입력이 일치하지 않습니다.');
@@ -1752,6 +1761,7 @@ window.executeChangePassword = async function() {
 if (!state.tempPwObj) return;
 const { n1 } = state.tempPwObj;
 db.adminPw = n1;
+
 let saveSuccess = false;
 if (isCloudMode) {
 try {
@@ -1877,7 +1887,7 @@ db.logs.forEach(log => {
 const badgeColor = log.type === 'UPDATE' ? 'bg-indigo-100 text-indigo-700' : (log.type === 'NOTICE' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700');
 const row = document.createElement('div');
 row.className = "flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50 rounded-2xl border text-xs gap-2";
-row.innerHTML = &lt;div class="flex items-center gap-2"&gt; &lt;span class="px-2.5 py-1 rounded-lg font-black${badgeColor}">{log.content}</p>
+row.innerHTML = &lt;div class="flex items-center gap-2"&gt; &lt;span class="px-2.5 py-1 rounded-lg font-black${badgeColor}"> {log.content}</p>
 </div>
 <span class="text-[10px] text-slate-400 font-bold shrink-0">${new Date(log.ts).toLocaleString()}</span>`;
 list.appendChild(row);
