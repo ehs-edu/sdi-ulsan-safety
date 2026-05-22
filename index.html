@@ -135,8 +135,8 @@ border-radius: 2px;
 </div>
 </div>
 <div class="flex items-center gap-2">
-<div id="cloud-badge" onclick="openDiagnostics()" class="cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100/50 transition-all shadow-sm">
-<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
+<div id="cloud-badge" onclick="openDiagnostics()" class="cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border transition-all shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse shrink-0"></span>
 <span id="cloud-status-text" class="whitespace-nowrap">연결 확인 중</span>
 </div>
 <div id="admin-indicator" class="hide flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
@@ -189,6 +189,10 @@ oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 <source src="" type="video/mp4">
 브라우저가 동영상을 지원하지 않습니다.
 </video>
+<!-- 영상 에러 시 나타나는 긴급 스킵 버튼 -->
+<button id="btn-emergency-skip" onclick="completeMediaView()" class="absolute top-4 right-4 bg-rose-600/90 hover:bg-rose-700 text-white text-[11px] font-bold px-4 py-2.5 rounded-xl shadow-lg z-20 hide transition-all flex items-center gap-2 btn-press backdrop-blur-sm">
+<i data-lucide="alert-triangle" class="w-4 h-4"></i> 영상 재생 불가 시 스킵
+</button>
 <div id="video-overlay" class="absolute inset-0 bg-black/70 flex items-center justify-center flex-col gap-4 z-10 transition-opacity duration-300">
 <button onclick="playSafetyVideo()" class="w-16 h-16 sm:w-20 sm:h-20 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:scale-95">
 <i data-lucide="play" class="w-8 h-8 sm:w-10 sm:h-10 ml-1"></i>
@@ -591,7 +595,8 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 </div>
 </div>
-</div> <div class="sticky bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center z-50">
+</div> 
+<div class="sticky bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center z-50">
 <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
 <div class="flex items-center gap-1.5 text-slate-500">
 <i data-lucide="cloud" class="w-4 h-4"></i>
@@ -604,9 +609,6 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 <span class="hidden sm:inline">관리자 시스템</span> 종료
 </button>
 </div>
-
-</div>
-
 </main>
 </div>
 
@@ -773,11 +775,11 @@ const ULSIAN_SDI_30_QUIZ = [
 ];
 
 const DEFAULT_CONFIG = {
-mediaType: 'video', // 'video' or 'ppt'
+mediaType: 'video',
 videoMode: 'url',
-videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-videoDuration: 0, // 0이면 실제길이
-pptPageDuration: 5 // 페이지당 초
+videoUrl: 'https://ehs-edu.github.io/sdi-ulsan-safety/Safety-video.mp4', // 기본 Github URL 적용 완료
+videoDuration: 0,
+pptPageDuration: 5
 };
 
 let db = {
@@ -834,42 +836,35 @@ req.onerror = () => reject(req.error);
 };
 
 let currentVideoFile = null;
-let currentPPTFiles = []; // Blob array for images
+let currentPPTFiles = [];
 
-// Media Player States
 let isMediaFinished = false;
 let videoPlayer = null;
 let mediaInterval = null;
 let currentPPTIndex = 0;
-let pptImagesData = []; // Loaded from IDB
+let pptImagesData = [];
 let pptPageTimer = 0;
 
-
-// =========================================================================
-// ★ Firebase 외부 호스팅 전용 강제 세팅 (오류 원천 차단)
-// =========================================================================
 let firebaseApp = null; let auth = null; let firestoreDb = null; let isCloudMode = false;
 let diagState = { init: "대기 중", auth: "대기 중", db: "대기 중", error: null };
 
-const appId = 'sdi-ulsan-safety-edu'; 
-
-// ★ 전달해주신 실제 설정값 완벽 반영 완료
+const appId = 'sdi-ulsan-safety-edu';
 const activeConfig = {
-  apiKey: "AIzaSyCrvz4uslI_Dv9qxQzr4nNAxygUFbEqURE",
-  authDomain: "sdi-safety-edu-12ac3.firebaseapp.com",
-  projectId: "sdi-safety-edu-12ac3",
-  storageBucket: "sdi-safety-edu-12ac3.firebasestorage.app",
-  messagingSenderId: "146881724668",
-  appId: "1:146881724668:web:10d82eac1e03201f959779"
+apiKey: "AIzaSyCrvz4uslI_Dv9qxQzr4nNAxygUFbEqURE",
+authDomain: "sdi-safety-edu-12ac3.firebaseapp.com",
+projectId: "sdi-safety-edu-12ac3",
+storageBucket: "sdi-safety-edu-12ac3.firebasestorage.app",
+messagingSenderId: "146881724668",
+appId: "1:146881724668:web:10d82eac1e03201f959779"
 };
-// =========================================================================
-
 
 async function initFirebase() {
-if(!activeConfig.apiKey || activeConfig.apiKey.includes("TODO")) { 
-  setOfflineMode("환경변수 없음 (API Key 입력 필요)"); 
-  return; 
+if(!activeConfig.apiKey || activeConfig.apiKey.includes("TODO")) {
+setOfflineMode("환경변수 없음 (API Key 입력 필요)");
+return;
 }
+
+updateCloudBadge('connecting', "클라우드 연결 중...");
 
 try {
 diagState.init = "진행 중"; updateDiagUI();
@@ -879,7 +874,7 @@ firestoreDb = getFirestore(firebaseApp);
 diagState.init = "성공"; diagState.auth = "진행 중"; updateDiagUI();
 
 try {
-await signInAnonymously(auth); // Firebase Console에서 익명로그인 활성화 필수
+await signInAnonymously(auth);
 diagState.auth = "성공"; updateDiagUI();
 } catch (e) {
 diagState.auth = `실패 (${e.code})`; updateDiagUI();
@@ -888,7 +883,7 @@ diagState.auth = `실패 (${e.code})`; updateDiagUI();
 onAuthStateChanged(auth, async (user) => {
 if (user) {
 isCloudMode = true; diagState.db = "성공"; updateDiagUI();
-updateCloudBadge(true, "클라우드 동기화 됨");
+updateCloudBadge('success', "클라우드 동기화 완료");
 startRealtimeSync();
 } else { verifyFirestoreAccess(); }
 });
@@ -906,7 +901,8 @@ try {
 const testDocRef = getDocRef('config', 'connection_test');
 await setDoc(testDocRef, { lastPing: Date.now() }, { merge: true });
 diagState.db = "성공"; diagState.error = null; updateDiagUI();
-isCloudMode = true; updateCloudBadge(true, "연결 완료 (우회)");
+isCloudMode = true;
+updateCloudBadge('success', "클라우드 동기화 완료 (우회)");
 startRealtimeSync();
 } catch (e) {
 diagState.db = "실패"; diagState.error = `Firestore 오류: ${e.message}`; updateDiagUI();
@@ -931,30 +927,41 @@ else { errBox.classList.add('hide'); }
 
 function setOfflineMode(reason) {
 isCloudMode = false;
-updateCloudBadge(false, reason);
+updateCloudBadge('error', reason);
 }
 
-function updateCloudBadge(active, text) {
+// 3가지 상태(초록, 노랑, 빨강)를 명확히 구분하는 배지 업데이트 함수
+function updateCloudBadge(status, text) {
 const statusText = document.getElementById('cloud-status-text');
 const settingsSync = document.getElementById('settings-sync-mode');
-const adminFooterSync = document.getElementById('admin-footer-sync-status'); // 관리자 전용 풋터 상태 추가
+const adminFooterSync = document.getElementById('admin-footer-sync-status');
 
 if (statusText) statusText.innerText = text;
 if (settingsSync) settingsSync.innerText = text;
 
+let badgeClass = "";
+let textClass = "";
+
+if (status === 'success') {
+badgeClass = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 transition-all shadow-sm";
+textClass = "text-emerald-600";
+} else if (status === 'connecting') {
+badgeClass = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100 transition-all shadow-sm";
+textClass = "text-amber-500";
+} else {
+badgeClass = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100 transition-all shadow-sm";
+textClass = "text-rose-500";
+}
+
 if (adminFooterSync) {
 adminFooterSync.innerText = text;
-adminFooterSync.className = `text-[11px] sm:text-xs font-black ${active ? 'text-emerald-600' : 'text-slate-500'}`;
+adminFooterSync.className = `text-[11px] sm:text-xs font-black ${textClass}`;
 }
 
 const badge = document.getElementById('cloud-badge');
-if(badge) {
-if(active) badge.className = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 transition-all";
-else badge.className = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100 transition-all";
-}
+if(badge) badge.className = badgeClass;
 }
 
-// 모든 데이터를 지정된 고정 경로로 저장 (어디서 접속하든 동일한 DB 공간 사용)
 function getCollectionRef(colName) { return collection(firestoreDb, 'artifacts', appId, 'public', 'data', colName); }
 function getDocRef(colName, docId) { return doc(firestoreDb, 'artifacts', appId, 'public', 'data', colName, docId); }
 
@@ -974,6 +981,7 @@ if (!snap.empty) { db.bank = []; snap.forEach(d => db.bank.push({ id: d.id, ...d
 onSnapshot(getCollectionRef('logs'), (snap) => {
 db.logs = []; snap.forEach(d => db.logs.push({ id: d.id, ...d.data() })); db.logs.sort((a,b)=>b.ts-a.ts); saveLocal(); renderLogs();
 }, (e)=>{});
+// ★ 실시간 설정 동기화: 관리자가 바꾼 영상 URL이 이벤트를 통해 즉시 반영됨
 onSnapshot(getDocRef('config', 'settings'), (snap) => {
 if (snap.exists()) {
 const data = snap.data();
@@ -997,7 +1005,6 @@ localStorage.setItem('sdi_config_v13', JSON.stringify(db.config));
 localStorage.setItem('sdi_admin_pw_v13', db.adminPw);
 }
 
-// 응시 완료 시 클라우드에 최우선으로 저장
 async function writeToCloudOrLocal(collectionName, docId, dataPayload) {
 if (isCloudMode) {
 try { await setDoc(getDocRef(collectionName, docId), dataPayload); return true; } catch (e) { console.error(e); }
@@ -1037,7 +1044,6 @@ if(mediaInterval) clearInterval(mediaInterval);
 switchView('auth');
 }
 
-// 공용 Confirm 모달
 let currentConfirmCallback = null;
 window.showCommonConfirm = function(title, desc, btnText, btnColorClass, callback) {
 document.getElementById('cc-title').innerText = title;
@@ -1046,7 +1052,6 @@ const btn = document.getElementById('cc-btn-confirm');
 btn.innerText = btnText;
 btn.className = `flex-1 py-4 text-white rounded-xl font-black ${btnColorClass}`;
 
-// 아이콘 색상 변경
 const iconBox = document.getElementById('cc-icon-box');
 if(btnColorClass.includes('rose')) {
 iconBox.className = "w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6";
@@ -1065,7 +1070,6 @@ document.getElementById('cc-btn-confirm').addEventListener('click', () => {
 if(currentConfirmCallback) currentConfirmCallback();
 });
 
-// 1. 응시자 로그인 및 미디어 전환
 window.checkAuthAndStartMedia = async function() {
 const name = document.getElementById('input-name').value.trim();
 const carNum = document.getElementById('input-car').value.trim();
@@ -1084,7 +1088,6 @@ await prepareMediaViewer();
 switchView('media');
 }
 
-// 2. 미디어(비디오 or PPT) 뷰어 준비
 function formatTime(seconds) {
 const m = Math.floor(seconds / 60).toString().padStart(2, '0');
 const s = Math.floor(seconds % 60).toString().padStart(2, '0');
@@ -1106,12 +1109,13 @@ const pCont = document.getElementById('media-ppt-container');
 const tCur = document.getElementById('media-time-current');
 const tTot = document.getElementById('media-time-total');
 const pBar = document.getElementById('media-progress-bar');
+const skipBtn = document.getElementById('btn-emergency-skip');
 
 tCur.innerText = "00:00";
 pBar.style.width = "0%";
+skipBtn.classList.add('hide'); // 진입 시 스킵버튼 기본 숨김
 
 if (db.config.mediaType === 'video') {
-// 비디오 모드
 vCont.classList.remove('hide'); pCont.classList.add('hide');
 document.getElementById('video-overlay').classList.remove('hide');
 document.getElementById('media-info-text').innerHTML = '교육 동영상 시청 중에는 진행 바를 조작하여 <strong class="text-red-500">건너뛸 수 없습니다.</strong>';
@@ -1119,12 +1123,25 @@ document.getElementById('media-info-text').innerHTML = '교육 동영상 시청 
 videoPlayer = document.getElementById('safety-video');
 
 if (db.config.videoMode === 'url') {
-videoPlayer.src = db.config.videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+videoPlayer.src = db.config.videoUrl || "https://ehs-edu.github.io/sdi-ulsan-safety/Safety-video.mp4";
 } else {
 const blob = await idbMedia.load('main_video');
 if (blob) { videoPlayer.src = URL.createObjectURL(blob); }
-else { toast('저장된 영상이 없어 기본 영상을 로드합니다.'); videoPlayer.src = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"; }
+else { 
+toast('저장된 영상이 없어 기본 영상을 로드합니다.'); 
+videoPlayer.src = "https://ehs-edu.github.io/sdi-ulsan-safety/Safety-video.mp4"; 
 }
+}
+
+// ★ 영상 에러 발생 시 긴급 스킵 버튼 표시 처리
+videoPlayer.onerror = function() {
+skipBtn.classList.remove('hide');
+toast('동영상 로드 오류 발생. 우측 상단의 긴급 스킵 버튼을 이용하세요.');
+};
+videoPlayer.onstalled = function() {
+skipBtn.classList.remove('hide');
+toast('동영상 로드가 지연되고 있습니다. 필요 시 스킵 버튼을 이용하세요.');
+};
 
 let maxSeenTime = 0;
 let targetDuration = 0;
@@ -1145,7 +1162,6 @@ let p = 0;
 if(targetDuration > 0) p = (current / targetDuration) * 100;
 pBar.style.width = `${Math.min(p, 100)}%`;
 
-// 설정된 시청 시간 도달 시 자동 완료
 if (targetDuration > 0 && current >= targetDuration && !isMediaFinished) {
 completeMediaView();
 }
@@ -1160,7 +1176,6 @@ if(!isMediaFinished) completeMediaView();
 };
 
 } else {
-// PPT 모드
 vCont.classList.add('hide'); pCont.classList.remove('hide');
 document.getElementById('ppt-overlay').classList.remove('hide');
 document.getElementById('media-info-text').innerHTML = 'PPT 교육 자료 시청 중입니다. 페이지당 지정된 시간 후 자동으로 넘어갑니다. 임의로 <strong class="text-red-500">건너뛸 수 없습니다.</strong>';
@@ -1186,7 +1201,11 @@ lucide.createIcons();
 
 window.playSafetyVideo = function() {
 if(videoPlayer) {
-videoPlayer.play();
+videoPlayer.play().catch(e => {
+console.error("Play prevented", e);
+document.getElementById('btn-emergency-skip').classList.remove('hide');
+toast('재생 중 문제가 발생했습니다. 스킵 버튼을 이용해주세요.');
+});
 document.getElementById('video-overlay').classList.add('hide');
 }
 }
@@ -1209,22 +1228,21 @@ tCur.innerText = formatTime(globalTimer);
 pBar.style.width = `${(globalTimer / totalDuration) * 100}%`;
 
 if(pptPageTimer >= db.config.pptPageDuration) {
-// 다음 슬라이드로
 pptPageTimer = 0;
 currentPPTIndex++;
 if(currentPPTIndex < pptImagesData.length) {
 document.getElementById('safety-ppt-img').src = URL.createObjectURL(pptImagesData[currentPPTIndex]);
 document.getElementById('ppt-page-text').innerText = `${currentPPTIndex + 1} / ${pptImagesData.length}`;
 } else {
-// 종료
-currentPPTIndex = pptImagesData.length - 1; // 마지막 인덱스 유지
+currentPPTIndex = pptImagesData.length - 1;
 completeMediaView();
 }
 }
 }, 1000);
 }
 
-function completeMediaView() {
+// 전역 스킵 호출용 함수로 노출
+window.completeMediaView = function() {
 isMediaFinished = true;
 if(mediaInterval) clearInterval(mediaInterval);
 if(videoPlayer) videoPlayer.pause();
@@ -1241,7 +1259,6 @@ lucide.createIcons();
 toast('교육 시청이 완료되었습니다. 시험을 시작할 수 있습니다.');
 }
 
-// 3. 평가 시작
 window.startEvaluation = function() {
 if (!isMediaFinished) return toast('교육 자료를 끝까지 시청해야 합니다.');
 if (videoPlayer) videoPlayer.pause();
@@ -1334,7 +1351,6 @@ if (ySelect.options.length === 0) {
 const cy = new Date().getFullYear();
 for(let i=0; i<3; i++) ySelect.add(new Option(cy-i+'년', cy-i));
 }
-// Init Media Settings
 document.getElementById('video-url-input').value = db.config.videoUrl || '';
 document.getElementById('video-duration-input').value = db.config.videoDuration || 0;
 document.getElementById('ppt-page-duration-input').value = db.config.pptPageDuration || 5;
@@ -1345,7 +1361,6 @@ else { document.querySelector('input[value="url"]').checked = true; }
 setMediaType(db.config.mediaType);
 }
 
-// Media Tab Logic (Admin)
 window.setMediaType = function(type) {
 db.config.mediaType = type;
 const tabV = document.getElementById('tab-media-video');
@@ -1388,7 +1403,7 @@ currentVideoFile = file;
 window.handlePPTFilesSelect = function(input) {
 const files = Array.from(input.files);
 if(files.length > 0) {
-currentPPTFiles = files; // Blob 배열 저장
+currentPPTFiles = files;
 const previewText = document.getElementById('ppt-preview-count');
 previewText.innerText = `총 ${files.length}장의 슬라이드 이미지가 선택되었습니다.`;
 previewText.classList.remove('hide');
@@ -1411,7 +1426,7 @@ if (mode === 'url') {
 const vUrl = document.getElementById('video-url-input').value.trim();
 db.config.videoUrl = vUrl;
 configUpdate.videoUrl = vUrl;
-toast('동영상 URL 설정이 저장되었습니다.');
+toast('동영상 URL 설정이 저장되었습니다. 사용자들에게 즉시 동기화됩니다.');
 } else {
 if (currentVideoFile) {
 toast('영상 파일을 기기에 안전하게 저장 중입니다...');
@@ -1434,15 +1449,13 @@ toast('선택된 PPT 이미지가 없습니다. 설정값(시간)만 저장됩�
 }
 
 saveLocal();
+// ★ Firebase에 configUpdate 내용을 저장하여 모든 사용자에게 동영상 변경 적용
 if (isCloudMode) {
 try { await setDoc(getDocRef('config', 'settings'), configUpdate, { merge: true }); }
 catch (e) { console.error(e); }
 }
 }
 
-// ----------------------------------------------------
-// Download Saved Media (Video & PPT)
-// ----------------------------------------------------
 window.downloadSavedVideo = async function() {
 toast('저장된 영상을 불러오는 중입니다...');
 try {
@@ -1491,7 +1504,6 @@ toast('다운로드 중 오류가 발생했습니다.');
 }
 }
 
-// Stats & Charts
 window.renderStats = function() {
 const ySelect = document.getElementById('filter-year');
 if (!ySelect || ySelect.options.length === 0) return;
@@ -1528,7 +1540,7 @@ type: 'bar',
 data: {
 labels: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
 datasets: [
-{ label: '이수자', data: passData, backgroundColor: passData.map((_, i) => `rgba(20, 40, 160,${getAlpha(i)})`), borderRadius: 6, barPercentage: 0.8 }, 
+{ label: '이수자', data: passData, backgroundColor: passData.map((_, i) => `rgba(20, 40, 160, ${getAlpha(i)})`), borderRadius: 6, barPercentage: 0.8 }, 
 { label: '미이수자', data: failData, backgroundColor: failData.map((_, i) => `rgba(244, 63, 94, ${getAlpha(i)})`), borderRadius: 6, barPercentage: 0.8 }
 ]
 },
@@ -1536,24 +1548,21 @@ options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { po
 });
 }
 
-// User Table Logic
 window.renderUserTable = function() {
 const tbody = document.getElementById('user-table');
 if(!tbody) return; tbody.innerHTML = '';
 document.getElementById('user-count').innerText = db.users.length;
 db.users.slice().sort((a,b) => b.ts - a.ts).forEach(u => {
 const tr = document.createElement('tr');
-tr.innerHTML = `
-<td class="px-4 py-3 text-center"><input type="checkbox" value="${u.id}" class="user-check"></td>
-<td class="px-4 py-3 text-slate-400 text-[11px]">${new Date(u.ts).toLocaleString()}</td>
-<td class="px-4 py-3 font-bold">${u.name}</td>
-<td class="px-4 py-3 text-slate-500">${u.carNum}</td>
-<td class="px-4 py-3 font-mono font-bold">${u.score}점</td>
+tr.innerHTML = `<td class="px-4 py-3 text-center"><input type="checkbox" value="${u.id}" class="user-check"></td>
+<td class="px-4 py-3 text-slate-400 text-[11px]">${new Date(u.ts).toLocaleString()}</td> <td class="px-4 py-3 font-bold">${u.name}</td>
+<td class="px-4 py-3 text-slate-500">${u.carNum}</td> <td class="px-4 py-3 font-mono font-bold">${u.score}점</td>
 <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-black ${u.passed?'bg-blue-50 text-blue-600':'bg-rose-50 text-rose-500'}">${u.passed?'PASS':'FAIL'}</span></td>`;
 tbody.appendChild(tr);
 });
 document.getElementById('btn-save-delete').classList.add('hide');
 }
+
 window.toggleAll = function(el) { document.querySelectorAll('.user-check').forEach(c => c.checked = el.checked); }
 window.prepareDelete = function() {
 const checked = Array.from(document.querySelectorAll('.user-check:checked')).map(c => c.value);
@@ -1595,31 +1604,24 @@ window.renderHistoryTable = function() {
 const tbody = document.getElementById('history-table');
 if(!tbody) return; tbody.innerHTML = '';
 db.history.slice().sort((a,b) => b.deleteTs - a.deleteTs).forEach(h => {
-tbody.innerHTML += `<tr>
-<td class="px-4 py-3 text-rose-500 font-bold">${new Date(h.deleteTs).toLocaleString()}</td>
-<td class="px-4 py-3 text-slate-400">${new Date(h.ts).toLocaleString()}</td>
-<td class="px-4 py-3 font-bold">${h.name}</td>
-<td class="px-4 py-3 text-slate-500">${h.carNum||'-'}</td>
-<td class="px-4 py-3 font-mono font-bold">${h.score}점</td>
+tbody.innerHTML += `<tr> <td class="px-4 py-3 text-rose-500 font-bold">${new Date(h.deleteTs).toLocaleString()}</td>
+<td class="px-4 py-3 text-slate-400">${new Date(h.ts).toLocaleString()}</td> <td class="px-4 py-3 font-bold">${h.name}</td>
+<td class="px-4 py-3 text-slate-500">${h.carNum||'-'}</td> <td class="px-4 py-3 font-mono font-bold">${h.score}점</td>
 </tr>`;
 });
 }
 
-// Bank Table Logic
 window.renderBankTable = function() {
 const tbody = document.getElementById('bank-table');
 if(!tbody) return; tbody.innerHTML = '';
 document.getElementById('bank-count').innerText = db.bank.length;
 db.bank.forEach((q, idx) => {
 const tr = document.createElement('tr');
-tr.innerHTML = `
-<td class="px-3 py-3 text-center"><input type="checkbox" value="${q.idx}" class="bank-item-check" onchange="updateBankSelectedCount()"></td>
+tr.innerHTML = `<td class="px-3 py-3 text-center"><input type="checkbox" value="${q.idx}" class="bank-item-check" onchange="updateBankSelectedCount()"></td>
 <td class="px-3 py-3 font-black text-slate-400 text-center">${q.idx}</td>
-<td class="px-4 py-3 font-bold text-slate-700">${q.q}</td>
+<td class="px-4 py-3 text-slate-800 font-bold text-keep">${q.q}</td>
 <td class="px-4 py-3 text-slate-600 font-medium text-[10px] sm:text-[11px] leading-relaxed">
-${q.a.map((o, i) => `<span class="${q.c === i+1 ? 'text-blue-600 font-black' : ''}">${i+1}. ${o}</span>`).join('<br/>')} 
-</td>
-<td class="px-3 py-3 text-center"><span class="bg-blue-50 border border-blue-100 text-blue-600 w-6 h-6 inline-flex items-center justify-center rounded-full font-black text-[10px]">${q.c}</span></td>
+${q.a.map((o, i) => `<span class="${q.c === i+1 ? 'text-blue-600 font-black' : ''}">${o}</span>`).join('<br/>')} </td> <td class="px-3 py-3 text-center"><span class="bg-blue-50 border border-blue-100 text-blue-600 w-6 h-6 inline-flex items-center justify-center rounded-full font-black text-[10px]">${q.c}</span></td>
 <td class="px-3 py-3 text-center"><button onclick="openQuestionModal(${idx})" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded font-bold text-slate-600 transition-colors">편집</button></td>`;
 tbody.appendChild(tr);
 });
@@ -1651,7 +1653,6 @@ closeCommonConfirm();
 toast('문항이 성공적으로 삭제되었습니다.');
 }
 
-// Question Editor
 window.openQuestionModal = function(idx) {
 const title = document.getElementById('question-modal-title');
 const tInp = document.getElementById('edit-q-text'); const iInp = document.getElementById('edit-q-image');
@@ -1679,19 +1680,14 @@ if (!text || aList.length < 2) return toast('문제 내용 및 보기를 정확�
 if (idxStr === "-1") {
 const nextIdx = db.bank.length > 0 ? Math.max(...db.bank.map(q => q.idx)) + 1 : 1;
 const newItem = { idx: nextIdx, q: text, imageDesc: img, a: aList, c: correct };
-if (isCloudMode) { await writeToCloudOrLocal('bank', `Q-${nextIdx}`, newItem); } 
-else { db.bank.push(newItem); saveLocal(); renderBankTable(); } 
-await addLog('UPDATE', `신규 문항 추가: "${text.substring(0,18)}..."`);
+if (isCloudMode) { await writeToCloudOrLocal('bank', `Q-${nextIdx}`, newItem); } else { db.bank.push(newItem); saveLocal(); renderBankTable(); } await addLog('UPDATE', `신규 문항 추가: "${text.substring(0,18)}..."`);
 } else {
 const curIdx = parseInt(idxStr); const updatedItem = { idx: curIdx, q: text, imageDesc: img, a: aList, c: correct };
-if (isCloudMode) { await writeToCloudOrLocal('bank', `Q-${curIdx}`, updatedItem); } 
-else { const findIdx = db.bank.findIndex(q => q.idx === curIdx); if (findIdx !== -1) db.bank[findIdx] = updatedItem; saveLocal(); renderBankTable(); } 
-await addLog('UPDATE', `문항(${curIdx}번) 편집 완료`);
+if (isCloudMode) { await writeToCloudOrLocal('bank', `Q-${curIdx}`, updatedItem); } else { const findIdx = db.bank.findIndex(q => q.idx === curIdx); if (findIdx !== -1) db.bank[findIdx] = updatedItem; saveLocal(); renderBankTable(); } await addLog('UPDATE', `문항(${curIdx}번) 편집 완료`);
 }
 closeQuestionModal(); toast('저장되었습니다.');
 }
 
-// Excel Upload Mode
 window.handleBankUpload = function(input) {
 const file = input.files[0]; if(!file) return;
 const reader = new FileReader();
@@ -1735,16 +1731,13 @@ await addLog('UPDATE', `문제은행 엑셀 업로드 완료 (총 ${finalBankLis
 toast('성공적으로 업데이트 되었습니다.'); tempUploadBank = [];
 }
 
-// Logs Management
 window.showLogAddModal = function() { document.getElementById('log-modal').classList.remove('hide'); }
 window.closeLogModal = function() { document.getElementById('log-modal').classList.add('hide'); }
 async function addLog(type, content, isAuto = true) {
-const logId = `LOG-${Date.now()}`; 
-const newLog = { type, content, ts: Date.now(), isAuto }; 
+const logId = `LOG-${Date.now()}`; const newLog = { type, content, ts: Date.now(), isAuto }; 
 if (!await writeToCloudOrLocal('logs', logId, newLog)) { 
 db.logs.unshift({ id: logId, ...newLog }); 
-if(db.logs.length > 100) db.logs.pop(); 
-saveLocal(); renderLogs(); 
+if(db.logs.length > 100) db.logs.pop(); saveLocal(); renderLogs(); 
 } 
 } 
 window.saveManualLog = async function() { 
@@ -1760,12 +1753,11 @@ db.logs.forEach(log => {
 const bc = log.type === 'UPDATE' ? 'bg-indigo-100 text-indigo-700' : (log.type === 'NOTICE' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'); 
 const row = document.createElement('div'); 
 row.className = "flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50 rounded-2xl border text-xs gap-2"; 
-row.innerHTML = `<div class="flex items-center gap-2"><span class="px-2.5 py-1 rounded-lg font-black ${bc}">${log.type}</span><span class="font-medium text-slate-800 break-all">${log.content}</span></div><span class="text-slate-400">${new Date(log.ts).toLocaleString()}</span>`;
+row.innerHTML = `<div class="flex items-center gap-2"><span class="px-2.5 py-1 rounded-lg font-black ${bc}">${log.type}</span><span class="font-medium text-slate-800 break-all">${log.content}</span></div><span class="font-medium text-slate-400 break-all">${new Date(log.ts).toLocaleString()}</span>`;
 list.appendChild(row);
 });
 }
 
-// Downloads & PPT Generation
 window.openDownloadModal = function(type) {
 state.currentDownloadType = type;
 let dName = "SDI_Report.xlsx";
@@ -1856,12 +1848,10 @@ toast("보고서 생성 중 오류가 발생했습니다.");
 }
 }
 
-// Diagnostics
 window.openDiagnostics = function() { document.getElementById('diagnostics-modal').classList.remove('hide'); updateDiagUI(); lucide.createIcons(); }
 window.closeDiagnostics = function() { document.getElementById('diagnostics-modal').classList.add('hide'); }
 window.retryConnection = function() { diagState = { init: "진행 중", auth: "대기 중", db: "대기 중", error: null }; updateDiagUI(); initFirebase(); }
 
-// PW Change Logic
 window.requestChangePassword = function() {
 const curPw = document.getElementById('pw-current').value;
 const newPw = document.getElementById('pw-new').value;
@@ -1875,7 +1865,7 @@ showCommonConfirm(
 '비밀번호를 변경하시겠습니까?',
 '다음 로그인부터는 변경된 비밀번호를 사용해야 합니다.',
 '변경 승인',
-'bg-slate-900', // 버튼 색상
+'bg-slate-900',
 executeChangePassword
 );
 }
