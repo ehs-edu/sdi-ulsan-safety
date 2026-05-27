@@ -91,14 +91,13 @@ accent-color: var(--sdi-blue-main);
 .custom-scroll::-webkit-scrollbar-track { background: transparent; }
 .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 
-/* Video Player Custom CSS to prevent skipping on UI level */
+/* Video Player Custom CSS */
 video::-webkit-media-controls-timeline,
 video::-webkit-media-controls-seek-back-button,
 video::-webkit-media-controls-seek-forward-button {
 display: none !important;
 }
 
-/* Range Input Custom */
 input[type=range] {
 -webkit-appearance: none;
 width: 100%;
@@ -118,9 +117,20 @@ cursor: pointer;
 background: rgba(255,255,255,0.3);
 border-radius: 2px;
 }
+
+#loading-overlay {
+position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000;
+display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
+}
 </style>
 </head>
 <body>
+
+<div id="loading-overlay" class="hide animate-fade">
+<i data-lucide="loader" class="w-12 h-12 animate-spin text-blue-500 mb-4"></i>
+<h3 class="text-lg font-black" id="loading-title">데이터베이스 처리 중</h3>
+<p class="text-xs text-slate-300 mt-2 font-medium" id="loading-desc">파일 용량에 따라 다소 시간이 소요될 수 있습니다...</p>
+</div>
 
 <div id="app-container" class="animate-fade">
 
@@ -184,16 +194,15 @@ oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 
 <div class="relative w-full bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border-[3px] border-slate-800 flex flex-col">
 
+<!-- 공통 긴급 스킵 버튼 (동영상/PPT 모두 적용되도록 컨테이너 상단에 배치) -->
+<button id="btn-emergency-skip" onclick="completeMediaView()" class="absolute top-4 right-4 bg-rose-600/95 hover:bg-rose-700 text-white text-[11px] sm:text-xs font-black px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-2xl z-30 hide transition-all flex items-center gap-2 btn-press backdrop-blur-md border border-rose-400 animate-pulse">
+<i data-lucide="alert-octagon" class="w-4 h-4 sm:w-5 sm:h-5"></i> 🚨 재생 오류 스킵
+</button>
+
 <div id="media-video-container" class="relative w-full aspect-video hide flex-1">
 <video id="safety-video" class="w-full h-full object-contain bg-black" playsinline preload="metadata">
-<!-- GitHub 동영상 URL을 HTML source에 기본 삽입하여 명시적으로 연결 -->
-<source src="https://ehs-edu.github.io/sdi-ulsan-safety/Safety-video.mp4" type="video/mp4">
 브라우저가 동영상을 지원하지 않습니다.
 </video>
-<!-- 영상 에러 시 나타나는 긴급 스킵 버튼 -->
-<button id="btn-emergency-skip" onclick="completeMediaView()" class="absolute top-4 right-4 bg-rose-600/90 hover:bg-rose-700 text-white text-[11px] font-bold px-4 py-2.5 rounded-xl shadow-lg z-20 hide transition-all flex items-center gap-2 btn-press backdrop-blur-sm">
-<i data-lucide="alert-triangle" class="w-4 h-4"></i> 영상 재생 불가 시 스킵
-</button>
 <div id="video-overlay" class="absolute inset-0 bg-black/70 flex items-center justify-center flex-col gap-4 z-10 transition-opacity duration-300">
 <button onclick="playSafetyVideo()" class="w-16 h-16 sm:w-20 sm:h-20 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:scale-95">
 <i data-lucide="play" class="w-8 h-8 sm:w-10 sm:h-10 ml-1"></i>
@@ -229,7 +238,7 @@ oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3 shadow-sm">
 <i data-lucide="info" class="text-blue-600 w-5 h-5 shrink-0 mt-0.5"></i>
 <p id="media-info-text" class="text-[11px] sm:text-xs text-blue-800 font-medium leading-relaxed text-keep">
-교육 자료 진행 중에는 임의로 조작하여 <strong class="text-red-500">건너뛸 수 없습니다.</strong>
+교육 자료 진행 중에는 임의로 조작하여 <strong class="text-red-500">건너뛸 수 없습니다.</strong> (단, 오류 발생 시 스킵 버튼 활성화)
 지정된 교육 시간이 완전히 종료되면 하단의 시험 시작 버튼이 자동으로 활성화됩니다.
 </p>
 </div>
@@ -383,10 +392,10 @@ class="w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transitio
 <div class="bg-white p-6 sm:p-8 rounded-3xl border shadow-sm space-y-6 max-w-3xl mx-auto mt-4">
 <div class="text-center space-y-2">
 <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
-<i data-lucide="monitor-play" class="w-7 h-7"></i>
+<i data-lucide="database" class="w-7 h-7"></i>
 </div>
 <h3 class="text-lg sm:text-xl font-black text-slate-900">안전 교육 자료 설정</h3>
-<p class="text-[11px] sm:text-xs text-slate-500 font-medium leading-relaxed">응시자가 평가 진입 전 의무적으로 시청해야 할 자료를 설정합니다.</p>
+<p class="text-[11px] sm:text-xs text-slate-500 font-medium leading-relaxed">Storage(저장소) 권한 문제 없이, <strong>Firebase Database 분할 저장 기술</strong>을 사용합니다.<br/>업로드된 자료는 쪼개져서 저장된 뒤 모든 기기에서 실시간 결합되어 재생됩니다.</p>
 </div>
 
 <div class="flex p-1 bg-slate-100 rounded-xl gap-1">
@@ -400,14 +409,14 @@ class="w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transitio
 <input type="radio" name="video_mode" value="url" checked onchange="toggleVideoMode()" class="w-4 h-4">
 <div>
 <p class="text-xs sm:text-sm font-bold text-slate-800">URL 링크 등록</p>
-<p class="text-[9px] sm:text-[10px] text-slate-400 font-medium mt-0.5">외부 호스팅 (권장)</p>
+<p class="text-[9px] sm:text-[10px] text-slate-400 font-medium mt-0.5">외부 호스팅 및 유튜브 등</p>
 </div>
 </label>
-<label class="border p-4 rounded-2xl cursor-pointer flex items-center gap-3 hover:bg-slate-50 transition-colors" id="label-mode-file">
-<input type="radio" name="video_mode" value="file" onchange="toggleVideoMode()" class="w-4 h-4">
+<label class="border p-4 rounded-2xl cursor-pointer flex items-center gap-3 hover:bg-slate-50 transition-colors" id="label-mode-db">
+<input type="radio" name="video_mode" value="db" onchange="toggleVideoMode()" class="w-4 h-4">
 <div>
-<p class="text-xs sm:text-sm font-bold text-slate-800">기기 파일 첨부</p>
-<p class="text-[9px] sm:text-[10px] text-slate-400 font-medium mt-0.5">현재 기기 로컬 저장</p>
+<p class="text-xs sm:text-sm font-bold text-slate-800">DB 직접 업로드</p>
+<p class="text-[9px] sm:text-[10px] text-slate-400 font-medium mt-0.5">DB 자동 분할 암호화 저장</p>
 </div>
 </label>
 </div>
@@ -417,17 +426,17 @@ class="w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transitio
 <input type="url" id="video-url-input" class="w-full p-4 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 font-medium text-xs sm:text-sm" placeholder="https://example.com/safety_video.mp4">
 </div>
 
-<div id="video-section-file" class="hide space-y-2 animate-fade">
-<label class="text-[10px] font-black text-slate-400 uppercase">기기 내 영상 파일 선택 (.mp4)</label>
+<div id="video-section-db" class="hide space-y-2 animate-fade">
+<label class="text-[10px] font-black text-slate-400 uppercase">영상 파일 선택 (.mp4)</label>
 <div class="flex flex-col gap-2">
 <label class="flex-1 p-4 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors flex flex-col items-center justify-center text-slate-500 bg-slate-50">
 <i data-lucide="upload-cloud" class="w-6 h-6 mb-2"></i>
-<span class="text-[11px] font-bold text-center" id="video-file-name">동영상 파일을 선택하세요<br/><span class="text-[9px] font-normal mt-1 block">200MB 이하 권장 (브라우저 로컬 저장)</span></span>
+<span class="text-[11px] font-bold text-center" id="video-file-name">동영상 파일을 선택하세요<br/><span class="text-[9px] font-normal mt-1 block text-rose-500">DB 1MB 제한 우회를 위해 자동 분할됩니다 (최대 20MB 이하 권장)</span></span>
 <input type="file" id="video-file-input" accept="video/mp4,video/webm" class="hidden" onchange="handleVideoFileSelect(this)">
 </label>
 <div class="flex justify-end mt-1">
 <button type="button" onclick="downloadSavedVideo()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border rounded-xl text-[10px] font-bold text-slate-600 flex items-center gap-1.5 transition-colors btn-press">
-<i data-lucide="download" class="w-3 h-3 text-blue-600"></i> 현재 저장된 영상 다운로드
+<i data-lucide="download" class="w-3 h-3 text-blue-600"></i> 현재 등록된 영상 확인 및 다운로드
 </button>
 </div>
 </div>
@@ -443,11 +452,11 @@ class="w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transitio
 </div>
 
 <div id="media-type-ppt" class="hide space-y-5 animate-fade">
-<div class="bg-orange-50 border border-orange-100 rounded-xl p-4 flex gap-3">
-<i data-lucide="alert-circle" class="text-orange-500 w-5 h-5 shrink-0"></i>
-<p class="text-[10px] sm:text-xs text-orange-800 font-medium leading-relaxed">
-PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<br/>
-가장 안정적인 <strong>슬라이드 이미지(JPG/PNG) 변환 후 다중 업로드</strong> 방식을 권장합니다. (슬라이드를 이미지로 저장 후 모두 선택)
+<div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3">
+<i data-lucide="info" class="text-blue-600 w-5 h-5 shrink-0"></i>
+<p class="text-[10px] sm:text-xs text-blue-800 font-medium leading-relaxed">
+슬라이드를 여러 장의 이미지(JPG/PNG)로 변환 후 모두 선택하여 업로드하세요.<br/>
+선택한 이미지는 <strong>데이터베이스(DB)에 안전하게 조각나 저장된 후</strong> 모든 기기에서 즉시 공유됩니다.
 </p>
 </div>
 
@@ -456,14 +465,14 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 <div class="flex flex-col gap-2">
 <label class="w-full p-6 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors flex flex-col items-center justify-center text-slate-500 bg-slate-50">
 <i data-lucide="images" class="w-8 h-8 mb-2 text-slate-400"></i>
-<span class="text-xs font-bold text-center" id="ppt-file-name">여기를 클릭하여 슬라이드 이미지 파일들을 한 번에 선택하세요.</span>
+<span class="text-xs font-bold text-center" id="ppt-file-name">여기를 클릭하여 슬라이드 이미지 파일들을 한 번에 선택하세요.<br/><span class="text-[9px] font-normal mt-1 block">저장 버튼을 누르면 데이터베이스에 업로드 됩니다.</span></span>
 <input type="file" id="ppt-file-input" accept="image/png, image/jpeg" multiple class="hidden" onchange="handlePPTFilesSelect(this)">
 </label>
 <p id="ppt-preview-count" class="text-xs text-blue-600 font-bold text-center mt-1 hide">선택된 슬라이드: 0장</p>
 
 <div class="flex justify-end mt-1">
 <button type="button" onclick="downloadSavedPPT()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border rounded-xl text-[10px] font-bold text-slate-600 flex items-center gap-1.5 transition-colors btn-press">
-<i data-lucide="download" class="w-3 h-3 text-orange-600"></i> 저장된 슬라이드 모음(ZIP) 다운로드
+<i data-lucide="download" class="w-3 h-3 text-orange-600"></i> 현재 등록된 슬라이드(ZIP) 다운로드
 </button>
 </div>
 </div>
@@ -478,7 +487,7 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 </div>
 
-<button onclick="saveMediaSettings()" class="w-full py-4 sdi-gradient text-white rounded-xl font-black btn-press shadow-lg mt-6">교육 자료 설정 적용 및 저장</button>
+<button onclick="saveMediaSettings()" class="w-full py-4 sdi-gradient text-white rounded-xl font-black btn-press shadow-lg mt-6">데이터베이스(DB) 분할 업로드 및 저장</button>
 </div>
 </div>
 
@@ -570,7 +579,7 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 <div id="atab-settings" class="hide flex flex-col items-center gap-6 py-6 pb-12">
 <div class="w-full max-w-md bg-slate-50 p-6 rounded-2xl border text-xs leading-relaxed space-y-3">
 <div class="flex items-center gap-2 font-black text-slate-800">
-<i data-lucide="cloud" class="w-4 h-4 text-blue-600"></i> 클라우드 동기화 상태
+<i data-lucide="cloud" class="w-4 h-4 text-blue-600"></i> 데이터베이스 동기화 상태
 </div>
 <div class="text-[10px] text-blue-600 font-bold bg-blue-50 p-2.5 rounded-lg border border-blue-100">
 ✓ 현재 상태: <span id="settings-sync-mode">상태를 불러오는 중...</span>
@@ -619,14 +628,14 @@ PPTX 파일 직접 재생은 모든 기기에서 불안정할 수 있습니다.<
 </div>
 
 <div id="common-confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] hide flex items-center justify-center p-6">
-<div class="bg-white w-full max-w-xs rounded-3xl p-8 text-center animate-fade shadow-2xl">
+<div class="bg-white w-full max-w-xs rounded-3xl p-8 text-center animate-fade shadow-2xl whitespace-pre-wrap">
 <div id="cc-icon-box" class="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
 <i data-lucide="alert-triangle" id="cc-icon" class="w-8 h-8"></i>
 </div>
 <h3 id="cc-title" class="text-lg font-black text-slate-900 mb-2">정말 진행하시겠습니까?</h3>
-<p id="cc-desc" class="text-xs text-slate-400 font-medium mb-8">이 작업은 취소할 수 없습니다.</p>
+<p id="cc-desc" class="text-xs text-slate-500 font-bold mb-8 leading-relaxed">이 작업은 취소할 수 없습니다.</p>
 <div class="flex gap-3">
-<button onclick="closeCommonConfirm()" class="flex-1 py-4 bg-slate-100 rounded-xl font-bold text-slate-500">취소</button>
+<button onclick="closeCommonConfirm()" class="flex-1 py-4 bg-slate-100 rounded-xl font-bold text-slate-500">취소/닫기</button>
 <button id="cc-btn-confirm" class="flex-1 py-4 bg-rose-500 text-white rounded-xl font-black">확인</button>
 </div>
 </div>
@@ -757,7 +766,6 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.6.
 import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// Mobile Viewport Height Fix
 function updateFullHeight() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
 window.addEventListener('resize', updateFullHeight);
 updateFullHeight();
@@ -780,60 +788,33 @@ mediaType: 'video',
 videoMode: 'url',
 videoUrl: 'https://ehs-edu.github.io/sdi-ulsan-safety/Safety-video.mp4',
 videoDuration: 0,
-pptPageDuration: 5
+pptPageDuration: 5,
+dbVideoId: null, 
+dbPptIds: [] 
 };
 
 let db = {
-users: JSON.parse(localStorage.getItem('sdi_db_users_v13') || '[]'),
-history: JSON.parse(localStorage.getItem('sdi_db_history_v13') || '[]'),
-bank: JSON.parse(localStorage.getItem('sdi_db_bank_v13') || JSON.stringify(ULSIAN_SDI_30_QUIZ)),
-logs: JSON.parse(localStorage.getItem('sdi_db_logs_v13') || '[]'),
-adminPw: localStorage.getItem('sdi_admin_pw_v13') || '1234',
-config: JSON.parse(localStorage.getItem('sdi_config_v13') || JSON.stringify(DEFAULT_CONFIG))
+users: JSON.parse(localStorage.getItem('sdi_db_users_v16') || '[]'),
+history: JSON.parse(localStorage.getItem('sdi_db_history_v16') || '[]'),
+bank: JSON.parse(localStorage.getItem('sdi_db_bank_v16') || JSON.stringify(ULSIAN_SDI_30_QUIZ)),
+logs: JSON.parse(localStorage.getItem('sdi_db_logs_v16') || '[]'),
+adminPw: localStorage.getItem('sdi_admin_pw_v16') || '1234',
+config: JSON.parse(localStorage.getItem('sdi_config_v16') || JSON.stringify(DEFAULT_CONFIG))
 };
 
-// 마이그레이션 방어코드
 if(!db.config.mediaType) db.config.mediaType = 'video';
 if(db.config.videoDuration === undefined) db.config.videoDuration = 0;
 if(db.config.pptPageDuration === undefined) db.config.pptPageDuration = 5;
+if(!db.config.dbPptIds) db.config.dbPptIds = [];
 
 let state = { user: null, quizSet: [], currIdx: 0, answers: [], chart: null, pendingDelete: [], currentDownloadType: "" };
 let tempUploadBank = [];
 
-// --- IndexedDB for Media (Video & PPT Images) ---
 const idbMedia = {
-dbName: 'SDIMediaStorage',
-storeName: 'media',
-init() {
-return new Promise((resolve, reject) => {
-const req = indexedDB.open(this.dbName, 2);
-req.onupgradeneeded = (e) => {
-if (!e.target.result.objectStoreNames.contains(this.storeName)) {
-e.target.result.createObjectStore(this.storeName);
-}
-};
-req.onsuccess = () => resolve(req.result);
-req.onerror = () => reject(req.error);
-});
-},
-async save(key, data) {
-const dbInst = await this.init();
-return new Promise((resolve, reject) => {
-const tx = dbInst.transaction(this.storeName, 'readwrite');
-tx.objectStore(this.storeName).put(data, key);
-tx.oncomplete = () => resolve(true);
-tx.onerror = () => reject(tx.error);
-});
-},
-async load(key) {
-const dbInst = await this.init();
-return new Promise((resolve, reject) => {
-const tx = dbInst.transaction(this.storeName, 'readonly');
-const req = tx.objectStore(this.storeName).get(key);
-req.onsuccess = () => resolve(req.result);
-req.onerror = () => reject(req.error);
-});
-}
+dbName: 'SDIMediaStorage', storeName: 'media',
+init() { return new Promise((r, j) => { const req = indexedDB.open(this.dbName, 2); req.onupgradeneeded = (e) => { if (!e.target.result.objectStoreNames.contains(this.storeName)) e.target.result.createObjectStore(this.storeName); }; req.onsuccess = () => r(req.result); req.onerror = () => j(req.error); }); },
+async save(key, data) { const dbInst = await this.init(); return new Promise((r, j) => { const tx = dbInst.transaction(this.storeName, 'readwrite'); tx.objectStore(this.storeName).put(data, key); tx.oncomplete = () => r(true); tx.onerror = () => j(tx.error); }); },
+async load(key) { const dbInst = await this.init(); return new Promise((r, j) => { const tx = dbInst.transaction(this.storeName, 'readonly'); const req = tx.objectStore(this.storeName).get(key); req.onsuccess = () => r(req.result); req.onerror = () => j(req.error); }); }
 };
 
 let currentVideoFile = null;
@@ -843,7 +824,7 @@ let isMediaFinished = false;
 let videoPlayer = null;
 let mediaInterval = null;
 let currentPPTIndex = 0;
-let pptImagesData = [];
+let pptImagesData = []; 
 let pptPageTimer = 0;
 
 let firebaseApp = null; let auth = null; let firestoreDb = null; let isCloudMode = false;
@@ -860,13 +841,8 @@ appId: "1:146881724668:web:10d82eac1e03201f959779"
 };
 
 async function initFirebase() {
-if(!activeConfig.apiKey || activeConfig.apiKey.includes("TODO")) {
-setOfflineMode("환경변수 없음 (API Key 입력 필요)");
-return;
-}
-
+if(!activeConfig.apiKey || activeConfig.apiKey.includes("TODO")) { setOfflineMode("환경변수 없음 (API Key 입력 필요)"); return; }
 updateCloudBadge('connecting', "클라우드 연결 중...");
-
 try {
 diagState.init = "진행 중"; updateDiagUI();
 firebaseApp = getApps().length === 0 ? initializeApp(activeConfig) : getApps()[0];
@@ -874,12 +850,8 @@ auth = getAuth(firebaseApp);
 firestoreDb = getFirestore(firebaseApp);
 diagState.init = "성공"; diagState.auth = "진행 중"; updateDiagUI();
 
-try {
-await signInAnonymously(auth);
-diagState.auth = "성공"; updateDiagUI();
-} catch (e) {
-diagState.auth = `실패 (${e.code})`; updateDiagUI();
-}
+try { await signInAnonymously(auth); diagState.auth = "성공"; updateDiagUI(); } 
+catch (e) { diagState.auth = `실패 (${e.code})`; updateDiagUI(); }
 
 onAuthStateChanged(auth, async (user) => {
 if (user) {
@@ -889,10 +861,7 @@ startRealtimeSync();
 } else { verifyFirestoreAccess(); }
 });
 setTimeout(verifyFirestoreAccess, 500);
-} catch (err) {
-console.error("Firebase init fail:", err);
-setOfflineMode("연결 실패");
-}
+} catch (err) { console.error("Firebase init fail:", err); setOfflineMode("연결 실패"); }
 }
 
 async function verifyFirestoreAccess() {
@@ -917,47 +886,24 @@ const authEl = document.getElementById('diag-auth');
 const dbEl = document.getElementById('diag-db');
 const errBox = document.getElementById('diag-error-box');
 const errMsg = document.getElementById('diag-error-msg');
-if (initEl) { initEl.innerText = diagState.init; initEl.className = `font-black ${diagState.init === '성공' ? 'text-emerald-600' : (diagState.init.includes('실패') ? 'text-rose-500' : 'text-slate-400')}`; }
-if (authEl) { authEl.innerText = diagState.auth; authEl.className = `font-black ${diagState.auth === '성공' ? 'text-emerald-600' : (diagState.auth.includes('실패') ? 'text-rose-500' : 'text-slate-400')}`; }
+if (initEl) { initEl.innerText = diagState.init; initEl.className = `font-black ${diagState.init === '성공' ? 'text-emerald-600' : (diagState.init.includes('실패') ? 'text-rose-500' : 'text-slate-400')}`; } 
+if (authEl) { authEl.innerText = diagState.auth; authEl.className = `font-black ${diagState.auth === '성공' ? 'text-emerald-600' : (diagState.auth.includes('실패') ? 'text-rose-500' : 'text-slate-400')}`; } 
 if (dbEl) { dbEl.innerText = diagState.db; dbEl.className = `font-black ${diagState.db === '성공' ? 'text-emerald-600' : (diagState.db.includes('실패') ? 'text-rose-500' : 'text-slate-400')}`; }
-if (errBox && errMsg) {
-if (diagState.error) { errBox.classList.remove('hide'); errMsg.innerText = diagState.error; }
-else { errBox.classList.add('hide'); }
-}
+if (errBox && errMsg) { if (diagState.error) { errBox.classList.remove('hide'); errMsg.innerText = diagState.error; } else { errBox.classList.add('hide'); } }
 }
 
-function setOfflineMode(reason) {
-isCloudMode = false;
-updateCloudBadge('error', reason);
-}
-
+function setOfflineMode(reason) { isCloudMode = false; updateCloudBadge('error', reason); }
 function updateCloudBadge(status, text) {
 const statusText = document.getElementById('cloud-status-text');
 const settingsSync = document.getElementById('settings-sync-mode');
 const adminFooterSync = document.getElementById('admin-footer-sync-status');
+if (statusText) statusText.innerText = text; if (settingsSync) settingsSync.innerText = text;
 
-if (statusText) statusText.innerText = text;
-if (settingsSync) settingsSync.innerText = text;
-
-let badgeClass = "";
-let textClass = "";
-
-if (status === 'success') {
-badgeClass = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 transition-all shadow-sm";
-textClass = "text-emerald-600";
-} else if (status === 'connecting') {
-badgeClass = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100 transition-all shadow-sm";
-textClass = "text-amber-500";
-} else {
-badgeClass = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100 transition-all shadow-sm";
-textClass = "text-rose-500";
-}
-
-if (adminFooterSync) {
-adminFooterSync.innerText = text;
-adminFooterSync.className = `text-[11px] sm:text-xs font-black ${textClass}`;
-}
-
+let badgeClass = "", textClass = "";
+if (status === 'success') { badgeClass = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 transition-all shadow-sm"; textClass = "text-emerald-600"; } 
+else if (status === 'connecting') { badgeClass = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100 transition-all shadow-sm"; textClass = "text-amber-500"; } 
+else { badgeClass = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold border bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100 transition-all shadow-sm"; textClass = "text-rose-500"; }
+if (adminFooterSync) { adminFooterSync.innerText = text; adminFooterSync.className = `text-[11px] sm:text-xs font-black ${textClass}`; }
 const badge = document.getElementById('cloud-badge');
 if(badge) badge.className = badgeClass;
 }
@@ -967,20 +913,10 @@ function getDocRef(colName, docId) { return doc(firestoreDb, 'artifacts', appId,
 
 function startRealtimeSync() {
 if (!isCloudMode) return;
-onSnapshot(getCollectionRef('users'), (snap) => {
-db.users = []; snap.forEach(d => db.users.push({ id: d.id, ...d.data() }));
-saveLocal(); renderUserTable(); renderStats();
-}, (e)=>{});
-onSnapshot(getCollectionRef('history'), (snap) => {
-db.history = []; snap.forEach(d => db.history.push({ id: d.id, ...d.data() }));
-saveLocal(); renderHistoryTable();
-}, (e)=>{});
-onSnapshot(getCollectionRef('bank'), (snap) => {
-if (!snap.empty) { db.bank = []; snap.forEach(d => db.bank.push({ id: d.id, ...d.data() })); db.bank.sort((a,b)=>a.idx-b.idx); saveLocal(); renderBankTable(); }
-}, (e)=>{});
-onSnapshot(getCollectionRef('logs'), (snap) => {
-db.logs = []; snap.forEach(d => db.logs.push({ id: d.id, ...d.data() })); db.logs.sort((a,b)=>b.ts-a.ts); saveLocal(); renderLogs();
-}, (e)=>{});
+onSnapshot(getCollectionRef('users'), (snap) => { db.users = []; snap.forEach(d => db.users.push({ id: d.id, ...d.data() })); saveLocal(); renderUserTable(); renderStats(); }, (e)=>{});
+onSnapshot(getCollectionRef('history'), (snap) => { db.history = []; snap.forEach(d => db.history.push({ id: d.id, ...d.data() })); saveLocal(); renderHistoryTable(); }, (e)=>{});
+onSnapshot(getCollectionRef('bank'), (snap) => { if (!snap.empty) { db.bank = []; snap.forEach(d => db.bank.push({ id: d.id, ...d.data() })); db.bank.sort((a,b)=>a.idx-b.idx); saveLocal(); renderBankTable(); } }, (e)=>{});
+onSnapshot(getCollectionRef('logs'), (snap) => { db.logs = []; snap.forEach(d => db.logs.push({ id: d.id, ...d.data() })); db.logs.sort((a,b)=>b.ts-a.ts); saveLocal(); renderLogs(); }, (e)=>{});
 onSnapshot(getDocRef('config', 'settings'), (snap) => {
 if (snap.exists()) {
 const data = snap.data();
@@ -990,97 +926,111 @@ if(data.videoMode) db.config.videoMode = data.videoMode;
 if(data.videoUrl) db.config.videoUrl = data.videoUrl;
 if(data.videoDuration !== undefined) db.config.videoDuration = data.videoDuration;
 if(data.pptPageDuration !== undefined) db.config.pptPageDuration = data.pptPageDuration;
+if(data.dbVideoId) db.config.dbVideoId = data.dbVideoId;
+if(data.dbPptIds) db.config.dbPptIds = data.dbPptIds;
 saveLocal();
 }
 }, (e)=>{});
 }
 
 function saveLocal() {
-localStorage.setItem('sdi_db_users_v13', JSON.stringify(db.users));
-localStorage.setItem('sdi_db_history_v13', JSON.stringify(db.history));
-localStorage.setItem('sdi_db_bank_v13', JSON.stringify(db.bank));
-localStorage.setItem('sdi_db_logs_v13', JSON.stringify(db.logs));
-localStorage.setItem('sdi_config_v13', JSON.stringify(db.config));
-localStorage.setItem('sdi_admin_pw_v13', db.adminPw);
+localStorage.setItem('sdi_db_users_v16', JSON.stringify(db.users));
+localStorage.setItem('sdi_db_history_v16', JSON.stringify(db.history));
+localStorage.setItem('sdi_db_bank_v16', JSON.stringify(db.bank));
+localStorage.setItem('sdi_db_logs_v16', JSON.stringify(db.logs));
+localStorage.setItem('sdi_config_v16', JSON.stringify(db.config));
+localStorage.setItem('sdi_admin_pw_v16', db.adminPw);
 }
 
-async function writeToCloudOrLocal(collectionName, docId, dataPayload) {
-if (isCloudMode) {
-try { await setDoc(getDocRef(collectionName, docId), dataPayload); return true; } catch (e) { console.error(e); }
+async function writeToCloudOrLocal(collectionName, docId, dataPayload) { if (isCloudMode) { try { await setDoc(getDocRef(collectionName, docId), dataPayload); return true; } catch (e) { console.error(e); } } return false; }
+async function deleteFromCloud(collectionName, docId) { if (isCloudMode) { try { await deleteDoc(getDocRef(collectionName, docId)); return true; } catch (e) { console.error(e); } } return false; }
+
+async function saveMediaToFirestoreDB(file, docPrefixId) {
+return new Promise((resolve, reject) => {
+const reader = new FileReader();
+reader.onload = async (e) => {
+const dataUrl = e.target.result;
+const CHUNK_SIZE = 800000;
+const totalChunks = Math.ceil(dataUrl.length / CHUNK_SIZE);
+try {
+showLoading(`데이터베이스 분할 저장 중...`, `문서 메타데이터 기록`);
+await setDoc(getDocRef('media_meta', docPrefixId), { chunks: totalChunks, type: file.type, name: file.name, size: file.size, ts: Date.now() });
+for (let i = 0; i < totalChunks; i++) {
+const chunkStr = dataUrl.substring(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+showLoading(`데이터베이스 분할 저장 중...`, `데이터베이스 청크 전송 중... ${Math.round(((i+1)/totalChunks)*100)}%`);
+await setDoc(getDocRef('media_chunks', `${docPrefixId}_${i}`), { data: chunkStr });
 }
-return false;
-}
-async function deleteFromCloud(collectionName, docId) {
-if (isCloudMode) {
-try { await deleteDoc(getDocRef(collectionName, docId)); return true; } catch (e) { console.error(e); }
-}
-return false;
+resolve(true);
+} catch (err) { console.error(err); reject(err); }
+};
+reader.onerror = (e) => reject(e); reader.readAsDataURL(file); 
+});
 }
 
+async function loadMediaFromFirestoreDB(docPrefixId, customTitle = '교육자료 데이터베이스 결합 중...') {
+try {
+showLoading(customTitle, `데이터베이스 메타 정보 분석 중...`);
+const metaSnap = await getDoc(getDocRef('media_meta', docPrefixId));
+if (!metaSnap.exists()) { hideLoading(); return null; }
+const meta = metaSnap.data(); let fullDataUrl = ""; const promises = [];
+for (let i = 0; i < meta.chunks; i++) promises.push(getDoc(getDocRef('media_chunks', `${docPrefixId}_${i}`)));
+showLoading(customTitle, `분할된 조각 결합 중... (총 ${meta.chunks} 파트)`);
+const chunkSnaps = await Promise.all(promises);
+chunkSnaps.forEach(snap => { if(snap.exists()) fullDataUrl += snap.data().data; });
+hideLoading(); return fullDataUrl;
+} catch (err) { console.error(err); hideLoading(); return null; }
+}
+
+window.toastTimer = null;
 window.toast = function(msg) {
-const t = document.getElementById('toast');
-document.getElementById('toast-msg').innerText = msg;
+const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg;
 t.classList.replace('opacity-0', 'opacity-100');
-setTimeout(() => t.classList.replace('opacity-100', 'opacity-0'), 2500);
+if(window.toastTimer) clearTimeout(window.toastTimer);
+window.toastTimer = setTimeout(() => { t.classList.replace('opacity-100', 'opacity-0'); }, 3000);
 }
+
+function showLoading(title, desc) {
+const l = document.getElementById('loading-overlay');
+document.getElementById('loading-title').innerText = title; document.getElementById('loading-desc').innerText = desc;
+l.classList.remove('hide');
+}
+function hideLoading() { document.getElementById('loading-overlay').classList.add('hide'); }
 
 window.switchView = function(vid) {
 document.querySelectorAll('#view-port > div').forEach(div => div.classList.add('hide'));
 document.getElementById('view-' + vid).classList.remove('hide');
 document.getElementById('admin-indicator').classList.toggle('hide', vid !== 'admin-main');
 if(vid === 'admin-main') setAdminTab('stats');
-lucide.createIcons();
-document.getElementById('view-port').scrollTop = 0;
+lucide.createIcons(); document.getElementById('view-port').scrollTop = 0;
 }
 
 window.resetToHome = function() {
-state.user = null;
-document.getElementById('input-name').value = '';
-document.getElementById('input-car').value = '';
-document.getElementById('admin-pw-input').value = '';
+state.user = null; document.getElementById('input-name').value = ''; document.getElementById('input-car').value = ''; document.getElementById('admin-pw-input').value = '';
 if(videoPlayer) { videoPlayer.pause(); }
 if(mediaInterval) clearInterval(mediaInterval);
+if(window.mediaFailsafeTimer) clearTimeout(window.mediaFailsafeTimer);
 switchView('auth');
 }
 
 let currentConfirmCallback = null;
 window.showCommonConfirm = function(title, desc, btnText, btnColorClass, callback) {
-document.getElementById('cc-title').innerText = title;
-document.getElementById('cc-desc').innerText = desc;
-const btn = document.getElementById('cc-btn-confirm');
-btn.innerText = btnText;
-btn.className = `flex-1 py-4 text-white rounded-xl font-black ${btnColorClass}`;
-
+document.getElementById('cc-title').innerText = title; document.getElementById('cc-desc').innerText = desc;
+const btn = document.getElementById('cc-btn-confirm'); btn.innerText = btnText; btn.className = `flex-1 py-4 text-white rounded-xl font-black ${btnColorClass}`;
 const iconBox = document.getElementById('cc-icon-box');
-if(btnColorClass.includes('rose')) {
-iconBox.className = "w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6";
-} else {
-iconBox.className = "w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6";
+if(btnColorClass.includes('rose')) { iconBox.className = "w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6"; } 
+else { iconBox.className = "w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6"; }
+currentConfirmCallback = callback; document.getElementById('common-confirm-modal').classList.remove('hide');
 }
-
-currentConfirmCallback = callback;
-document.getElementById('common-confirm-modal').classList.remove('hide');
-}
-window.closeCommonConfirm = function() {
-document.getElementById('common-confirm-modal').classList.add('hide');
-currentConfirmCallback = null;
-}
-document.getElementById('cc-btn-confirm').addEventListener('click', () => {
-if(currentConfirmCallback) currentConfirmCallback();
-});
+window.closeCommonConfirm = function() { document.getElementById('common-confirm-modal').classList.add('hide'); currentConfirmCallback = null; }
+document.getElementById('cc-btn-confirm').addEventListener('click', () => { if(currentConfirmCallback) { currentConfirmCallback(); } else { closeCommonConfirm(); } });
 
 window.checkAuthAndStartMedia = async function() {
-const name = document.getElementById('input-name').value.trim();
-const carNum = document.getElementById('input-car').value.trim();
-
+const name = document.getElementById('input-name').value.trim(); const carNum = document.getElementById('input-car').value.trim();
 if(!name || !carNum) return toast('성명과 차량번호를 모두 입력하세요.');
 if(carNum.length !== 4) return toast('차량번호 뒷자리 4자리를 정확히 입력하세요.');
 
 const failCount = db.users.filter(u => u.name === name && u.carNum === carNum && u.passed === false).length;
-if (failCount >= 3) {
-toast('경고: 동일 정보로 3회 불합격하여 해당 회차 응시가 자동 차단되었습니다.');
-return;
-}
+if (failCount >= 3) return toast('경고: 동일 정보로 3회 불합격하여 해당 회차 응시가 자동 차단되었습니다.');
 
 state.user = { name, carNum, ts: Date.now(), id: 'SDI-' + Math.random().toString(36).substr(2,6).toUpperCase() };
 await prepareMediaViewer();
@@ -1096,6 +1046,7 @@ return `${m}:${s}`;
 async function prepareMediaViewer() {
 isMediaFinished = false;
 if(mediaInterval) clearInterval(mediaInterval);
+if(window.mediaFailsafeTimer) clearTimeout(window.mediaFailsafeTimer);
 
 const btnExam = document.getElementById('btn-start-exam');
 const iconLock = document.getElementById('icon-exam-lock');
@@ -1110,40 +1061,43 @@ const tTot = document.getElementById('media-time-total');
 const pBar = document.getElementById('media-progress-bar');
 const skipBtn = document.getElementById('btn-emergency-skip');
 
-tCur.innerText = "00:00";
-pBar.style.width = "0%";
-skipBtn.classList.add('hide'); 
+tCur.innerText = "00:00"; pBar.style.width = "0%"; skipBtn.classList.add('hide');
+
+// 8초 무조건적인 타임아웃 스킵 (네트워크 지연, 파일 손상 등 어떠한 경우라도 보장)
+window.mediaFailsafeTimer = setTimeout(() => {
+if(!isMediaFinished) {
+skipBtn.classList.remove('hide');
+toast('⚠️ 로딩이 지연되고 있습니다. 우측 상단의 [오류 스킵] 버튼을 눌러 시험을 진행하세요.');
+}
+}, 8000);
 
 if (db.config.mediaType === 'video') {
 vCont.classList.remove('hide'); pCont.classList.add('hide');
 document.getElementById('video-overlay').classList.remove('hide');
-document.getElementById('media-info-text').innerHTML = '교육 동영상 시청 중에는 진행 바를 조작하여 <strong class="text-red-500">건너뛸 수 없습니다.</strong>';
-
 videoPlayer = document.getElementById('safety-video');
 
 if (db.config.videoMode === 'url') {
 videoPlayer.src = db.config.videoUrl || "https://ehs-edu.github.io/sdi-ulsan-safety/Safety-video.mp4";
-} else {
+videoPlayer.load();
+} else if (db.config.videoMode === 'db') {
+if (isCloudMode && db.config.dbVideoId) {
+const fetchedData = await loadMediaFromFirestoreDB(db.config.dbVideoId, '클라우드 DB에서 영상 동기화 중...');
+if (fetchedData) { videoPlayer.src = fetchedData; videoPlayer.load(); } else { fallbackVideoLoad(); }
+} else { fallbackVideoLoad(); }
+} else { fallbackVideoLoad(); }
+
+async function fallbackVideoLoad() {
 const blob = await idbMedia.load('main_video');
-if (blob) { videoPlayer.src = URL.createObjectURL(blob); }
-else {
-toast('저장된 영상이 없어 기본 영상을 로드합니다.');
-videoPlayer.src = "https://ehs-edu.github.io/sdi-ulsan-safety/Safety-video.mp4";
-}
+if (blob) { videoPlayer.src = URL.createObjectURL(blob); videoPlayer.load(); } 
+else { toast('영상 정보가 없어 기본 영상을 로드합니다.'); videoPlayer.src = "https://ehs-edu.github.io/sdi-ulsan-safety/Safety-video.mp4"; videoPlayer.load(); }
 }
 
-videoPlayer.onerror = function() {
-skipBtn.classList.remove('hide');
-toast('동영상 로드 오류 발생. 우측 상단의 긴급 스킵 버튼을 이용하세요.');
-};
-videoPlayer.onstalled = function() {
-skipBtn.classList.remove('hide');
-toast('동영상 로드가 지연되고 있습니다. 필요 시 스킵 버튼을 이용하세요.');
-};
+videoPlayer.onplay = () => { clearTimeout(window.mediaFailsafeTimer); skipBtn.classList.add('hide'); };
+videoPlayer.onerror = function() { skipBtn.classList.remove('hide'); toast('동영상 로드 오류 발생. 우측 상단의 스킵 버튼을 이용하세요.'); };
+videoPlayer.onstalled = function() { skipBtn.classList.remove('hide'); toast('네트워크 지연 감지. 스킵이 가능해졌습니다.'); };
+videoPlayer.onwaiting = function() { skipBtn.classList.remove('hide'); };
 
-let maxSeenTime = 0;
-let targetDuration = 0;
-
+let maxSeenTime = 0; let targetDuration = 0;
 videoPlayer.onloadedmetadata = () => {
 targetDuration = db.config.videoDuration > 0 ? db.config.videoDuration : videoPlayer.duration;
 tTot.innerText = formatTime(targetDuration);
@@ -1152,46 +1106,41 @@ tTot.innerText = formatTime(targetDuration);
 videoPlayer.ontimeupdate = function() {
 if(isMediaFinished) return;
 if (!videoPlayer.seeking) { maxSeenTime = Math.max(maxSeenTime, videoPlayer.currentTime); }
-
-const current = videoPlayer.currentTime;
-tCur.innerText = formatTime(current);
-
-let p = 0;
-if(targetDuration > 0) p = (current / targetDuration) * 100;
+const current = videoPlayer.currentTime; tCur.innerText = formatTime(current);
+let p = 0; if(targetDuration > 0) p = (current / targetDuration) * 100;
 pBar.style.width = `${Math.min(p, 100)}%`;
-
-if (targetDuration > 0 && current >= targetDuration && !isMediaFinished) {
-completeMediaView();
-}
+if (targetDuration > 0 && current >= targetDuration && !isMediaFinished) { completeMediaView(); }
 };
-
-videoPlayer.onseeking = function() {
-if (videoPlayer.currentTime > maxSeenTime + 1) { videoPlayer.currentTime = maxSeenTime; }
-};
-
-videoPlayer.onended = function() {
-if(!isMediaFinished) completeMediaView();
-};
+videoPlayer.onseeking = function() { if (videoPlayer.currentTime > maxSeenTime + 1) { videoPlayer.currentTime = maxSeenTime; } };
+videoPlayer.onended = function() { if(!isMediaFinished) completeMediaView(); };
 
 } else {
 vCont.classList.add('hide'); pCont.classList.remove('hide');
 document.getElementById('ppt-overlay').classList.remove('hide');
-document.getElementById('media-info-text').innerHTML = 'PPT 교육 자료 시청 중입니다. 페이지당 지정된 시간 후 자동으로 넘어갑니다. 임의로 <strong class="text-red-500">건너뛸 수 없습니다.</strong>';
 
+pptImagesData = [];
+if (isCloudMode && db.config.dbPptIds && db.config.dbPptIds.length > 0) {
+for(let i=0; i<db.config.dbPptIds.length; i++) {
+const dataUrl = await loadMediaFromFirestoreDB(db.config.dbPptIds[i], `슬라이드 DB 호출 중... (${i+1}/${db.config.dbPptIds.length})`);
+if(dataUrl) pptImagesData.push(dataUrl);
+}
+} else {
 const blobs = await idbMedia.load('main_ppt_images');
-pptImagesData = blobs || [];
+if (blobs && blobs.length > 0) pptImagesData = blobs.map(b => URL.createObjectURL(b));
+}
 
 if(pptImagesData.length === 0) {
-toast('저장된 PPT 이미지가 없습니다. 관리자에게 문의하세요.');
+skipBtn.classList.remove('hide');
+toast('클라우드에 저장된 PPT 이미지가 없거나 로드에 실패했습니다. 스킵 버튼을 눌러주세요.');
 return;
 }
 
-currentPPTIndex = 0;
-pptPageTimer = 0;
+clearTimeout(window.mediaFailsafeTimer);
+
+currentPPTIndex = 0; pptPageTimer = 0;
 const totalDuration = pptImagesData.length * db.config.pptPageDuration;
 tTot.innerText = formatTime(totalDuration);
-
-document.getElementById('safety-ppt-img').src = URL.createObjectURL(pptImagesData[0]);
+document.getElementById('safety-ppt-img').src = pptImagesData[0];
 document.getElementById('ppt-page-text').innerText = `${currentPPTIndex + 1} / ${pptImagesData.length}`;
 }
 lucide.createIcons();
@@ -1210,7 +1159,6 @@ document.getElementById('video-overlay').classList.add('hide');
 
 window.startPPTSlide = function() {
 document.getElementById('ppt-overlay').classList.add('hide');
-
 const tCur = document.getElementById('media-time-current');
 const pBar = document.getElementById('media-progress-bar');
 const totalDuration = pptImagesData.length * db.config.pptPageDuration;
@@ -1218,23 +1166,16 @@ let globalTimer = 0;
 
 mediaInterval = setInterval(() => {
 if(isMediaFinished) { clearInterval(mediaInterval); return; }
-
-globalTimer++;
-pptPageTimer++;
-
+globalTimer++; pptPageTimer++;
 tCur.innerText = formatTime(globalTimer);
 pBar.style.width = `${(globalTimer / totalDuration) * 100}%`;
 
 if(pptPageTimer >= db.config.pptPageDuration) {
-pptPageTimer = 0;
-currentPPTIndex++;
+pptPageTimer = 0; currentPPTIndex++;
 if(currentPPTIndex < pptImagesData.length) {
-document.getElementById('safety-ppt-img').src = URL.createObjectURL(pptImagesData[currentPPTIndex]);
+document.getElementById('safety-ppt-img').src = pptImagesData[currentPPTIndex];
 document.getElementById('ppt-page-text').innerText = `${currentPPTIndex + 1} / ${pptImagesData.length}`;
-} else {
-currentPPTIndex = pptImagesData.length - 1;
-completeMediaView();
-}
+} else { currentPPTIndex = pptImagesData.length - 1; completeMediaView(); }
 }
 }, 1000);
 }
@@ -1242,10 +1183,11 @@ completeMediaView();
 window.completeMediaView = function() {
 isMediaFinished = true;
 if(mediaInterval) clearInterval(mediaInterval);
+if(window.mediaFailsafeTimer) clearTimeout(window.mediaFailsafeTimer);
 if(videoPlayer) videoPlayer.pause();
 
-const pBar = document.getElementById('media-progress-bar');
-pBar.style.width = "100%";
+document.getElementById('btn-emergency-skip').classList.add('hide');
+document.getElementById('media-progress-bar').style.width = "100%";
 
 const btnExam = document.getElementById('btn-start-exam');
 const iconLock = document.getElementById('icon-exam-lock');
@@ -1253,7 +1195,7 @@ btnExam.disabled = false;
 btnExam.className = "w-full py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg transition-all duration-300 flex items-center justify-center gap-3 sdi-gradient text-white btn-press shadow-lg shadow-blue-900/20";
 iconLock.setAttribute("data-lucide", "unlock");
 lucide.createIcons();
-toast('교육 시청이 완료되었습니다. 시험을 시작할 수 있습니다.');
+toast('교육 시청이 완료되었습니다. (또는 강제 스킵됨) 시험을 시작할 수 있습니다.');
 }
 
 window.startEvaluation = function() {
@@ -1262,10 +1204,8 @@ if (videoPlayer) videoPlayer.pause();
 let indices = Array.from({ length: db.bank.length }, (_, i) => i);
 state.quizSet = indices.sort(() => 0.5 - Math.random()).slice(0, 10).map(i => db.bank[i]);
 if(state.quizSet.length < 10) return toast('문제은행의 문항이 10개 미만입니다.');
-state.currIdx = 0;
-state.answers = Array(10).fill(null);
-switchView('quiz');
-renderQuiz();
+state.currIdx = 0; state.answers = Array(10).fill(null);
+switchView('quiz'); renderQuiz();
 }
 
 function renderQuiz() {
@@ -1273,20 +1213,15 @@ const q = state.quizSet[state.currIdx];
 document.getElementById('q-idx-text').innerText = state.currIdx + 1;
 document.getElementById('q-progress').style.width = ((state.currIdx + 1) * 10) + '%';
 document.getElementById('q-text').innerText = q.q;
-
 const descContainer = document.getElementById('q-image-desc-container');
 const descEl = document.getElementById('q-image-desc');
-if (q.imageDesc && q.imageDesc.trim() !== "") {
-descContainer.classList.remove('hide'); descEl.innerText = q.imageDesc;
-} else { descContainer.classList.add('hide'); }
+if (q.imageDesc && q.imageDesc.trim() !== "") { descContainer.classList.remove('hide'); descEl.innerText = q.imageDesc; } else { descContainer.classList.add('hide'); }
 
-const optBox = document.getElementById('q-options');
-optBox.innerHTML = '';
+const optBox = document.getElementById('q-options'); optBox.innerHTML = '';
 q.a.forEach((ans, idx) => {
 const btn = document.createElement('button');
 btn.className = `p-4 text-left border-2 rounded-2xl font-bold transition-all btn-press text-xs sm:text-sm ${state.answers[state.currIdx] === idx+1 ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-100 bg-white hover:border-blue-200'}`;
-btn.innerText = ans;
-btn.onclick = () => selectAnswer(idx + 1);
+btn.innerText = ans; btn.onclick = () => selectAnswer(idx + 1);
 optBox.appendChild(btn);
 });
 document.getElementById('btn-back').disabled = state.currIdx === 0;
@@ -1299,8 +1234,7 @@ setTimeout(() => { if(state.currIdx < 9) { state.currIdx++; renderQuiz(); } else
 window.movePrev = function() { if(state.currIdx > 0) { state.currIdx--; renderQuiz(); } }
 
 async function completeEvaluation() {
-let score = 0;
-state.quizSet.forEach((q, i) => { if(state.answers[i] === q.c) score += 10; });
+let score = 0; state.quizSet.forEach((q, i) => { if(state.answers[i] === q.c) score += 10; });
 const result = { ...state.user, score, passed: score >= 80 };
 
 const cloudSuccess = await writeToCloudOrLocal('users', result.id, result);
@@ -1319,12 +1253,9 @@ if(result.passed) { new QRCode(qrc, { text: result.id, width: 120, height: 120, 
 else { qrc.innerHTML = '<div class="w-24 h-24 bg-slate-50 border-2 border-dashed rounded-2xl flex items-center justify-center text-slate-400 font-bold text-[10px] text-center px-2">재응시 요망</div>'; }
 }
 
-// --- ADMIN SYSTEM ---
 window.verifyAdmin = function() {
-if(document.getElementById('admin-pw-input').value === db.adminPw) {
-switchView('admin-main');
-initAdminSettings();
-} else toast('비밀번호가 일치하지 않습니다.');
+if(document.getElementById('admin-pw-input').value === db.adminPw) { switchView('admin-main'); initAdminSettings(); } 
+else toast('비밀번호가 일치하지 않습니다.');
 }
 
 window.setAdminTab = function(tab) {
@@ -1335,44 +1266,31 @@ document.querySelectorAll('[id^="atab-"]').forEach(div => div.classList.add('hid
 const target = document.getElementById('atab-' + tab);
 if(target) target.classList.remove('hide');
 
-if(tab === 'stats') renderStats();
-if(tab === 'users') renderUserTable();
-if(tab === 'bank') renderBankTable();
-if(tab === 'history') renderHistoryTable();
-if(tab === 'logs') renderLogs();
+if(tab === 'stats') renderStats(); else if(tab === 'users') renderUserTable(); else if(tab === 'bank') renderBankTable(); else if(tab === 'history') renderHistoryTable(); else if(tab === 'logs') renderLogs();
 }
 
 function initAdminSettings() {
 const ySelect = document.getElementById('filter-year');
-if (ySelect.options.length === 0) {
-const cy = new Date().getFullYear();
-for(let i=0; i<3; i++) ySelect.add(new Option(cy-i+'년', cy-i));
-}
+if (ySelect.options.length === 0) { const cy = new Date().getFullYear(); for(let i=0; i<3; i++) ySelect.add(new Option(cy-i+'년', cy-i)); }
 document.getElementById('video-url-input').value = db.config.videoUrl || '';
 document.getElementById('video-duration-input').value = db.config.videoDuration || 0;
 document.getElementById('ppt-page-duration-input').value = db.config.pptPageDuration || 5;
 
-if(db.config.videoMode === 'file') { document.querySelector('input[value="file"]').checked = true; }
+if(db.config.videoMode === 'db' || db.config.videoMode === 'file') { document.querySelector('input[value="db"]').checked = true; }
 else { document.querySelector('input[value="url"]').checked = true; }
-
 setMediaType(db.config.mediaType);
 }
 
 window.setMediaType = function(type) {
 db.config.mediaType = type;
-const tabV = document.getElementById('tab-media-video');
-const tabP = document.getElementById('tab-media-ppt');
-const secV = document.getElementById('media-type-video');
-const secP = document.getElementById('media-type-ppt');
+const tabV = document.getElementById('tab-media-video'), tabP = document.getElementById('tab-media-ppt');
+const secV = document.getElementById('media-type-video'), secP = document.getElementById('media-type-ppt');
 
 if(type === 'video') {
-tabV.className = "flex-1 py-3 text-xs font-black rounded-lg transition-all bg-white shadow-sm text-blue-700";
-tabP.className = "flex-1 py-3 text-xs font-black rounded-lg transition-all text-slate-500 hover:bg-slate-200";
-secV.classList.remove('hide'); secP.classList.add('hide');
-toggleVideoMode();
+tabV.className = "flex-1 py-3 text-xs font-black rounded-lg transition-all bg-white shadow-sm text-blue-700"; tabP.className = "flex-1 py-3 text-xs font-black rounded-lg transition-all text-slate-500 hover:bg-slate-200";
+secV.classList.remove('hide'); secP.classList.add('hide'); toggleVideoMode();
 } else {
-tabP.className = "flex-1 py-3 text-xs font-black rounded-lg transition-all bg-white shadow-sm text-orange-600";
-tabV.className = "flex-1 py-3 text-xs font-black rounded-lg transition-all text-slate-500 hover:bg-slate-200";
+tabP.className = "flex-1 py-3 text-xs font-black rounded-lg transition-all bg-white shadow-sm text-orange-600"; tabV.className = "flex-1 py-3 text-xs font-black rounded-lg transition-all text-slate-500 hover:bg-slate-200";
 secP.classList.remove('hide'); secV.classList.add('hide');
 }
 }
@@ -1380,19 +1298,19 @@ secP.classList.remove('hide'); secV.classList.add('hide');
 window.toggleVideoMode = function() {
 const mode = document.querySelector('input[name="video_mode"]:checked').value;
 if (mode === 'url') {
-document.getElementById('video-section-url').classList.remove('hide'); document.getElementById('video-section-file').classList.add('hide');
-document.getElementById('label-mode-url').classList.add('border-blue-500', 'bg-blue-50'); document.getElementById('label-mode-file').classList.remove('border-blue-500', 'bg-blue-50');
+document.getElementById('video-section-url').classList.remove('hide'); document.getElementById('video-section-db').classList.add('hide');
+document.getElementById('label-mode-url').classList.add('border-blue-500', 'bg-blue-50'); document.getElementById('label-mode-db').classList.remove('border-blue-500', 'bg-blue-50');
 } else {
-document.getElementById('video-section-url').classList.add('hide'); document.getElementById('video-section-file').classList.remove('hide');
-document.getElementById('label-mode-file').classList.add('border-blue-500', 'bg-blue-50'); document.getElementById('label-mode-url').classList.remove('border-blue-500', 'bg-blue-50');
+document.getElementById('video-section-url').classList.add('hide'); document.getElementById('video-section-db').classList.remove('hide');
+document.getElementById('label-mode-db').classList.add('border-blue-500', 'bg-blue-50'); document.getElementById('label-mode-url').classList.remove('border-blue-500', 'bg-blue-50');
 }
 }
 
 window.handleVideoFileSelect = function(input) {
 const file = input.files[0];
 if(file) {
-if(file.size > 200 * 1024 * 1024) toast('200MB 이하의 영상 파일을 권장합니다.');
-document.getElementById('video-file-name').innerHTML = `${file.name}<br/><span class="text-[9px] font-normal mt-1 block">선택 완료 (저장 버튼을 눌러 적용)</span>`;
+if(file.size > 20 * 1024 * 1024) toast('⚠️ 20MB를 초과하는 영상은 로딩 속도 저하를 유발할 수 있습니다.');
+document.getElementById('video-file-name').innerHTML = `${file.name}<br/><span class="text-[9px] font-normal mt-1 block text-blue-500">선택 완료 (저장 버튼을 눌러 DB에 분할 업로드하세요)</span>`;
 currentVideoFile = file;
 }
 }
@@ -1414,261 +1332,185 @@ let configUpdate = { mediaType: mType };
 if (mType === 'video') {
 const mode = document.querySelector('input[name="video_mode"]:checked').value;
 const vDur = parseInt(document.getElementById('video-duration-input').value) || 0;
-db.config.videoMode = mode;
-db.config.videoDuration = vDur;
-configUpdate.videoMode = mode;
-configUpdate.videoDuration = vDur;
+db.config.videoDuration = vDur; configUpdate.videoDuration = vDur;
 
 if (mode === 'url') {
 const vUrl = document.getElementById('video-url-input').value.trim();
-db.config.videoUrl = vUrl;
-configUpdate.videoUrl = vUrl;
-toast('동영상 URL 설정이 저장되었습니다. 사용자들에게 즉시 동기화됩니다.');
+db.config.videoUrl = vUrl; db.config.videoMode = 'url'; configUpdate.videoUrl = vUrl; configUpdate.videoMode = 'url';
+toast('동영상 URL 설정이 저장되어 전 기기에 동기화되었습니다.');
 } else {
 if (currentVideoFile) {
-toast('영상 파일을 기기에 안전하게 저장 중입니다...');
-await idbMedia.save('main_video', currentVideoFile);
-toast('파일이 기기에 성공적으로 저장되었습니다.');
-} else { return toast('선택된 파일이 없습니다. 기존 파일이 유지됩니다.'); }
-}
+if (isCloudMode) {
+try {
+const uniqueId = `video_${Date.now()}`;
+await saveMediaToFirestoreDB(currentVideoFile, uniqueId);
+hideLoading();
+db.config.dbVideoId = uniqueId; db.config.videoMode = 'db';
+configUpdate.dbVideoId = uniqueId; configUpdate.videoMode = 'db';
+document.querySelector('input[value="db"]').checked = true;
+toggleVideoMode();
+toast('데이터베이스에 영상이 분할 저장되어 모든 기기에서 공유됩니다.');
+} catch (e) { console.error(e); hideLoading(); toast(`업로드 실패: 데이터베이스 용량 초과 또는 권한 문제`); return; }
 } else {
+toast('클라우드 미연결: 로컬 브라우저에 임시 저장됩니다.');
+await idbMedia.save('main_video', currentVideoFile);
+db.config.videoMode = 'file'; configUpdate.videoMode = 'file';
+}
+} else { return toast('선택된 영상 파일이 없습니다.'); }
+}
+} else { 
 const pDur = parseInt(document.getElementById('ppt-page-duration-input').value) || 5;
-db.config.pptPageDuration = pDur;
-configUpdate.pptPageDuration = pDur;
+db.config.pptPageDuration = pDur; configUpdate.pptPageDuration = pDur;
 
 if (currentPPTFiles.length > 0) {
-toast('PPT 이미지 파일들을 기기에 저장 중입니다...');
-await idbMedia.save('main_ppt_images', currentPPTFiles);
-toast(`총 ${currentPPTFiles.length}장의 이미지가 저장되었습니다.`);
-} else {
-toast('선택된 PPT 이미지가 없습니다. 설정값(시간)만 저장됩니다.');
-}
-}
-
-saveLocal();
 if (isCloudMode) {
-try { await setDoc(getDocRef('config', 'settings'), configUpdate, { merge: true }); }
-catch (e) { console.error(e); }
+try {
+let uploadedIds = [];
+for(let i=0; i<currentPPTFiles.length; i++) {
+const uniqueId = `ppt_${Date.now()}_${i}`;
+showLoading(`데이터베이스 분할 저장 중...`, `이미지 처리 중... ${i+1}/${currentPPTFiles.length}`);
+await saveMediaToFirestoreDB(currentPPTFiles[i], uniqueId);
+uploadedIds.push(uniqueId);
 }
+hideLoading();
+db.config.dbPptIds = uploadedIds; configUpdate.dbPptIds = uploadedIds;
+toast(`총 ${currentPPTFiles.length}장의 이미지가 DB에 저장되었습니다.`);
+} catch (e) { console.error(e); hideLoading(); toast('업로드 실패: 데이터베이스 문제 발생'); return; }
+} else {
+toast('클라우드 연결 안 됨: 로컬 장비에 임시 저장됩니다.');
+await idbMedia.save('main_ppt_images', currentPPTFiles);
+}
+} else { toast('새로 선택된 PPT가 없어 시간 설정만 저장됩니다.'); }
+}
+saveLocal();
+if (isCloudMode) { try { await setDoc(getDocRef('config', 'settings'), configUpdate, { merge: true }); } catch (e) { console.error(e); } }
 }
 
 window.downloadSavedVideo = async function() {
 toast('저장된 영상을 불러오는 중입니다...');
 try {
-const blob = await idbMedia.load('main_video');
-if (!blob) return toast('현재 기기에 저장된 영상이 없습니다.');
-const url = URL.createObjectURL(blob);
-const a = document.createElement('a');
-a.href = url;
-a.download = blob.name || 'SDI_안전교육영상.mp4';
-document.body.appendChild(a);
-a.click();
-document.body.removeChild(a);
-URL.revokeObjectURL(url);
-} catch(e) {
-console.error(e);
-toast('다운로드 중 오류가 발생했습니다.');
-}
+let dataUrl = "";
+if (db.config.videoMode === 'db' && db.config.dbVideoId && isCloudMode) {
+dataUrl = await loadMediaFromFirestoreDB(db.config.dbVideoId, 'DB에서 다운로드 생성 중...');
+} else if (db.config.videoMode === 'file') {
+const blob = await idbMedia.load('main_video'); if(blob) dataUrl = URL.createObjectURL(blob);
+} else if (db.config.videoMode === 'url') { dataUrl = db.config.videoUrl; }
+if (!dataUrl) return toast('현재 등록된 영상 데이터가 없습니다.');
+const a = document.createElement('a'); a.href = dataUrl; a.target = "_blank"; a.download = 'SDI_안전교육영상.mp4';
+document.body.appendChild(a); a.click(); document.body.removeChild(a);
+} catch(e) { console.error(e); toast('다운로드 중 오류가 발생했습니다.'); }
 }
 
 window.downloadSavedPPT = async function() {
-toast('슬라이드 이미지를 압축하는 중입니다. 잠시만 기다려주세요...');
+toast('슬라이드 이미지를 압축하는 중입니다...');
 try {
-const blobs = await idbMedia.load('main_ppt_images');
-if (!blobs || blobs.length === 0) return toast('현재 기기에 저장된 슬라이드 이미지가 없습니다.');
-
-const zip = new JSZip();
-blobs.forEach((blob, idx) => {
-const ext = blob.type === 'image/png' ? 'png' : 'jpg';
-const fileName = blob.name || `slide_${String(idx + 1).padStart(3, '0')}.${ext}`;
-zip.file(fileName, blob);
-});
-
-const zipBlob = await zip.generateAsync({type:"blob"});
-const url = URL.createObjectURL(zipBlob);
-const a = document.createElement('a');
-a.href = url;
-a.download = 'SDI_PPT_슬라이드_모음.zip';
-document.body.appendChild(a);
-a.click();
-document.body.removeChild(a);
-URL.revokeObjectURL(url);
-toast('압축 파일 다운로드가 완료되었습니다.');
-} catch (e) {
-console.error(e);
-toast('다운로드 중 오류가 발생했습니다.');
+const zip = new JSZip(); let hasFiles = false;
+if (db.config.dbPptIds && db.config.dbPptIds.length > 0 && isCloudMode) {
+for (let i = 0; i < db.config.dbPptIds.length; i++) {
+const dUrl = await loadMediaFromFirestoreDB(db.config.dbPptIds[i], `DB 파일 다운로드 병합 중... ${i+1}/${db.config.dbPptIds.length}`);
+if(dUrl) { const parts = dUrl.split(','); const binary = atob(parts[1]); const array = new Uint8Array(binary.length); for(let j=0; j<binary.length; j++) array[j] = binary.charCodeAt(j); zip.file(`slide_${String(i + 1).padStart(3, '0')}.jpg`, array); hasFiles = true; }
 }
+} else {
+const blobs = await idbMedia.load('main_ppt_images');
+if (blobs && blobs.length > 0) { blobs.forEach((blob, idx) => { const ext = blob.type === 'image/png' ? 'png' : 'jpg'; zip.file(`slide_${String(idx + 1).padStart(3, '0')}.${ext}`, blob); }); hasFiles = true; }
+}
+if(!hasFiles) return toast('다운로드 가능한 슬라이드 데이터가 없습니다.');
+const zipBlob = await zip.generateAsync({type:"blob"}); const url = URL.createObjectURL(zipBlob);
+const a = document.createElement('a'); a.href = url; a.download = 'SDI_PPT_슬라이드_모음.zip';
+document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+toast('압축 파일 다운로드가 완료되었습니다.');
+} catch (e) { console.error(e); toast('다운로드 중 오류가 발생했습니다.'); }
 }
 
 window.renderStats = function() {
-const ySelect = document.getElementById('filter-year');
-if (!ySelect || ySelect.options.length === 0) return;
-const selYear = parseInt(ySelect.value);
-const selMonth = document.getElementById('filter-month').value;
-
+const ySelect = document.getElementById('filter-year'); if (!ySelect || ySelect.options.length === 0) return;
+const selYear = parseInt(ySelect.value); const selMonth = document.getElementById('filter-month').value;
 let filteredAll = db.users.filter(u => new Date(u.ts).getFullYear() === selYear);
 let summaryFiltered = [...filteredAll];
 if(selMonth !== 'all') summaryFiltered = summaryFiltered.filter(u => new Date(u.ts).getMonth() === parseInt(selMonth));
 
-const total = summaryFiltered.length;
-const passTotal = summaryFiltered.filter(u => u.passed).length;
-const failTotal = total - passTotal;
-const rateTotal = total > 0 ? Math.round((passTotal/total)*100) : 0;
-
-document.getElementById('st-total').innerText = total;
-document.getElementById('st-pass').innerText = passTotal;
-document.getElementById('st-fail').innerText = failTotal;
-document.getElementById('st-rate').innerText = rateTotal + '%';
+const total = summaryFiltered.length; const passTotal = summaryFiltered.filter(u => u.passed).length;
+const failTotal = total - passTotal; const rateTotal = total > 0 ? Math.round((passTotal/total)*100) : 0;
+document.getElementById('st-total').innerText = total; document.getElementById('st-pass').innerText = passTotal;
+document.getElementById('st-fail').innerText = failTotal; document.getElementById('st-rate').innerText = rateTotal + '%';
 
 const passData = Array(12).fill(0); const failData = Array(12).fill(0); const rateData = Array(12).fill(0);
 filteredAll.forEach(u => { const m = new Date(u.ts).getMonth(); if(u.passed) passData[m]++; else failData[m]++; });
-for(let i=0; i<12; i++) {
-const mT = passData[i] + failData[i];
-rateData[i] = mT > 0 ? Math.round((passData[i]/mT)*100) : 0;
-}
 const getAlpha = (idx) => { if(selMonth === 'all') return 1; return parseInt(selMonth) === idx ? 1 : 0.2; };
 
-const canvas = document.getElementById('statChart');
-if (!canvas) return; const ctx = canvas.getContext('2d');
+const canvas = document.getElementById('statChart'); if (!canvas) return; const ctx = canvas.getContext('2d');
 if(state.chart) state.chart.destroy();
 state.chart = new Chart(ctx, {
-type: 'bar',
-data: {
-labels: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-datasets: [
-{ label: '이수자', data: passData, backgroundColor: passData.map((_, i) => `rgba(20, 40, 160, ${getAlpha(i)})`), borderRadius: 6, barPercentage: 0.8 }, 
+type: 'bar', data: { labels: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'], datasets: [
+{ label: '이수자', data: passData, backgroundColor: passData.map((_, i) => `rgba(20, 40, 160,${getAlpha(i)})`), borderRadius: 6, barPercentage: 0.8 }, 
 { label: '미이수자', data: failData, backgroundColor: failData.map((_, i) => `rgba(244, 63, 94, ${getAlpha(i)})`), borderRadius: 6, barPercentage: 0.8 }
-]
-},
-options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
 });
 }
 
 window.renderUserTable = function() {
-const tbody = document.getElementById('user-table');
-if(!tbody) return; tbody.innerHTML = '';
+const tbody = document.getElementById('user-table'); if(!tbody) return; tbody.innerHTML = '';
 document.getElementById('user-count').innerText = db.users.length;
 db.users.slice().sort((a,b) => b.ts - a.ts).forEach(u => {
 const tr = document.createElement('tr');
 tr.innerHTML = `<td class="px-4 py-3 text-center"><input type="checkbox" value="${u.id}" class="user-check"></td>
 <td class="px-4 py-3 text-slate-400 text-[11px]">${new Date(u.ts).toLocaleString()}</td>
-<td class="px-4 py-3 font-bold">${u.name}</td>
+<td class="px-4 py-3 font-bold text-slate-800">${u.name}</td>
 <td class="px-4 py-3 text-slate-500">${u.carNum}</td>
-<td class="px-4 py-3 font-mono font-bold">${u.score}점</td>
-<td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-black ${u.passed?'bg-blue-50 text-blue-600':'bg-rose-50 text-rose-500'}">${u.passed?'PASS':'FAIL'}</span></td>`;
+<td class="px-4 py-3 text-slate-500">${u.score}점</td>
+<td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-black ${u.passed?'bg-emerald-50 text-emerald-600 border border-emerald-200':'bg-rose-50 text-rose-500 border border-rose-200'}">${u.passed?'PASS':'FAIL'}</span></td>`;
 tbody.appendChild(tr);
-});
-document.getElementById('btn-save-delete').classList.add('hide');
+}); document.getElementById('btn-save-delete').classList.add('hide');
 }
-
 window.toggleAll = function(el) { document.querySelectorAll('.user-check').forEach(c => c.checked = el.checked); }
 window.prepareDelete = function() {
 const checked = Array.from(document.querySelectorAll('.user-check:checked')).map(c => c.value);
 if(checked.length === 0) return toast('삭제할 대상을 선택하세요.');
-state.pendingDelete = checked;
-document.getElementById('btn-save-delete').classList.remove('hide');
-toast('삭제 대기 목록이 준비되었습니다. 영구 저장 버튼을 클릭하십시오.');
+state.pendingDelete = checked; document.getElementById('btn-save-delete').classList.remove('hide'); toast('삭제 대기 목록 준비 완료. 영구 저장 버튼을 클릭하세요.');
 }
-
-window.confirmDeleteSave = function() {
-showCommonConfirm(
-'정말 영구 삭제하시겠습니까?',
-'선택한 응시자의 기록이 이력 탭으로 이동되며 복구할 수 없습니다.',
-'확인 및 삭제',
-'bg-rose-500',
-executeDelete
-);
-}
-
+window.confirmDeleteSave = function() { showCommonConfirm('정말 영구 삭제하시겠습니까?', '선택한 응시자의 기록이 이력 탭으로 이동됩니다.', '확인 및 삭제', 'bg-rose-500', executeDelete); }
 window.executeDelete = async function() {
-const idsToDelete = new Set(state.pendingDelete);
-const deletedData = db.users.filter(u => idsToDelete.has(u.id)).map(u => ({ ...u, deleteTs: Date.now() }));
-
-for(let h of deletedData) {
-await writeToCloudOrLocal('history', h.id, h);
-await deleteFromCloud('users', h.id);
-}
-if(!isCloudMode) {
-db.history = [...db.history, ...deletedData];
-db.users = db.users.filter(u => !idsToDelete.has(u.id));
-saveLocal();
-}
+const idsToDelete = new Set(state.pendingDelete); const deletedData = db.users.filter(u => idsToDelete.has(u.id)).map(u => ({ ...u, deleteTs: Date.now() }));
+for(let h of deletedData) { await writeToCloudOrLocal('history', h.id, h); await deleteFromCloud('users', h.id); }
+if(!isCloudMode) { db.history = [...db.history, ...deletedData]; db.users = db.users.filter(u => !idsToDelete.has(u.id)); saveLocal(); }
 await addLog('UPDATE', `응시 이력 데이터 삭제 이동 처리됨 (${idsToDelete.size}건)`);
-state.pendingDelete = []; closeCommonConfirm(); renderUserTable();
-toast('정상적으로 삭제 반영되었습니다.');
+state.pendingDelete = []; closeCommonConfirm(); renderUserTable(); toast('정상적으로 삭제 반영되었습니다.');
 }
 
 window.renderHistoryTable = function() {
-const tbody = document.getElementById('history-table');
-if(!tbody) return; tbody.innerHTML = '';
+const tbody = document.getElementById('history-table'); if(!tbody) return; tbody.innerHTML = '';
 db.history.slice().sort((a,b) => b.deleteTs - a.deleteTs).forEach(h => {
-tbody.innerHTML += `<tr>
-<td class="px-4 py-3 text-rose-500 font-bold">${new Date(h.deleteTs).toLocaleString()}</td>
-<td class="px-4 py-3 text-slate-400">${new Date(h.ts).toLocaleString()}</td>
-<td class="px-4 py-3 font-bold">${h.name}</td>
-<td class="px-4 py-3 text-slate-500">${h.carNum||'-'}</td>
-<td class="px-4 py-3 font-mono font-bold">${h.score}점</td>
-</tr>`;
+tbody.innerHTML += `<tr><td class="px-4 py-3 text-rose-500 font-bold">${new Date(h.deleteTs).toLocaleString()}</td><td class="px-4 py-3 text-slate-400 text-[11px]">${new Date(h.ts).toLocaleString()}</td><td class="px-4 py-3 font-bold text-slate-800">${h.name}</td><td class="px-4 py-3 text-slate-500">${h.carNum}</td><td class="px-4 py-3 text-slate-500">${h.score}점</td></tr>`;
 });
 }
-
 window.renderBankTable = function() {
-const tbody = document.getElementById('bank-table');
-if(!tbody) return; tbody.innerHTML = '';
+const tbody = document.getElementById('bank-table'); if(!tbody) return; tbody.innerHTML = '';
 document.getElementById('bank-count').innerText = db.bank.length;
 db.bank.forEach((q, idx) => {
 const tr = document.createElement('tr');
-tr.innerHTML = `<td class="px-3 py-3 text-center"><input type="checkbox" value="${q.idx}" class="bank-item-check" onchange="updateBankSelectedCount()"></td>
-<td class="px-3 py-3 font-black text-slate-400 text-center">${q.idx}</td>
-<td class="px-4 py-3 text-slate-600 font-medium text-[10px] sm:text-[11px] leading-relaxed">${q.q}</td>
-<td class="px-4 py-3 text-slate-600 font-medium text-[10px] sm:text-[11px] leading-relaxed">${q.a.map((o, i) => `<span class="${q.c === i+1 ? 'text-blue-600 font-black' : ''}">${o}</span>`).join('<br/>')}</td>
-<td class="px-3 py-3 text-center"><span class="bg-blue-50 border border-blue-100 text-blue-600 w-6 h-6 inline-flex items-center justify-center rounded-full font-black text-[10px]">${q.c}</span></td>
-<td class="px-3 py-3 text-center"><button onclick="openQuestionModal(${idx})" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded font-bold text-slate-600 transition-colors">편집</button></td>`;
+tr.innerHTML = `<td class="px-3 py-3 text-center"><input type="checkbox" value="${q.idx}" class="bank-item-check" onchange="updateBankSelectedCount()"></td><td class="px-3 py-3 font-black text-slate-400 text-center">${q.idx}</td><td class="px-4 py-3 text-slate-600 font-medium text-[10px] sm:text-[11px] leading-relaxed">${q.q}</td><td class="px-4 py-3 text-slate-600 font-medium text-[10px] sm:text-[11px] leading-relaxed">${q.a.map((o, i) => `<span class="${q.c === i+1 ? 'font-bold text-blue-600' : ''}">${i+1}. ${o}</span>`).join('<br/>')}</td><td class="px-3 py-3 text-center"><span class="bg-blue-50 border border-blue-100 text-blue-600 w-6 h-6 inline-flex items-center justify-center rounded-full font-black text-[10px]">${q.c}</span></td><td class="px-3 py-3 text-center"><button onclick="openQuestionModal(${idx})" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded font-bold text-slate-600 transition-colors">편집</button></td>`;
 tbody.appendChild(tr);
-});
-window.updateBankSelectedCount();
+}); window.updateBankSelectedCount();
 }
 window.toggleAllBank = function(el) { document.querySelectorAll('.bank-item-check').forEach(c => c.checked = el.checked); window.updateBankSelectedCount(); }
 window.updateBankSelectedCount = function() {
-const checked = document.querySelectorAll('.bank-item-check:checked');
-const bar = document.getElementById('bank-control-bar');
+const checked = document.querySelectorAll('.bank-item-check:checked'); const bar = document.getElementById('bank-control-bar');
 if(document.getElementById('checked-bank-count')) document.getElementById('checked-bank-count').innerText = checked.length;
 if(bar) { if (checked.length > 0) bar.classList.remove('hide'); else bar.classList.add('hide'); }
 }
-
-window.deleteCheckedQuestions = function() {
-showCommonConfirm(
-'선택한 문항을 삭제하시겠습니까?',
-'문제은행에서 완전히 삭제되며 평가 시 노출되지 않습니다.',
-'문항 삭제',
-'bg-rose-500',
-executeDeleteQuestions
-);
-}
+window.deleteCheckedQuestions = function() { showCommonConfirm('선택한 문항을 삭제하시겠습니까?', '문제은행에서 완전히 삭제되며 평가 시 노출되지 않습니다.', '문항 삭제', 'bg-rose-500', executeDeleteQuestions); }
 async function executeDeleteQuestions() {
 const idxsToDelete = Array.from(document.querySelectorAll('.bank-item-check:checked')).map(c => parseInt(c.value));
-if (isCloudMode) { for (let idx of idxsToDelete) await deleteFromCloud('bank', `Q-${idx}`); } 
-else { db.bank = db.bank.filter(q => !idxsToDelete.includes(q.idx)); saveLocal(); renderBankTable(); } 
-await addLog('UPDATE', `문제은행 문항 ${idxsToDelete.length}개가 삭제되었습니다.`);
-closeCommonConfirm();
-toast('문항이 성공적으로 삭제되었습니다.');
+if (isCloudMode) { for (let idx of idxsToDelete) await deleteFromCloud('bank', `Q-${idx}`); } else { db.bank = db.bank.filter(q => !idxsToDelete.includes(q.idx)); saveLocal(); renderBankTable(); } 
+await addLog('UPDATE', `문제은행 문항 ${idxsToDelete.length}개가 삭제되었습니다.`); closeCommonConfirm(); toast('문항이 성공적으로 삭제되었습니다.');
 }
-
 window.openQuestionModal = function(idx) {
 const title = document.getElementById('question-modal-title');
 const tInp = document.getElementById('edit-q-text'); const iInp = document.getElementById('edit-q-image');
-const o1 = document.getElementById('edit-q-opt1'); const o2 = document.getElementById('edit-q-opt2');
-const o3 = document.getElementById('edit-q-opt3'); const o4 = document.getElementById('edit-q-opt4');
+const o1 = document.getElementById('edit-q-opt1'); const o2 = document.getElementById('edit-q-opt2'); const o3 = document.getElementById('edit-q-opt3'); const o4 = document.getElementById('edit-q-opt4');
 const corr = document.getElementById('edit-q-correct'); const idxInp = document.getElementById('edit-q-idx');
-
-if (idx === null) {
-title.innerText = "신규 문항 추가"; tInp.value = ""; iInp.value = ""; o1.value = ""; o2.value = ""; o3.value = ""; o4.value = ""; corr.value = "1"; idxInp.value = "-1";
-} else {
-const item = db.bank[idx];
-title.innerText = "평가 문항 수정"; tInp.value = item.q; iInp.value = item.imageDesc || "";
-o1.value = item.a[0] || ""; o2.value = item.a[1] || ""; o3.value = item.a[2] || ""; o4.value = item.a[3] || "";
-corr.value = String(item.c); idxInp.value = String(item.idx);
-}
+if (idx === null) { title.innerText = "신규 문항 추가"; tInp.value = ""; iInp.value = ""; o1.value = ""; o2.value = ""; o3.value = ""; o4.value = ""; corr.value = "1"; idxInp.value = "-1"; } 
+else { const item = db.bank[idx]; title.innerText = "평가 문항 수정"; tInp.value = item.q; iInp.value = item.imageDesc || ""; o1.value = item.a[0] || ""; o2.value = item.a[1] || ""; o3.value = item.a[2] || ""; o4.value = item.a[3] || ""; corr.value = String(item.c); idxInp.value = String(item.idx); }
 document.getElementById('question-modal').classList.remove('hide');
 }
 window.closeQuestionModal = function() { document.getElementById('question-modal').classList.add('hide'); }
@@ -1676,221 +1518,100 @@ window.saveQuestionItem = async function() {
 const text = document.getElementById('edit-q-text').value.trim(); const img = document.getElementById('edit-q-image').value.trim();
 const aList = [document.getElementById('edit-q-opt1').value.trim(), document.getElementById('edit-q-opt2').value.trim(), document.getElementById('edit-q-opt3').value.trim(), document.getElementById('edit-q-opt4').value.trim()].filter(x=>x!=="");
 const correct = parseInt(document.getElementById('edit-q-correct').value); const idxStr = document.getElementById('edit-q-idx').value;
-
 if (!text || aList.length < 2) return toast('문제 내용 및 보기를 정확히 입력하세요.');
 if (idxStr === "-1") {
-const nextIdx = db.bank.length > 0 ? Math.max(...db.bank.map(q => q.idx)) + 1 : 1;
-const newItem = { idx: nextIdx, q: text, imageDesc: img, a: aList, c: correct };
+const nextIdx = db.bank.length > 0 ? Math.max(...db.bank.map(q => q.idx)) + 1 : 1; const newItem = { idx: nextIdx, q: text, imageDesc: img, a: aList, c: correct };
 if (isCloudMode) { await writeToCloudOrLocal('bank', `Q-${nextIdx}`, newItem); } else { db.bank.push(newItem); saveLocal(); renderBankTable(); } 
-await addLog('UPDATE', `신규 문항 추가: "${text.substring(0,18)}..."`); 
-} else { 
-const curIdx = parseInt(idxStr); const updatedItem = { idx: curIdx, q: text, imageDesc: img, a: aList, c: correct }; 
+await addLog('UPDATE', `신규 문항 추가: "${text.substring(0,18)}..."`);
+} else {
+const curIdx = parseInt(idxStr); const updatedItem = { idx: curIdx, q: text, imageDesc: img, a: aList, c: correct };
 if (isCloudMode) { await writeToCloudOrLocal('bank', `Q-${curIdx}`, updatedItem); } else { const findIdx = db.bank.findIndex(q => q.idx === curIdx); if (findIdx !== -1) db.bank[findIdx] = updatedItem; saveLocal(); renderBankTable(); } 
 await addLog('UPDATE', `문항(${curIdx}번) 편집 완료`);
 }
 closeQuestionModal(); toast('저장되었습니다.');
 }
-
 window.handleBankUpload = function(input) {
-const file = input.files[0]; if(!file) return;
-const reader = new FileReader();
+const file = input.files[0]; if(!file) return; const reader = new FileReader();
 reader.onload = (e) => {
-try {
-const data = new Uint8Array(e.target.result);
-const workbook = XLSX.read(data, { type: 'array' });
-const ws = workbook.Sheets[workbook.SheetNames[0]];
-const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+try { const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, { type: 'array' }); const ws = workbook.Sheets[workbook.SheetNames[0]]; const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
 if (rows.length < 2) return toast('업로드된 엑셀에 데이터가 없습니다.');
-
 let qIdx = 0, iIdx = 1, oIdxs = [2,3,4,5], aIdx = 6;
-tempUploadBank = rows.slice(1).filter(r => r[qIdx] && r[aIdx]).map((r, i) => {
-return { q: String(r[qIdx]).trim(), imageDesc: r[iIdx]?String(r[iIdx]).trim():"", a: oIdxs.map(i=>r[i]).filter(v=>v!==undefined&&v!==""), c: parseInt(r[aIdx]) };
-}).filter(q => q.a.length >= 2 && !isNaN(q.c));
-
+tempUploadBank = rows.slice(1).filter(r => r[qIdx] && r[aIdx]).map((r, i) => { return { q: String(r[qIdx]).trim(), imageDesc: r[iIdx]?String(r[iIdx]).trim():"", a: oIdxs.map(i=>r[i]).filter(v=>v!==undefined&&v!==""), c: parseInt(r[aIdx]) }; }).filter(q => q.a.length >= 2 && !isNaN(q.c));
 if(tempUploadBank.length === 0) return toast('유효한 문항이 없습니다.');
-document.getElementById('upload-mode-modal').classList.remove('hide');
-document.getElementById('upload-mode-merge').onclick = () => executeUploadAndClose(true);
-document.getElementById('upload-mode-overwrite').onclick = () => executeUploadAndClose(false);
+document.getElementById('upload-mode-modal').classList.remove('hide'); document.getElementById('upload-mode-merge').onclick = () => executeUploadAndClose(true); document.getElementById('upload-mode-overwrite').onclick = () => executeUploadAndClose(false);
 } catch (err) { toast('엑셀 해독 에러'); }
 input.value = '';
-};
-reader.readAsArrayBuffer(file);
+}; reader.readAsArrayBuffer(file);
 }
 window.closeUploadModeModal = function() { document.getElementById('upload-mode-modal').classList.add('hide'); tempUploadBank = []; }
 async function executeUploadAndClose(isMerge) {
-document.getElementById('upload-mode-modal').classList.add('hide');
-let finalBankList = [];
-if (isMerge) {
-const maxIdx = db.bank.length > 0 ? Math.max(...db.bank.map(q => q.idx)) : 0;
-const mappedNew = tempUploadBank.map((q, i) => ({ idx: maxIdx + 1 + i, ...q }));
-finalBankList = [...db.bank, ...mappedNew];
-} else { finalBankList = tempUploadBank.map((q, i) => ({ idx: i + 1, ...q })); }
-
-if (isCloudMode) {
-if (!isMerge) { for(let q of db.bank) await deleteFromCloud('bank', `Q-${q.idx}`); } 
-for(let q of finalBankList) await writeToCloudOrLocal('bank', `Q-${q.idx}`, q); 
-} else { db.bank = finalBankList; saveLocal(); renderBankTable(); } 
-await addLog('UPDATE', `문제은행 엑셀 업로드 완료 (총 ${finalBankList.length}문항)`);
-toast('성공적으로 업데이트 되었습니다.'); tempUploadBank = [];
+document.getElementById('upload-mode-modal').classList.add('hide'); let finalBankList = [];
+if (isMerge) { const maxIdx = db.bank.length > 0 ? Math.max(...db.bank.map(q => q.idx)) : 0; const mappedNew = tempUploadBank.map((q, i) => ({ idx: maxIdx + 1 + i, ...q })); finalBankList = [...db.bank, ...mappedNew]; } else { finalBankList = tempUploadBank.map((q, i) => ({ idx: i + 1, ...q })); }
+if (isCloudMode) { if (!isMerge) { for(let q of db.bank) await deleteFromCloud('bank', `Q-${q.idx}`); } for(let q of finalBankList) await writeToCloudOrLocal('bank', `Q-${q.idx}`, q); } else { db.bank = finalBankList; saveLocal(); renderBankTable(); }
+await addLog('UPDATE', `문제은행 엑셀 업로드 완료`); toast('성공적으로 업데이트 되었습니다.'); tempUploadBank = [];
 }
-
 window.showLogAddModal = function() { document.getElementById('log-modal').classList.remove('hide'); }
 window.closeLogModal = function() { document.getElementById('log-modal').classList.add('hide'); }
 async function addLog(type, content, isAuto = true) {
-const logId = `LOG-${Date.now()}`; 
-const newLog = { type, content, ts: Date.now(), isAuto }; 
+const logId = `LOG-${Date.now()}`; const newLog = { type, content, ts: Date.now(), isAuto }; 
 if (!await writeToCloudOrLocal('logs', logId, newLog)) { db.logs.unshift({ id: logId, ...newLog }); if(db.logs.length > 100) db.logs.pop(); saveLocal(); renderLogs(); } 
 } 
-window.saveManualLog = async function() { 
-const type = document.getElementById('log-type').value; 
-const content = document.getElementById('log-content').value.trim(); 
-if (!content) return toast('로그 내용을 입력해 주세요.'); 
-await addLog(type, content, false); 
-closeLogModal(); 
-toast('로그가 추가되었습니다.'); 
-} 
-window.renderLogs = function() { 
-const list = document.getElementById('log-list'); 
-if(!list) return; list.innerHTML = ''; 
-db.logs.forEach(log => { 
-const bc = log.type === 'UPDATE' ? 'bg-indigo-100 text-indigo-700' : (log.type === 'NOTICE' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'); 
-const row = document.createElement('div'); 
-row.className = "flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50 rounded-2xl border text-xs gap-2"; 
-row.innerHTML = `<div class="flex items-center gap-2"><span class="px-2.5 py-1 rounded-lg font-black ${bc}">${log.type}</span><span class="font-medium text-slate-800 break-all">${log.content}</span></div><span class="font-medium text-slate-400 break-all">${new Date(log.ts).toLocaleString()}</span>`;
-list.appendChild(row);
-});
+window.saveManualLog = async function() { const type = document.getElementById('log-type').value; const content = document.getElementById('log-content').value.trim(); if (!content) return toast('로그 내용을 입력해 주세요.'); await addLog(type, content, false); closeLogModal(); toast('로그가 추가되었습니다.'); } 
+window.renderLogs = function() { const list = document.getElementById('log-list'); if(!list) return; list.innerHTML = ''; 
+db.logs.forEach(log => { const bc = log.type === 'UPDATE' ? 'bg-indigo-100 text-indigo-700' : (log.type === 'NOTICE' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'); 
+const row = document.createElement('div'); row.className = "flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50 rounded-2xl border text-xs gap-2"; row.innerHTML =`<div class="flex items-center gap-2"><span class="px-2.5 py-1 rounded-lg font-black ${bc}">${log.type}</span><span class="font-medium text-slate-800 break-all">${log.content}</span></div><span class="text-[10px] text-slate-400 font-bold whitespace-nowrap">${new Date(log.ts).toLocaleString()}</span>`; list.appendChild(row); });
 }
 
 window.openDownloadModal = function(type) {
-state.currentDownloadType = type;
-let dName = "SDI_Report.xlsx";
-const dateStr = new Date().toLocaleDateString().replace(/ /g,'');
-if (type === 'stats') dName = `SDI_월별통계_${new Date().getFullYear()}년.xlsx`; 
-else if (type === 'users') dName = `SDI_응시자목록_${dateStr}.xlsx`; 
-else if (type === 'logs') dName = `SDI_변경사항로그_${dateStr}.xlsx`; 
-else if (type === 'history') dName = `SDI_삭제이력_${dateStr}.xlsx`; 
-else if (type === 'bank') dName = `SDI_현재문제은행_${dateStr}.xlsx`; 
-else if (type === 'template') dName = "SDI_Quiz_Bank_Template.xlsx"; 
-else if (type === 'ppt') dName = `SDI_종합분석보고서_${new Date().getFullYear()}년.pptx`;
-
-document.getElementById('target-filename').value = dName;
-document.getElementById('download-config-modal').classList.remove('hide');
+state.currentDownloadType = type; let dName = "SDI_Report.xlsx"; const dateStr = new Date().toLocaleDateString().replace(/ /g,'');
+if (type === 'stats') dName = `SDI_월별통계_${new Date().getFullYear()}년.xlsx`; else if (type === 'users') dName = `SDI_응시자목록_${dateStr}.xlsx`; else if (type === 'logs') dName = `SDI_변경사항로그_${dateStr}.xlsx`; else if (type === 'history') dName = `SDI_삭제이력_${dateStr}.xlsx`; else if (type === 'bank') dName = `SDI_현재문제은행_${dateStr}.xlsx`; else if (type === 'template') dName = "SDI_Quiz_Bank_Template.xlsx"; else if (type === 'ppt') dName = `SDI_종합분석보고서_${new Date().getFullYear()}년.pptx`;
+document.getElementById('target-filename').value = dName; document.getElementById('download-config-modal').classList.remove('hide');
 }
 window.closeDownloadModal = function() { document.getElementById('download-config-modal').classList.add('hide'); state.currentDownloadType = ""; }
 window.executeTargetDownload = function() {
-const filename = document.getElementById('target-filename').value.trim() || "SDI_File.xlsx";
-const type = state.currentDownloadType;
-closeDownloadModal();
-
+const filename = document.getElementById('target-filename').value.trim() || "SDI_File.xlsx"; const type = state.currentDownloadType; closeDownloadModal();
 if (type === 'ppt') { generateCleanPPTReport(filename); return; }
-
 let data = [];
-if (type === 'template') {
-data.push(["문제", "예시설명(그림/사진/텍스트)", "보기1", "보기2", "보기3", "보기4", "정답(숫자)"]);
-} else if (type === 'stats') {
-data.push(["기준 연도", document.getElementById('filter-year').value]);
-data.push(["월", "전체 응시자", "합격", "불합격"]);
-} else if (type === 'users') {
-data.push(["응시 일시", "성명", "차량번호", "점수", "결과"]);
-db.users.forEach(u => data.push([new Date(u.ts).toLocaleString(), u.name, u.carNum||'-', u.score, u.passed?"합격":"불합격"]));
-} else if (type === 'bank') {
-data.push(["문제", "예시", "보기1", "보기2", "보기3", "보기4", "정답(숫자)"]);
-db.bank.forEach(q => data.push([q.q, q.imageDesc||"", q.a[0]||"", q.a[1]||"", q.a[2]||"", q.a[3]||"", q.c]));
-} else if (type === 'history') {
-data.push(["삭제 일시", "원래 응시 일시", "성명", "차량번호", "점수"]);
-db.history.forEach(h => data.push([new Date(h.deleteTs).toLocaleString(), new Date(h.ts).toLocaleString(), h.name, h.carNum||'-', h.score]));
-} else if (type === 'logs') {
-data.push(["발생 일시", "분류", "내용"]);
-db.logs.forEach(l => data.push([new Date(l.ts).toLocaleString(), l.type, l.content]));
-}
-
-const ws = XLSX.utils.aoa_to_sheet(data); const wb = XLSX.utils.book_new();
-XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-XLSX.writeFile(wb, filename);
-toast("엑셀 파일 저장이 완료되었습니다.");
+if (type === 'template') { data.push(["문제", "예시설명(그림/사진/텍스트)", "보기1", "보기2", "보기3", "보기4", "정답(숫자)"]); } 
+else if (type === 'stats') { data.push(["기준 연도", document.getElementById('filter-year').value]); data.push(["월", "전체 응시자", "합격", "불합격"]); } 
+else if (type === 'users') { data.push(["응시 일시", "성명", "차량번호", "점수", "결과"]); db.users.forEach(u => data.push([new Date(u.ts).toLocaleString(), u.name, u.carNum||'-', u.score, u.passed?"합격":"불합격"])); } 
+else if (type === 'bank') { data.push(["문제", "예시", "보기1", "보기2", "보기3", "보기4", "정답(숫자)"]); db.bank.forEach(q => data.push([q.q, q.imageDesc||"", q.a[0]||"", q.a[1]||"", q.a[2]||"", q.a[3]||"", q.c])); } 
+else if (type === 'history') { data.push(["삭제 일시", "원래 응시 일시", "성명", "차량번호", "점수"]); db.history.forEach(h => data.push([new Date(h.deleteTs).toLocaleString(), new Date(h.ts).toLocaleString(), h.name, h.carNum||'-', h.score])); } 
+else if (type === 'logs') { data.push(["발생 일시", "분류", "내용"]); db.logs.forEach(l => data.push([new Date(l.ts).toLocaleString(), l.type, l.content])); }
+const ws = XLSX.utils.aoa_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Sheet1"); XLSX.writeFile(wb, filename); toast("엑셀 파일 저장이 완료되었습니다.");
 }
 
 async function generateCleanPPTReport(filename) {
-toast('보고서를 생성 중입니다. 잠시만 기다려주세요...');
+toast('보고서를 생성 중입니다...');
 try {
-let pptx = new PptxGenJS();
-
-const selYear = document.getElementById('filter-year').value;
-const selMonth = document.getElementById('filter-month').value;
-let dUsers = db.users.filter(u => new Date(u.ts).getFullYear() === parseInt(selYear));
-let monthStr = '전체 월';
-if (selMonth !== 'all') {
-dUsers = dUsers.filter(u => new Date(u.ts).getMonth() === parseInt(selMonth));
-monthStr = `${parseInt(selMonth)+1}월`;
-}
-const total = dUsers.length; const pass = dUsers.filter(u => u.passed).length; const fail = total - pass;
-const rate = total > 0 ? Math.round((pass/total)*100) : 0;
-
-let slide1 = pptx.addSlide();
-slide1.background = { fill: "001A72" };
-slide1.addText("삼성SDI S&E Management System", { x: 1, y: 1.5, fontSize: 14, color: "4D6AFF", bold: true });
-slide1.addText("안전 교육 종합 분석 보고서", { x: 1, y: 2, w: 8, fontSize: 36, color: "FFFFFF", bold: true });
-slide1.addText(`분석 기준: ${selYear}년 ${monthStr}\n생성 일시: ${new Date().toLocaleString()}`, { x: 1, y: 4.5, fontSize: 12, color: "FFFFFF" });
-
-let slide2 = pptx.addSlide();
-slide2.addText("안전 교육 이수 현황 요약", { x: 0.5, y: 0.5, fontSize: 24, color: "1428A0", bold: true });
-let statRows = [
-[{ text: "구분", options: { bold: true, fill: "f1f5f9" } }, { text: "인원/비율", options: { bold: true, fill: "f1f5f9" } }],
-["전체 응시 건수", `${total}건`], ["합격 이수자", `${pass}건`], ["미이수(불합격)", `${fail}건`], ["종합 이수율", `${rate}%`]
-];
+let pptx = new PptxGenJS(); const selYear = document.getElementById('filter-year').value; const selMonth = document.getElementById('filter-month').value;
+let dUsers = db.users.filter(u => new Date(u.ts).getFullYear() === parseInt(selYear)); let monthStr = '전체 월';
+if (selMonth !== 'all') { dUsers = dUsers.filter(u => new Date(u.ts).getMonth() === parseInt(selMonth)); monthStr = `${parseInt(selMonth)+1}월`; }
+const total = dUsers.length; const pass = dUsers.filter(u => u.passed).length; const fail = total - pass; const rate = total > 0 ? Math.round((pass/total)*100) : 0;
+let slide1 = pptx.addSlide(); slide1.background = { fill: "001A72" }; slide1.addText("삼성SDI S&E Management System", { x: 1, y: 1.5, fontSize: 14, color: "4D6AFF", bold: true }); slide1.addText("안전 교육 종합 분석 보고서", { x: 1, y: 2, w: 8, fontSize: 36, color: "FFFFFF", bold: true }); slide1.addText(`분석 기준: ${selYear}년 ${monthStr}\n생성 일시: ${new Date().toLocaleString()}`, { x: 1, y: 4.5, fontSize: 12, color: "FFFFFF" });
+let slide2 = pptx.addSlide(); slide2.addText("안전 교육 이수 현황 요약", { x: 0.5, y: 0.5, fontSize: 24, color: "1428A0", bold: true });
+let statRows = [ [{ text: "구분", options: { bold: true, fill: "f1f5f9" } }, { text: "인원/비율", options: { bold: true, fill: "f1f5f9" } }], ["전체 응시 건수", `${total}건`], ["합격 이수자", `${pass}건`], ["미이수(불합격)", `${fail}건`], ["종합 이수율", `${rate}%`] ];
 slide2.addTable(statRows, { x: 0.5, y: 1.5, w: 9, rowH: 0.5, fontSize: 14, align: "center", border: { pt: 1, color: "e2e8f0" } });
-slide2.addText(`현재 선택된 기간의 이수율은 ${rate}% 입니다. 3회 이상 불합격자는 시스템상 재응시가 자동 차단되므로 현장 통제 관리가 필요합니다.`,
-{ x: 0.5, y: 4.5, w: 9, fontSize: 12, color: "334155", fill: "eff6ff", align: "center", margin: 10 });
-
-pptx.writeFile({ fileName: filename });
-toast('PPT 리포트 파일 생성이 완료되었습니다.');
-} catch (e) {
-console.error("PPT Error:", e);
-toast("보고서 생성 중 오류가 발생했습니다.");
-}
+slide2.addText(`현재 선택된 기간의 이수율은 ${rate}% 입니다. 3회 이상 불합격자는 자동 차단되므로 현장 통제 관리가 필요합니다.`, { x: 0.5, y: 4.5, w: 9, fontSize: 12, color: "334155", fill: "eff6ff", align: "center", margin: 10 });
+pptx.writeFile({ fileName: filename }); toast('PPT 리포트 파일 생성이 완료되었습니다.');
+} catch (e) { console.error("PPT Error:", e); toast("보고서 생성 중 오류가 발생했습니다."); }
 }
 
 window.openDiagnostics = function() { document.getElementById('diagnostics-modal').classList.remove('hide'); updateDiagUI(); lucide.createIcons(); }
 window.closeDiagnostics = function() { document.getElementById('diagnostics-modal').classList.add('hide'); }
 window.retryConnection = function() { diagState = { init: "진행 중", auth: "대기 중", db: "대기 중", error: null }; updateDiagUI(); initFirebase(); }
-
 window.requestChangePassword = function() {
-const curPw = document.getElementById('pw-current').value;
-const newPw = document.getElementById('pw-new').value;
-const confirmPw = document.getElementById('pw-new-confirm').value;
-
-if(curPw !== db.adminPw) return toast('현재 비밀번호가 틀렸습니다.');
-if(!newPw || newPw.length < 4) return toast('4자리 이상의 새 비밀번호를 입력하세요.');
-if(newPw !== confirmPw) return toast('새 비밀번호 재확인이 일치하지 않습니다.');
-
-showCommonConfirm(
-'비밀번호를 변경하시겠습니까?',
-'다음 로그인부터는 변경된 비밀번호를 사용해야 합니다.',
-'변경 승인',
-'bg-slate-900',
-executeChangePassword
-);
+const curPw = document.getElementById('pw-current').value; const newPw = document.getElementById('pw-new').value; const confirmPw = document.getElementById('pw-new-confirm').value;
+if(curPw !== db.adminPw) return toast('현재 비밀번호가 틀렸습니다.'); if(!newPw || newPw.length < 4) return toast('4자리 이상의 새 비밀번호를 입력하세요.'); if(newPw !== confirmPw) return toast('새 비밀번호 재확인이 일치하지 않습니다.');
+showCommonConfirm('비밀번호를 변경하시겠습니까?', '다음 로그인부터는 변경된 비밀번호를 사용해야 합니다.', '변경 승인', 'bg-slate-900', executeChangePassword);
 }
-
 window.executeChangePassword = async function() {
-const newPw = document.getElementById('pw-new').value;
-db.adminPw = newPw;
-saveLocal();
+const newPw = document.getElementById('pw-new').value; db.adminPw = newPw; saveLocal();
 if (isCloudMode) await setDoc(getDocRef('config', 'settings'), { adminPw: newPw }, { merge: true });
-await addLog('MAINTAIN', '관리자 비밀번호가 변경되었습니다.');
-
-document.getElementById('pw-current').value = '';
-document.getElementById('pw-new').value = '';
-document.getElementById('pw-new-confirm').value = '';
-
-closeCommonConfirm();
-toast('비밀번호가 성공적으로 변경되었습니다.');
+await addLog('MAINTAIN', '관리자 비밀번호가 변경되었습니다.'); document.getElementById('pw-current').value = ''; document.getElementById('pw-new').value = ''; document.getElementById('pw-new-confirm').value = ''; closeCommonConfirm(); toast('비밀번호가 성공적으로 변경되었습니다.');
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-initFirebase();
-lucide.createIcons();
-});
+window.addEventListener('DOMContentLoaded', () => { initFirebase(); lucide.createIcons(); });
 </script>
 </body>
 </html>
